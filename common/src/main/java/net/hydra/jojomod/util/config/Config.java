@@ -1172,6 +1172,8 @@ public class Config implements Cloneable {
         public Float chanceToEncounterNewAnimal;
         @FloatOption(group = "inherit", value = 0.25F, min = 0.0F, max = 1.0F)
         public Float chanceForAltStands;
+        @FloatOption(group = "inherit", value = 0.015F, min = 0.0F, max = 1.0F)
+        public Float chanceForAltMobs;
         @IntOption(group = "inherit", value = 100, min = 0, max = 72000)
         public Integer d4cAttackMultOnMobs;
         @IntOption(group = "inherit", value = 100, min = 0, max = 72000)
@@ -1330,7 +1332,7 @@ public class Config implements Cloneable {
         public Boolean hideHallucinationParticles;
         @BooleanOption(group = "inherit", value = true)
         public Boolean hallucinationHidesEffects;
-        @IntOption(group = "inherit", value = 300, min = 1, max = 72000)
+        @IntOption(group = "inherit", value = 400, min = 1, max = 72000)
         public Integer hallucinatoryAcidStageUpTime;
         @IntOption(group = "inherit", value = 400, min = 20, max = 72000)
         public Integer hallucinatoryAcidDespawnTime;
