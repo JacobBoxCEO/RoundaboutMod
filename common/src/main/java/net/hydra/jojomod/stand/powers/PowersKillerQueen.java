@@ -1796,6 +1796,10 @@ public class PowersKillerQueen extends NewPunchingStand {
             if (detonateTimer > getDetonateWindup() - 2) {
                 if (bombEntity instanceof StrayCatEntity SC && SC.getBubbleShield()) {
                     detonateTimer = getDetonateWindup() - 2;
+                    ((StandUser)bombEntity).roundabout$setExplosionInflation(-1);
+                    if (this.getActivePower() == DETONATE) {
+                        this.setPowerNone();
+                    }
                 }else {
                     Entity bomb = bombEntity;
 
@@ -1820,8 +1824,11 @@ public class PowersKillerQueen extends NewPunchingStand {
                                     entity.getY(),
                                     entity.getZ()
                             );
-                            if (dist < 1.5) {
+                            if (dist < 1.5 && entity.getBubbleShield()) {
                                 detonateTimer = getDetonateWindup() - 2;
+                                if (this.getActivePower() == DETONATE) {
+                                    this.setPowerNone();
+                                }
                                 break;
                             }
                         }
@@ -1836,7 +1843,9 @@ public class PowersKillerQueen extends NewPunchingStand {
             } else  {
                 this.detonateTimer++;
             }
-            if (currentBombStatus == BOMB_ENTITY || currentBombStatus == BUBBLE_CONTACT || currentBombStatus == BLOCK_CONTACT || currentBombStatus == ITEM_CONTACT) {
+            if (!(bombEntity instanceof StrayCatEntity SC && SC.getBubbleShield())
+                    && (currentBombStatus == BOMB_ENTITY || currentBombStatus == BUBBLE_CONTACT
+                    || currentBombStatus == BLOCK_CONTACT || currentBombStatus == ITEM_CONTACT)) {
                 float percent = detonateTimer / (float) getDetonateWindup();
                 if (bombEntity instanceof LivingEntity && bombEntity.isAlive()) {
                     ((StandUser)bombEntity).roundabout$setExplosionInflation((int)(percent * 18));
@@ -4019,12 +4028,12 @@ public class PowersKillerQueen extends NewPunchingStand {
 
                 float size = 0.3f;
                 ResourceLocation icon = StandIcons.BITES_THE_DUST_TARGET;
-                if (LE == bitesTheDustPlantedEntity) {
+                if (LE.getId() == bitesTheDustPlantedEntity.getId()) {
                     icon = StandIcons.BITES_THE_DUST_PLANTED;
                     size = 0.25f;
                 }
 
-                if (LE == bitesTheDustPlantedEntity || LE.distanceTo(bitesTheDustPlantedEntity) <= btdRange && LE.hasLineOfSight(bitesTheDustPlantedEntity)) {
+                if (LE.getId() == bitesTheDustPlantedEntity.getId() || LE.distanceTo(bitesTheDustPlantedEntity) <= btdRange && LE.hasLineOfSight(bitesTheDustPlantedEntity)) {
                     matrixStack.pushPose();
 
                     float height = (LE.getBbHeight() + 0.43F);
