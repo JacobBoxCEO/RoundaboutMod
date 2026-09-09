@@ -32,6 +32,9 @@ import net.hydra.jojomod.event.powers.ModDamageTypes;
 import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.event.powers.StandUser;
 import net.hydra.jojomod.event.powers.TimeStop;
+import net.hydra.jojomod.event.powers.visagedata.voicedata.JotaroVoice;
+import net.hydra.jojomod.event.powers.visagedata.voicedata.KiraPartFourVoice;
+import net.hydra.jojomod.event.powers.visagedata.voicedata.PucciVoice;
 import net.hydra.jojomod.item.MaxStandDiscItem;
 import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.StandArrowItem;
@@ -1577,6 +1580,10 @@ public class PowersKillerQueen extends NewPunchingStand {
         } else if (move == PowerIndex.POWER_3_BLOCK) {
             return this.sendOrReturnSHA(true);
     	} else if (move == DETONATE) {
+             if ( self instanceof Player player
+                    && ((IPlayerEntity) player).roundabout$getVoiceData() instanceof KiraPartFourVoice voice) {
+                 voice.playPrimaryBomb();
+             }
     		return detonate();
     	} else if (move == PowerIndex.SNEAK_ATTACK_CHARGE){
             return this.setPowerKickWindup();
@@ -3074,6 +3081,11 @@ public class PowersKillerQueen extends NewPunchingStand {
                 if (SHA == null || SHA.isRemoved()) {
                     SheerHeartAttackEntity sha = ModEntities.SHEER_HEART_ATTACK.create(this.getSelf().level());
                     if (sha != null) {
+                        if ( self instanceof Player player
+                                && ((IPlayerEntity) player).roundabout$getVoiceData() instanceof KiraPartFourVoice voice) {
+                            voice.playSecondaryBomb();
+                        }
+
                         sha.setUser(this.self);
                         sha.setXRot(this.self.getXRot());
                         sha.setYRot(this.self.getYRot());
@@ -3663,10 +3675,34 @@ public class PowersKillerQueen extends NewPunchingStand {
 
 
     // sound related stuff
-    
+
+    @Override
+    public void playBarrageCrySound(){
+        if (!this.self.level().isClientSide()) {
+            if (this.self instanceof Player pe && ((IPlayerEntity)pe).roundabout$getVoiceData() instanceof KiraPartFourVoice JV) {
+                if (Math.random() > 0.7) {
+                    JV.playSoundIfPossible(ModSounds.KIRA4_KOICHI_1_EVENT, 42, 1, 2);
+                }
+            }
+        }
+        super.playBarrageCrySound();
+    }
+
     @Override
     public byte chooseBarrageSound(){ return SoundIndex.BARRAGE_CRY_SOUND;}
-    
+
+    @Override
+    public void playSummonSound() {
+        if (this.self.isCrouching() || hasHandsOut()){
+            return;
+        }
+
+        if (this.self instanceof Player pe && ((IPlayerEntity)pe).roundabout$getVoiceData() instanceof KiraPartFourVoice JV){
+            JV.playSummon();
+        }
+        playStandUserOnlySoundsIfNearby(this.getSummonSound(), 10, false,false);
+    }
+
     @Override
     protected Byte getSummonSound() {
         return SoundIndex.SUMMON_SOUND;
