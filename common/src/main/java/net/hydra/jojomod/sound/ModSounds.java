@@ -154,6 +154,10 @@ public class ModSounds {
     public static final ResourceLocation SUMMON_D4C_ID = new ResourceLocation(Roundabout.MOD_ID+":"+SUMMON_D4C);
     public static SoundEvent SUMMON_D4C_EVENT = SoundEvent.createVariableRangeEvent(SUMMON_D4C_ID);
 
+    public static final String SPECIAL_CHEST = "special_chest";
+    public static final ResourceLocation SPECIAL_CHEST_ID = new ResourceLocation(Roundabout.MOD_ID+":"+SPECIAL_CHEST);
+    public static SoundEvent SPECIAL_CHEST_EVENT = SoundEvent.createVariableRangeEvent(SPECIAL_CHEST_ID);
+
     public static final String D4C_PORTAL = "d4c_portal";
     public static final ResourceLocation D4C_PORTAL_ID = new ResourceLocation(Roundabout.MOD_ID+":"+D4C_PORTAL);
     public static SoundEvent D4C_PORTAL_EVENT = SoundEvent.createVariableRangeEvent(D4C_PORTAL_ID);
@@ -1034,6 +1038,15 @@ public class ModSounds {
     public static final String KIRA4_PRIMARY_BOMB = "kira4_kq_bomb";
     public static final ResourceLocation KIRA4_PRIMARY_BOMB_ID = new ResourceLocation(Roundabout.MOD_ID+":"+KIRA4_PRIMARY_BOMB);
     public static SoundEvent KIRA4_PRIMARY_BOMB_EVENT = SoundEvent.createVariableRangeEvent(KIRA4_PRIMARY_BOMB_ID);
+    public static final String KIRA4_BTD_1 = "kira4_kq_btd_1";
+    public static final ResourceLocation KIRA4_BTD_1_ID = new ResourceLocation(Roundabout.MOD_ID+":"+KIRA4_BTD_1);
+    public static SoundEvent KIRA4_BTD_1_EVENT = SoundEvent.createVariableRangeEvent(KIRA4_BTD_1_ID);
+    public static final String KIRA4_BTD_2 = "kira4_kq_btd_2";
+    public static final ResourceLocation KIRA4_BTD_2_ID = new ResourceLocation(Roundabout.MOD_ID+":"+KIRA4_BTD_2);
+    public static SoundEvent KIRA4_BTD_2_EVENT = SoundEvent.createVariableRangeEvent(KIRA4_BTD_2_ID);
+    public static final String KIRA4_BTD_RANGE = "kira4_btd_range";
+    public static final ResourceLocation KIRA4_BTD_RANGE_ID = new ResourceLocation(Roundabout.MOD_ID+":"+KIRA4_BTD_RANGE);
+    public static SoundEvent KIRA4_BTD_RANGE_EVENT = SoundEvent.createVariableRangeEvent(KIRA4_BTD_RANGE_ID);
 
     public static final String KIRA4_SHA_1 = "kira4_sha_1";
     public static final ResourceLocation KIRA4_SHA_1_ID = new ResourceLocation(Roundabout.MOD_ID+":"+KIRA4_SHA_1);
@@ -1702,6 +1715,24 @@ public class ModSounds {
     public static final String SUMMON_DIVER_DOWN = "summon_diver_down";
     public static final ResourceLocation SUMMON_DIVER_DOWN_ID = new ResourceLocation(Roundabout.MOD_ID+":"+SUMMON_DIVER_DOWN);
     public static SoundEvent SUMMON_DIVER_DOWN_EVENT = SoundEvent.createVariableRangeEvent(SUMMON_DIVER_DOWN_ID);
+    public static final String DIVER_DOWN_HIT = "diver_down_hit";
+    public static final ResourceLocation DIVER_DOWN_HIT_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_HIT);
+    public static SoundEvent DIVER_DOWN_HIT_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_HIT_ID);
+    public static final String DIVER_DOWN_HIT_HEAVY = "diver_down_hit_heavy";
+    public static final ResourceLocation DIVER_DOWN_HIT_HEAVY_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_HIT_HEAVY);
+    public static SoundEvent DIVER_DOWN_HIT_HEAVY_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_HIT_HEAVY_ID);
+    public static final String DIVER_DOWN_UI_SELECT = "diver_down_ui_select";
+    public static final ResourceLocation DIVER_DOWN_UI_SELECT_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_UI_SELECT);
+    public static SoundEvent DIVER_DOWN_UI_SELECT_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_UI_SELECT_ID);
+    public static final String DIVER_DOWN_CHARGE = "diver_down_charge";
+    public static final ResourceLocation DIVER_DOWN_CHARGE_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_CHARGE);
+    public static SoundEvent DIVER_DOWN_CHARGE_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_CHARGE_ID);
+    public static final String DIVER_DOWN_DIVE = "diver_down_dive";
+    public static final ResourceLocation DIVER_DOWN_DIVE_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_DIVE);
+    public static SoundEvent DIVER_DOWN_DIVE_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_DIVE_ID);
+    public static final String DIVER_DOWN_DIVE2 = "diver_down_dive2";
+    public static final ResourceLocation DIVER_DOWN_DIVE2_ID = new ResourceLocation(Roundabout.MOD_ID+":"+DIVER_DOWN_DIVE2);
+    public static SoundEvent DIVER_DOWN_DIVE2_EVENT = SoundEvent.createVariableRangeEvent(DIVER_DOWN_DIVE2_ID);
 
     public static final String SUMMON_GREEN_DAY = "summon_green_day";
     public static final ResourceLocation SUMMON_GREEN_DAY_ID = new ResourceLocation(Roundabout.MOD_ID+":"+SUMMON_GREEN_DAY);
