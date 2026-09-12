@@ -593,7 +593,9 @@ public class MainUtil {
             || (PowerTypes.hasStandActive(ent) && ent instanceof Mob mb && mb.onGround()))){
                 return true;
             }
-
+            else if(SU.roundabout$getStandPowers() instanceof PowersDiverDown PDD && PDD.inZipMode()){
+                return true;
+            }
         }
         return false;
     }
@@ -1383,6 +1385,9 @@ public class MainUtil {
         if (ent instanceof LivingEntity LE &&
                 ((StandUser)LE).roundabout$getStandPowers() instanceof PowersWalkingHeart PW &&
                 PW.hasExtendedHeelsForWalking()){
+            return true;
+        }
+        else if (ent instanceof LivingEntity LE && ((StandUser)LE).roundabout$getStandPowers() instanceof PowersDiverDown PDD && PDD.inZipMode()){
             return true;
         }
         return false;
@@ -2561,6 +2566,9 @@ public class MainUtil {
         if (((StandUser)LE).roundabout$getStandPowers() instanceof PowersWalkingHeart PW && PW.hasExtendedHeelsForWalking()){
             return true;
         }
+        if (((StandUser)LE).roundabout$getStandPowers() instanceof PowersDiverDown PDD && PDD.inZipMode()){
+            return true;
+        }
         return false;
     }
     public static boolean canHaveFrictionTaken(LivingEntity LE){
@@ -2568,6 +2576,9 @@ public class MainUtil {
             return false;
         }
         if (((StandUser)LE).roundabout$getStandPowers() instanceof PowersWalkingHeart PW && PW.hasExtendedHeelsForWalking()){
+            return false;
+        }
+        if (((StandUser)LE).roundabout$getStandPowers() instanceof PowersDiverDown PDD && PDD.inZipMode()){
             return false;
         }
         return !(isBossMob(LE) && ClientNetworking.getAppropriateConfig().softAndWetSettings.bossesCannotLoseFriction);
