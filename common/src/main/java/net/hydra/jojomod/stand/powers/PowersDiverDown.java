@@ -16,6 +16,7 @@ import net.hydra.jojomod.client.DiverDownControlsClient;
 import net.hydra.jojomod.client.KeyboardPilotInput;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
+import net.hydra.jojomod.entity.projectile.BoneProjectileEntity;
 import net.hydra.jojomod.entity.stand.DiverDownEntity;
 import net.hydra.jojomod.entity.stand.FollowingStandEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
@@ -133,7 +134,7 @@ public class PowersDiverDown extends NewPunchingStand {
             EMBED_POTION = 72,
             DIVER_LEGS = 73,
             EFFECT_CURE = 74,
-            COUNTER = 75,
+            TRANSFER = 75,
             RIBCAGE_TRAP = 76,
             BONE_BOMB = 77,
             SPRING_LEGS = 78;
@@ -198,10 +199,12 @@ public class PowersDiverDown extends NewPunchingStand {
     // used for dive
     public Entity submergedTarget = null;
     public static final int DIVE_WINDUP_MAX = 30; // 1.5 seconds uncancellable windup
-    public static final float DIVE_REACH = 5.0f; // how far it goes
+    public static final float DIVE_REACH = 4.0f; // how far it goes
     public boolean isTransferringDamage = false; // recursion guard, prevents things like 2 DDs repeatedly protecting
     // each other
     public boolean hasDiverLegs = false;
+    public static final int TRANSFER_WINDUP_MAX = 40;
+    private static final double TRANSFER_RANGE = 4.0;
 
     // stand creation model floaty creation whatever thingy.
     @Override
@@ -735,8 +738,19 @@ public class PowersDiverDown extends NewPunchingStand {
         if (this.getActivePower() == DIVER_SUBMERGE_START) {
             completeDiveServer();
         }
-
+        if (this.getActivePower() == TRANSFER) {
+            triggerTransfer();
+        }
         super.updateUniqueMoves();
+    }
+
+    @Override
+    public boolean interceptIncomingHarm(DamageSource source, float amount) {
+        // let transfer be cancellable
+        if (this.getActivePower() == TRANSFER) {
+            cancelTransfer();
+        }
+        return super.interceptIncomingHarm(source, amount);
     }
 
     public void standPhasePunch() {
@@ -1613,7 +1627,7 @@ public class PowersDiverDown extends NewPunchingStand {
     @Override
     public int getMaxPilotRange() {
         // (this is in blocks)
-        return 10;
+        return 13;
     }
 
     @Override
@@ -2379,7 +2393,7 @@ public class PowersDiverDown extends NewPunchingStand {
     public void completeDiveServer() {
         if(this.getAttackTimeDuring() >= DIVE_WINDUP_MAX) {
             // run the get target method to find a target
-            Entity target = getTargetEntity(self, 5.5F);
+            Entity target = getTargetEntity(self, DIVE_REACH);
             if (target instanceof StandEntity stand && stand.getUser() != null) {
                 target = stand.getUser();
             }
@@ -2549,14 +2563,20 @@ public class PowersDiverDown extends NewPunchingStand {
                 cureNegativeEffects();
                 return true;
             }
-            /* to be replaced
-            case COUNTER -> {
+            case TRANSFER -> {
                 //comment out when tested
-                //this.self.sendSystemMessage(Component.literal("it's countering get update from affliciton screen time"));
-                //prepareCounter();
+                this.self.sendSystemMessage(Component.literal("it's transfering get update from affliciton screen time"));
+                prepareTransfer();
                 return true;
-            }*/
+            }
             case BONE_BOMB -> {
+                triggerBoneExplosion();
+                return true;
+            }
+            case RIBCAGE_TRAP -> {
+                return true;
+            }
+            case SPRING_LEGS -> {
                 return true;
             }
             default -> {
@@ -2567,7 +2587,141 @@ public class PowersDiverDown extends NewPunchingStand {
 
     // bone bomb start
 
+    public void triggerBoneExplosion() {
+        if (this.self.level().isClientSide()) return;
+        if (!(this.submergedTarget instanceof LivingEntity host) || !host.isAlive()) return;
+
+        // Detonation: kill normal mobs; invisible blindness to players & bosses
+        if (host instanceof Player || MainUtil.isBossMob(host)) {
+            host.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 0, false, false, false));
+            // 20 second blindness
+        } else {
+            Level level = host.level();
+            Vec3 spawnPos = MainUtil.getMobCenter(host, 0.5F);
+            // Find nearest entity within 25 blocks
+            List<LivingEntity> nearby = level.getEntitiesOfClass(
+                    LivingEntity.class,
+                    host.getBoundingBox().inflate(25),
+                    e -> e != host
+                            && e != this.self
+                            && !(e instanceof StandEntity)
+                            && e.isAlive()
+                            && !e.isSpectator()
+            );
+
+            LivingEntity closestTarget = null;
+            double minDistanceSq = 25*25;
+            for (LivingEntity entity : nearby) {
+                double distSq = host.distanceToSqr(entity);
+                if (distSq < minDistanceSq) {
+                    minDistanceSq = distSq;
+                    closestTarget = entity;
+                }
+            }
+            // Shotgun blast towards nearest target
+            if (closestTarget != null) {
+                Vec3 targetCenter = MainUtil.getMobCenter(closestTarget, 0.5F);
+                Vec3 toTarget = targetCenter.subtract(spawnPos);
+
+                for (int i = 0; i < 8; i++) {
+                    BoneProjectileEntity bone = new BoneProjectileEntity(level, host);
+                    bone.setOwner(this.self);
+                    bone.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+                    // sets the gravity to false so it goes in a straight line like star platinum throw until 25 blocks pass
+                    bone.setNoGravity(true);
+                    //last number represents the spread
+                    bone.shoot(toTarget.x, toTarget.y, toTarget.z, 3F, 18F);
+                    level.addFreshEntity(bone);
+                }
+            }
+
+            // sounds and animations and stuff. probably no anims though, just gonna leave behind a blood splatter.
+
+            DamageHandler.StandDamageEntity(host, Float.MAX_VALUE, this.self);
+        }
+
+        emergeServer();
+    }
+
     // bone bomb end
+
+    // transfer start
+
+    private void prepareTransfer(){
+        if (this.self.level().isClientSide()) return;
+        if (this.submergedTarget == null || !this.submergedTarget.isAlive()) return;
+
+        // startup time
+        this.setActivePower(TRANSFER);
+        this.setAttackTime(0);
+        this.setAttackTimeDuring(0);
+
+        //test message
+        this.self.sendSystemMessage(Component.literal("it's transfering windup time"));
+
+        //play the animation and sounds here
+    }
+
+    public void triggerTransfer() {
+        if(getAttackTimeDuring() >= TRANSFER_WINDUP_MAX) {
+            this.self.sendSystemMessage(Component.literal("it's transfering time"));
+            LivingEntity host = (this.submergedTarget instanceof LivingEntity living) ? living : null;
+            if (host == null || !host.isAlive()) {
+                cancelTransfer();
+                return;
+            }
+
+            //makes a bounding box to find entities withing it
+            List<LivingEntity> nearby = host.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    host.getBoundingBox().inflate(TRANSFER_RANGE),
+                    e -> e != host
+                            && e != this.self
+                            && !(e instanceof StandEntity)
+                            && e.isAlive()
+                            && !e.isSpectator()
+            );
+
+            //gets the closest one
+            LivingEntity closestTarget = null;
+            double minDistanceSq = TRANSFER_RANGE * TRANSFER_RANGE;
+            for (LivingEntity entity : nearby) {
+                double distSq = host.distanceToSqr(entity);
+                if (distSq < minDistanceSq) {
+                    minDistanceSq = distSq;
+                    closestTarget = entity;
+                }
+            }
+
+            if (closestTarget == null) {
+                cancelTransfer();
+                return;
+            }
+
+            //transfer process
+            removeDiverLegsFromTarget();
+            if (this.submergedTarget != null) {
+                ((StandUser) this.submergedTarget).roundabout$SetDiverUser(null);
+            }
+            this.submergedTarget = closestTarget;
+            ((StandUser) this.submergedTarget).roundabout$SetDiverUser(this);
+
+            // sync with client
+            if (this.self instanceof Player player) {
+                S2CPacketUtil.sendIntPowerDataPacket(player, DIVER_SUBMERGE_START, closestTarget.getId());
+            }
+
+            // sets activate power back to 0
+            this.setPowerNone();
+
+            // animation and sounds here
+        }
+    }
+
+    private void cancelTransfer () {
+        this.setPowerNone();
+    }
+    // transfer end
 
     // cleanse negative effects start
 
