@@ -35,6 +35,7 @@ import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.event.powers.StandUser;
 import net.hydra.jojomod.client.gui.diverdown.custom_workbench_code.*;
 import net.hydra.jojomod.client.hud.StandHudRender;
+import net.hydra.jojomod.fates.powers.AbilityScapeBasis;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewPunchingStand;
@@ -65,20 +66,18 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.SplashPotionItem;
-import net.minecraft.world.item.LingeringPotionItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -290,94 +289,130 @@ public class PowersDiverDown extends NewPunchingStand {
      */
     @Override
     public void renderIcons(GuiGraphics context, int x, int y) {
-        // Ability 1 (Z)
-        if (isHoldingSneak()) {
-            if (canExecuteMoveWithLevel(getBlockDisassemblyLevel())) {
-                setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_DISASSEMBLE, PowerIndex.SKILL_1_SNEAK);
-            } else {
-                setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        } else if (isGuarding()) {
-            setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_SELF_SUBMERGE, PowerIndex.SKILL_1_GUARD);
-        } else {
-            setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_SUBMERGE, PowerIndex.SKILL_1);
-        }
-
-        // Ability 2 (X)
-        if (isDiveActive()) {
-            setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_AFFLICTION, PowerIndex.SKILL_2);
-        } else if (isGuarding()) {
-            if (canExecuteMoveWithLevel(getKickStorageLevel())) {
-                // isAutoRelease will be true if auto, false if manual
-                if (this.isAutoRelease)
-                    setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_TOGGLE_AUTO, PowerIndex.SKILL_2_GUARD);
-                else
-                    setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_TOGGLE_MANUAL, PowerIndex.SKILL_2_GUARD);
-            } else {
-                setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        } else if (isHoldingSneak()) {
-            if (canExecuteMoveWithLevel(getKickStorageLevel())) {
-                // changes the icons for deletion vs releation (real)
-                if (this.isAutoRelease)
-                    setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_CANCEL_STORE, PowerIndex.SKILL_2_SNEAK);
-                else
-                    setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_RELEASE_MANUAL, PowerIndex.SKILL_2_SNEAK);
-            } else {
-                setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        } else {
-            if (canExecuteMoveWithLevel(getKickStorageLevel())) {
-                setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_STORE, PowerIndex.SKILL_2);
-            } else {
-                setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        }
-
-        // Ability 3 (C)
-        if (isHoldingSneak()) {
-            if(canExecuteMoveWithLevel(getDiverZipLevel())){
-                setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_ZIP, PowerIndex.SKILL_3);
-            } else {
-                setSkillIcon(context, x, y, 3, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        } else if (canLatchOntoWall()) {
-            if(canExecuteMoveWithLevel(getDiverZipLevel())){
-                setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_VAULT, PowerIndex.GLOBAL_DASH);
-            } else {
-                setSkillIcon(context, x, y, 3, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-            }
-        } else {
-            setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
-        }
-
-        // Ability 4 (V)
-        if (areStandMovesDisabled()) {
-            if (isHoldingSneak()) {
-                setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_PLATFORM, PowerIndex.SKILL_4_SNEAK);
-            } else {
+        // other modes
+        if (areStandMovesDisabled() && !(this.getActivePower() == DIVER_SUBMERGE_START)) {
+            // submerge
+            if(isDiveActive()) {
+                    if (damageRedirectionEnabled) {
+                        setSkillIcon(context, x, y, 1, StandIcons.REDIRECTION_ENABLED, PowerIndex.SKILL_1);
+                    } else {
+                        setSkillIcon(context, x, y, 1, StandIcons.REDIRECTION_DISABLED, PowerIndex.SKILL_1);
+                    }
+                setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_AFFLICTION, PowerIndex.SKILL_2);
+                setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
                 setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_RECALL, PowerIndex.SKILL_4);
             }
-        } else {
-            if (isGuarding()) {
-                if(canExecuteMoveWithLevel(getWorkbenchLevel())){
-                    setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_WORKSTATION, PowerIndex.SKILL_4_GUARD);
+            // diver zip
+            else if(inZipMode()) {
+                setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_ZIP, PowerIndex.GLOBAL_DASH);
+                setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+            }
+            // diver limb scaffold
+            else if(hasLimbsDeployed()) {
+                setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
+                if (isHoldingSneak()) {
+                    setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_PLATFORM, PowerIndex.SKILL_4);
                 } else {
-                    setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-                }
-            } else if (isHoldingSneak()) {
-                if (canExecuteMoveWithLevel(getDiverLimbLevel())) {
-                    setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_PLATFORM, PowerIndex.SKILL_4_SNEAK);
-                } else {
-                    setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD,true);
-                }
-            } else {
-                if (canExecuteMoveWithLevel(getGroundDiveLevel())) {
-                    setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_GROUND_DIVE, PowerIndex.SKILL_4);
-                } else {
-                    setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD,true);
+                    setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_RECALL, PowerIndex.SKILL_4);
                 }
             }
+            // ground dive
+            else if(isPiloting()) {
+                if (oreDetectionEnabled) {
+                    setSkillIcon(context, x, y, 1, StandIcons.ORE_DETECTION_ENABLED, PowerIndex.SKILL_1);
+                } else {
+                    setSkillIcon(context, x, y, 1, StandIcons.ORE_DETECTION_DISABLED, PowerIndex.SKILL_1);
+                }
+                setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_GRAB, PowerIndex.SKILL_2);
+                setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_CHEST, PowerIndex.SKILL_3);
+                setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_RECALL, PowerIndex.SKILL_4);
+            }
+        }
+
+        // Ability 1 (Z)
+        else {
+            if (isHoldingSneak()) {
+                if (canExecuteMoveWithLevel(getBlockDisassemblyLevel())) {
+                    setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_DISASSEMBLE, PowerIndex.SKILL_1_SNEAK);
+                } else {
+                    setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            } else if (isGuarding()) {
+                setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_SELF_SUBMERGE, PowerIndex.SKILL_1_GUARD);
+            } else {
+                setSkillIcon(context, x, y, 1, StandIcons.DIVER_DOWN_SUBMERGE, PowerIndex.SKILL_1);
+            }
+
+            // Ability 2 (X)
+            if (isGuarding()) {
+                if (canExecuteMoveWithLevel(getKickStorageLevel())) {
+                    // isAutoRelease will be true if auto, false if manual
+                    if (this.isAutoRelease)
+                        setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_TOGGLE_AUTO, PowerIndex.SKILL_2_GUARD);
+                    else
+                        setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_TOGGLE_MANUAL, PowerIndex.SKILL_2_GUARD);
+                } else {
+                    setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            } else if (isHoldingSneak()) {
+                if (canExecuteMoveWithLevel(getKickStorageLevel())) {
+                    // changes the icons for deletion vs releation (real)
+                    if (this.isAutoRelease)
+                        setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_CANCEL_STORE, PowerIndex.SKILL_2_SNEAK);
+                    else
+                        setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_RELEASE_MANUAL, PowerIndex.SKILL_2_SNEAK);
+                } else {
+                    setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            } else {
+                if (canExecuteMoveWithLevel(getKickStorageLevel())) {
+                    setSkillIcon(context, x, y, 2, StandIcons.DIVER_DOWN_STORE, PowerIndex.SKILL_2);
+                } else {
+                    setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            }
+
+            // Ability 3 (C)
+            if (isHoldingSneak()) {
+                if (canExecuteMoveWithLevel(getDiverZipLevel())) {
+                    setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_ZIP, PowerIndex.SKILL_3);
+                } else {
+                    setSkillIcon(context, x, y, 3, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            } else if (canLatchOntoWall()) {
+                if (canExecuteMoveWithLevel(getDiverZipLevel())) {
+                    setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_VAULT, PowerIndex.GLOBAL_DASH);
+                } else {
+                    setSkillIcon(context, x, y, 3, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                }
+            } else {
+                setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
+            }
+
+            // Ability 4 (V)
+                if (isGuarding()) {
+                    if (canExecuteMoveWithLevel(getWorkbenchLevel())) {
+                        setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_WORKSTATION, PowerIndex.SKILL_4_GUARD);
+                    } else {
+                        setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                    }
+                } else if (isHoldingSneak()) {
+                    if (canExecuteMoveWithLevel(getDiverLimbLevel())) {
+                        setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_PLATFORM, PowerIndex.SKILL_4_SNEAK);
+                    } else {
+                        setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                    }
+                } else {
+                    if (canExecuteMoveWithLevel(getGroundDiveLevel())) {
+                        setSkillIcon(context, x, y, 4, StandIcons.DIVER_DOWN_GROUND_DIVE, PowerIndex.SKILL_4);
+                    } else {
+                        setSkillIcon(context, x, y, 4, StandIcons.LOCKED, PowerIndex.NO_CD, true);
+                    }
+                }
         }
     }
 
@@ -389,48 +424,48 @@ public class PowersDiverDown extends NewPunchingStand {
                 "instruction.roundabout.press_attack", StandIcons.DIVER_DOWN_PUNCH, 0, level, bypas));
         $$1.add(drawSingleGUIIcon(context, 18, leftPos + 20 + startPos, topPos + 99, 0, "ability.roundabout.guard",
                 "instruction.roundabout.hold_block", StandIcons.DIVER_DOWN_GUARD, 0, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 20 + startPos, topPos + 118, 0,
-                "ability.roundabout.diver_phase_punch",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 20 + startPos, topPos + 118, 0, "ability.roundabout.diver_phase_punch",
                 "instruction.roundabout.hold_attack_crouch", StandIcons.DIVER_DOWN_PHASE_PUNCH, 0, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 80, 0,
-                "ability.roundabout.barrage",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 80, 0, "ability.roundabout.barrage",
                 "instruction.roundabout.barrage", StandIcons.DIVER_DOWN_BARRAGE, 0, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 99, 0,
-                "ability.roundabout.diver_submerge",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 99, 0, "ability.roundabout.diver_submerge",
                 "instruction.roundabout.press_skill", StandIcons.DIVER_DOWN_SUBMERGE, 1, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 118, 0,
-                "ability.roundabout.diver_disassemble",
-                "instruction.roundabout.press_skill_block", StandIcons.DIVER_DOWN_DISASSEMBLE, 1, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 80, 0,
-                "ability.roundabout.diver_self_submerge",
-                "instruction.roundabout.press_skill_crouch", StandIcons.DIVER_DOWN_SELF_SUBMERGE, 1, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 99, 0,
-                "ability.roundabout.diver_selection",
-                "instruction.roundabout.press_skill", StandIcons.DIVER_DOWN_AFFLICTION, 2, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 118, 0,
-                "ability.roundabout.diver_store",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 39 + startPos, topPos + 118, 0, "ability.roundabout.diver_self_submerge",
+                "instruction.roundabout.press_skill_block", StandIcons.DIVER_DOWN_SELF_SUBMERGE, 1, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 80, getBlockDisassemblyLevel(), "ability.roundabout.diver_disassemble",
+                "instruction.roundabout.press_skill_crouch", StandIcons.DIVER_DOWN_DISASSEMBLE, 1, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 99, 0, "ability.roundabout.diver_redirection",
+                "instruction.roundabout.press_skill_submerged", StandIcons.REDIRECTION_ENABLED, 1, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 58 + startPos, topPos + 118, 0, "ability.roundabout.diver_selection",
+                "instruction.roundabout.press_skill_submerged", StandIcons.DIVER_DOWN_AFFLICTION, 2, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 77 + startPos, topPos + 80, getKickStorageLevel(), "ability.roundabout.diver_store",
                 "instruction.roundabout.press_skill", StandIcons.DIVER_DOWN_STORE, 2, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 77 + startPos, topPos + 80, 0,
-                "ability.roundabout.diver_release_toggle",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 77 + startPos, topPos + 99, getKickStorageLevel(), "ability.roundabout.diver_release_toggle",
                 "instruction.roundabout.press_skill_block", StandIcons.DIVER_DOWN_TOGGLE_AUTO, 2, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 77 + startPos, topPos + 99, 0,
-                "ability.roundabout.diver_cancel_store",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 77 + startPos, topPos + 118, getKickStorageLevel(), "ability.roundabout.diver_cancel_store",
                 "instruction.roundabout.press_skill_crouch", StandIcons.DIVER_DOWN_CANCEL_STORE, 2, level, bypas));
         $$1.add(drawSingleGUIIcon(context, 18, leftPos + 96 + startPos, topPos + 80, 0, "ability.roundabout.dodge",
                 "instruction.roundabout.press_skill", StandIcons.DODGE, 3, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 96 + startPos, topPos + 99, 0, "ability.roundabout.vault",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 96 + startPos, topPos + 99, getDiverZipLevel(), "ability.roundabout.diver_wall_zip",
                 "instruction.roundabout.press_skill_air", StandIcons.DIVER_DOWN_VAULT, 3, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 96 + startPos, topPos + 118, 0, "ability.roundabout.diver_zip",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 96 + startPos, topPos + 118, getDiverZipLevel(), "ability.roundabout.diver_zip",
                 "instruction.roundabout.press_skill_crouch", StandIcons.DIVER_DOWN_ZIP, 3, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 80, 0,
-                "ability.roundabout.diver_limb_platform",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 80, getDiverLimbLevel(), "ability.roundabout.diver_limb_platform",
                 "instruction.roundabout.press_skill_crouch", StandIcons.DIVER_DOWN_PLATFORM, 4, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 99, 0,
-                "ability.roundabout.diver_workstation",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 99, getWorkbenchLevel(), "ability.roundabout.diver_workstation",
                 "instruction.roundabout.press_skill_block", StandIcons.DIVER_DOWN_WORKSTATION, 4, level, bypas));
-        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 118, 0,
-                "ability.roundabout.diver_ground_dive",
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 115 + startPos, topPos + 118, getGroundDiveLevel(), "ability.roundabout.diver_ground_dive",
                 "instruction.roundabout.press_skill", StandIcons.DIVER_DOWN_GROUND_DIVE, 4, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 134 + startPos, topPos + 80, getGroundDiveLevel(), "ability.roundabout.diver_detection",
+                "instruction.roundabout.press_skill_submerged", StandIcons.ORE_DETECTION_ENABLED, 1, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 134 + startPos, topPos + 99, getGroundDiveLevel(), "ability.roundabout.diver_grab",
+                "instruction.roundabout.press_skill_submerged", StandIcons.DIVER_DOWN_GRAB, 2, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 134 + startPos, topPos + 118, getGroundDiveLevel(), "ability.roundabout.diver_chest",
+                "instruction.roundabout.press_skill_submerged", StandIcons.DIVER_DOWN_CHEST, 3, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 153 + startPos, topPos + 80, 0, "ability.roundabout.diver_recall",
+                "instruction.roundabout.press_skill_submerged", StandIcons.DIVER_DOWN_RECALL, 4, level, bypas));
+        $$1.add(drawSingleGUIIcon(context, 18, leftPos + 153 + startPos, topPos + 99, 0, "ability.roundabout.mining",
+                "instruction.roundabout.hold_attack", StandIcons.DIVER_DOWN_MINING, 0, level, bypas));
         return $$1;
     }
 
@@ -594,7 +629,7 @@ public class PowersDiverDown extends NewPunchingStand {
         if (areStandMovesDisabled()) {
             if (inZipMode()) {
                 // allows toggling the mode and that's it
-                if (context == PowerContext.SKILL_3_CROUCH) {
+                if (context == PowerContext.SKILL_3_CROUCH || context == PowerContext.SKILL_3_NORMAL) {
                     tryDiverZip();
                 }
                 return;
@@ -626,15 +661,15 @@ public class PowersDiverDown extends NewPunchingStand {
                 // stops everything else from working
                 return;
             } else if (isDiveActive()) {
-                if (context == PowerContext.SKILL_1_NORMAL){
+                if (context == PowerContext.SKILL_1_NORMAL || context == PowerContext.SKILL_1_CROUCH){
                     tryToggleDamageRedirect();
                 }
                 else if(context == PowerContext.SKILL_3_NORMAL)
                     tryToDashClient();
-                else if (context == PowerContext.SKILL_4_NORMAL) {
+                else if (context == PowerContext.SKILL_4_NORMAL || context == PowerContext.SKILL_4_CROUCH) {
                     tryEmergeClient();
                 }
-                else if (context == PowerContext.SKILL_2_NORMAL) {
+                else if (context == PowerContext.SKILL_2_NORMAL || context == PowerContext.SKILL_2_CROUCH) {
                     tryAfflictionSelectionClient();
                 }
                 return;
@@ -653,6 +688,9 @@ public class PowersDiverDown extends NewPunchingStand {
             case SKILL_1_GUARD -> {
                 tryStartSelfDiveClient();
             }
+            case SKILL_1_CROUCH_GUARD -> {
+                tryStartSelfDiveClient();
+            }
             // kick storage
             case SKILL_2_NORMAL -> {
                 tryPlantKickTrap();
@@ -663,6 +701,9 @@ public class PowersDiverDown extends NewPunchingStand {
             }
             // toggle between auto and manual
             case SKILL_2_GUARD -> {
+                tryToggleTrapMode();
+            }
+            case SKILL_2_CROUCH_GUARD -> {
                 tryToggleTrapMode();
             }
             // dash, need to figure out how other moves will work.
@@ -679,6 +720,9 @@ public class PowersDiverDown extends NewPunchingStand {
             }
             // workbench
             case SKILL_4_GUARD -> {
+                tryWorkbenchSelectionClient();
+            }
+            case SKILL_4_CROUCH_GUARD-> {
                 tryWorkbenchSelectionClient();
             }
             // limb climbing move
@@ -2677,7 +2721,7 @@ public class PowersDiverDown extends NewPunchingStand {
     }
 
     private void tryToggleTrapMode() {
-        this.isAutoRelease = !this.isAutoRelease; // Immediate client-side update for GUI icon
+        this.isAutoRelease = !this.isAutoRelease;
         this.tryPower(TOGGLE_TRAP_MODE, true);
         tryPowerPacket(TOGGLE_TRAP_MODE);
     }
@@ -3189,7 +3233,7 @@ public class PowersDiverDown extends NewPunchingStand {
         if (this.self.level().isClientSide()) return;
         if (!(this.submergedTarget instanceof LivingEntity host) || !host.isAlive()) return;
 
-        // Detonation: kill normal mobs; invisible blindness to players & bosses
+        // kill normal mobs; blindness to players & bosses
         if (host instanceof Player || MainUtil.isBossMob(host)) {
             host.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 0, false, false, false));
             emergeServer();
@@ -3349,8 +3393,8 @@ public class PowersDiverDown extends NewPunchingStand {
 
         // special turtle master cleanse like what is in the pearl jam docs
         if (hadSlowness) {
-            targetLiving.removeEffect(MobEffects.DAMAGE_BOOST);      // Clears Strength
-            targetLiving.removeEffect(MobEffects.DAMAGE_RESISTANCE); // Clears Resistance (Turtle Master)
+            targetLiving.removeEffect(MobEffects.DAMAGE_BOOST);
+            targetLiving.removeEffect(MobEffects.DAMAGE_RESISTANCE);
         }
 
         // sounds here
@@ -3385,31 +3429,68 @@ public class PowersDiverDown extends NewPunchingStand {
 
     // potion start
 
-    private void embedPotion(){
+    private void embedPotion() {
         if (this.self.level().isClientSide()) return;
         if (!(this.submergedTarget instanceof LivingEntity targetLiving) || !targetLiving.isAlive()) return;
         if (!(this.self instanceof Player player)) return;
 
-        // check for potions in both on and offhand
+        // Check for potions or mob buckets in both main hand and off hand
         InteractionHand hand = InteractionHand.MAIN_HAND;
         ItemStack stack = player.getMainHandItem();
+        boolean isMobBucket = stack.getItem() instanceof MobBucketItem;
         List<MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
 
-        if (effects.isEmpty()) {
+        if (effects.isEmpty() && !isMobBucket) {
             hand = InteractionHand.OFF_HAND;
             stack = player.getOffhandItem();
+            isMobBucket = stack.getItem() instanceof MobBucketItem;
             effects = PotionUtils.getMobEffects(stack);
         }
 
-        // If neither hand is holding an item with potion effects, do nothing
+        // mob bucket stuff
+        if (isMobBucket) {
+            // turn mobs passive
+            if (targetLiving instanceof Mob mob && !MainUtil.isBossMob(targetLiving)) {
+                mob.removeAllGoals(goal -> goal instanceof TargetGoal || goal instanceof MeleeAttackGoal || goal instanceof RangedAttackGoal);
+                mob.setTarget(null);
+                mob.setLastHurtByMob(null);
+                mob.setAggressive(false);
+            }
+
+            // prevent players and bosses passive from attacking for 5 seconds
+            if (targetLiving instanceof Player) {
+                targetLiving.addEffect(new MobEffectInstance(ModEffects.IMPRINTING, 100, 0, false, true, true), this.self);
+                targetLiving.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 4, false, false, false), this.self);
+            } else if (MainUtil.isBossMob(targetLiving)) {
+                targetLiving.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 2, false, false, false), this.self);
+            }
+
+            // return empty bucket to inventory
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+                if (stack.isEmpty()) {
+                    player.setItemInHand(hand, new ItemStack(Items.WATER_BUCKET));
+                } else {
+                    if (!player.getInventory().add(new ItemStack(Items.WATER_BUCKET))) {
+                        player.drop(new ItemStack(Items.WATER_BUCKET), false);
+                    }
+                }
+            }
+
+            // sound effects and stuff here
+            return;
+        }
+
+        // potion stuff
         if (effects.isEmpty()) return;
-        List<MobEffect> negativeEffects = new ArrayList<>();
+
         for (MobEffectInstance instance : effects) {
             MobEffect effect = instance.getEffect();
             if (effect.getCategory() == MobEffectCategory.HARMFUL) {
                 emergeServer();
             }
         }
+
         // apply the potion effect
         for (MobEffectInstance effect : effects) {
             int newDuration = effect.getDuration();
@@ -3430,10 +3511,7 @@ public class PowersDiverDown extends NewPunchingStand {
             targetLiving.addEffect(boostedEffect, this.self);
         }
 
-        // sounds and animations here
-
-        // KILL the potion
-        //somebody wanted the bottle to return to your inventory so i guess we're doing that
+        // Consume potion and return bottle
         if (!player.getAbilities().instabuild) {
             Item item = stack.getItem();
             stack.shrink(1);
