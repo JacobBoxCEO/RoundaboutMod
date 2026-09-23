@@ -465,7 +465,7 @@ public class PowersKillerQueen extends NewPunchingStand {
     }
 
     public float getKickAttackKnockback(){
-        return (0.3f + ((float)this.chargedFinal/(float)getMaxKickTime())*1.4F);
+        return (1.2f + ((float)this.chargedFinal/(float)getMaxKickTime())*1.6F);
     }
     public int getKickAttackKnockShieldTime(){ return 40; }
 
@@ -3339,12 +3339,12 @@ public class PowersKillerQueen extends NewPunchingStand {
                         || dist <= 5){
                     rotateMobHead(attackTarget);
                 }
-                if (this.currentShaStatus == SHA_SEND && this.SHA != null && !this.SHA.isRemoved()) {
+                /*if (this.currentShaStatus == SHA_SEND && this.SHA != null && !this.SHA.isRemoved()) {
                     if (this.SHA.mobAiShouldRetreactDetect(this.self)){
                         SHA.setHaveToReturn(!SHA.getHaveToReturn());
                         this.currentShaStatus = SHA_RETREAT;
                     }
-                }
+                }*/
 
                 if (this.attackTimeDuring == -1 || (this.attackTimeDuring < -1 && this.activePower == PowerIndex.ATTACK)) {
                     Entity targetEntity = getTargetEntity(this.self, -1);
@@ -3826,7 +3826,9 @@ public class PowersKillerQueen extends NewPunchingStand {
 
             if (entity.equals(this.self) || entity.equals(bomb)
                     || entity instanceof StandEntity || !entity.isAlive() || entity.isDeadOrDying()
-                    || PowerTypes.isInADifferentExistence(entity, bomb)) {
+                    || PowerTypes.isInADifferentExistence(entity, bomb)
+                    || entity.isAlliedTo(self) || (entity instanceof TamableAnimal TA && TA.getOwner() == self)
+            ) {
                 continue;
             }
 
