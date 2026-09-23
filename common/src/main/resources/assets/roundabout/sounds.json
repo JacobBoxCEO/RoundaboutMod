@@ -17,6 +17,12 @@
       "roundabout:d4c_copy_block"
     ]
   },
+  "d4c_clone": {
+    "subtitle": "sounds.roundabout.d4c_clone",
+    "sounds": [
+      "roundabout:d4c_clone"
+    ]
+  },
   "special_chest": {
     "subtitle": "sounds.roundabout.special_chest",
     "sounds": [
@@ -243,6 +249,24 @@
     "subtitle": "sounds.roundabout.diver_down_transfer",
     "sounds": [
       "roundabout:diver_down_transfer"
+    ]
+  },
+  "diver_down_spring": {
+    "subtitle": "sounds.roundabout.diver_down_spring",
+    "sounds": [
+      "roundabout:diver_down_spring"
+    ]
+  },
+  "diver_down_ribcage": {
+    "subtitle": "sounds.roundabout.diver_down_ribcage",
+    "sounds": [
+      "roundabout:diver_down_ribcage"
+    ]
+  },
+  "diver_down_bomb": {
+    "subtitle": "sounds.roundabout.diver_down_bomb",
+    "sounds": [
+      "roundabout:diver_down_bomb"
     ]
   },
   "summon_king_crimson": {

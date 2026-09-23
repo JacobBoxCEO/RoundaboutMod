@@ -46,6 +46,8 @@ public class ForgeSounds {
             register(ModSounds.WORLD_SUMMON_SOUND, ModSounds.WORLD_SUMMON_SOUND_ID);
     public static final RegistryObject<SoundEvent> SUMMON_D4C_EVENT =
             register(ModSounds.SUMMON_D4C, ModSounds.SUMMON_D4C_ID);
+    public static final RegistryObject<SoundEvent> D4C_CLONE =
+            register(ModSounds.D4C_CLONE, ModSounds.D4C_CLONE_ID);
     public static final RegistryObject<SoundEvent> SPECIAL_CHEST_EVENT =
             register(ModSounds.SPECIAL_CHEST, ModSounds.SPECIAL_CHEST_ID);
     public static final RegistryObject<SoundEvent> DISC_INSERT_EVENT =
@@ -977,6 +979,12 @@ public class ForgeSounds {
             register(ModSounds.DIVER_DOWN_ZIP, ModSounds.DIVER_DOWN_ZIP_ID);
     public static final RegistryObject<SoundEvent> DIVER_DOWN_TRANSFER =
             register(ModSounds.DIVER_DOWN_TRANSFER, ModSounds.DIVER_DOWN_TRANSFER_ID);
+    public static final RegistryObject<SoundEvent> DIVER_DOWN_SPRING =
+            register(ModSounds.DIVER_DOWN_SPRING, ModSounds.DIVER_DOWN_SPRING_ID);
+    public static final RegistryObject<SoundEvent> DIVER_DOWN_RIBCAGE =
+            register(ModSounds.DIVER_DOWN_RIBCAGE, ModSounds.DIVER_DOWN_RIBCAGE_ID);
+    public static final RegistryObject<SoundEvent> DIVER_DOWN_BOMB =
+            register(ModSounds.DIVER_DOWN_BOMB, ModSounds.DIVER_DOWN_BOMB_ID);
 
     public static final RegistryObject<SoundEvent> SUMMON_GREEN_DAY =
             register(ModSounds.SUMMON_GREEN_DAY, ModSounds.SUMMON_GREEN_DAY_ID);
