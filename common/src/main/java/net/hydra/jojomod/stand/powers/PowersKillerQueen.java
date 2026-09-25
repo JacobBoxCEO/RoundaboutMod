@@ -1770,6 +1770,7 @@ public class PowersKillerQueen extends NewPunchingStand {
         switch (activePower) {
             case BTD_ACTIVATIONS -> {
                 combatActivations = data;
+                btdTicks = 0;
             }
             case PowersKillerQueen.PLANTED-> {
                this.currentBombStatus = (byte)data;
@@ -3720,10 +3721,10 @@ public class PowersKillerQueen extends NewPunchingStand {
             else if (inBitesTheDustMode()) {
                 StandEntity stand = this.getStandEntity(this.getSelf());
 
-
                 if ((bitesTheDustPlantedEntity != null && !bitesTheDustPlantedEntity.isRemoved() && bitesTheDustPlantedEntity.isAlive()
                         && !((StandUser)bitesTheDustPlantedEntity).roundabout$hasAStand()) && canExecuteMoveWithLevel(getBitesTheDustLevel())
                         && (canExecuteMoveWithLevel(getBitesTheDustDayLevel()) || currentBombStatus != BITES_THE_DUST_BIGGER)
+                        && PowerTypes.isUsingStand(self)
                 ) {
                     if (Objects.nonNull(stand) && stand instanceof KillerQueenEntity KQE) {
                         stand.setFadePercent(30);
