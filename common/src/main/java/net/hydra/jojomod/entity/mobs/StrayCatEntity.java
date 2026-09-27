@@ -37,6 +37,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ClipContext;
@@ -384,7 +385,8 @@ public class StrayCatEntity extends TamableAnimal implements RangedAttackMob {
         if (this.getBubbleShield() && canBubbleShieldProtect(DMG)) {
             Entity attacker = DMG.getEntity();
 
-            if (attacker instanceof LivingEntity LE) {
+            if (attacker instanceof LivingEntity LE
+                    && (LE.distanceTo(this) < 0.45f && !(DMG.getDirectEntity() instanceof Projectile))) {
 
                 double $$11 = Math.max(0.0, 1.0 - LE.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
                 Vec3 $$12 = (LE.getPosition(1).subtract(getPosition(1))).multiply(1.0, 0.0, 1.0).normalize().scale((double) 0.5 * $$11);

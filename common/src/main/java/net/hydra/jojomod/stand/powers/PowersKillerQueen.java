@@ -2,7 +2,6 @@ package net.hydra.jojomod.stand.powers;
 
 import com.google.common.collect.Lists;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -47,7 +46,6 @@ import net.hydra.jojomod.util.S2CPacketUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -94,7 +92,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.*;
@@ -116,8 +113,6 @@ public class PowersKillerQueen extends NewPunchingStand {
     @Override public StandEntity getNewStandEntity(){ return ModEntities.KILLER_QUEEN.create(this.getSelf().level());}
 
     @Override public boolean canUseStandArrow() { return !canBitesTheDust(); }
-
-	// TODO Balance changes to bites the dust
 	
 	private static final byte
 		PLANTED=53,
@@ -1121,13 +1116,18 @@ public class PowersKillerQueen extends NewPunchingStand {
                         ((BlockItem)stack.getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem)stack.getItem()).getBlock() instanceof FancyLighterBlock)));
     }
 
-    public float getMaxBTDHostHealth() { return 25.0f; }
+    public float getMaxBTDHostHealth() { return 40.0f; }
+
+    public boolean isAffectedByBitesTheDust(Entity ent) {
+        return (ent instanceof Player || ent instanceof Mob)
+                && !(ent instanceof FallenMob || ent instanceof StandEntity);
+    }
 
     public boolean canBitesTheDustPlant(Entity targetEntity) {
         if (targetEntity == null) {
             return false;
-        } else if (!targetEntity.isAlive() || targetEntity instanceof StandEntity || MainUtil.isBossMob(targetEntity)
-                || targetEntity instanceof FallenMob || targetEntity instanceof StrayCatEntity) {
+        } else if (!targetEntity.isAlive() || MainUtil.isBossMob(targetEntity)
+                || !isAffectedByBitesTheDust(targetEntity) || targetEntity instanceof StrayCatEntity) {
             return false;
         }
         if (targetEntity instanceof Mob || targetEntity instanceof Player) {
@@ -1776,7 +1776,6 @@ public class PowersKillerQueen extends NewPunchingStand {
                     btdTicks = data;
                     disabledBTDTicks = 0;
                 }
-
             }
             case BTD_ACTIVATIONS -> {
                 combatActivations = data;
@@ -3052,7 +3051,7 @@ public class PowersKillerQueen extends NewPunchingStand {
                 btdTicks = 0;
             }
             if (self instanceof ServerPlayer PL) {
-                S2CPacketUtil.sendIntPowerDataPacket(PL, BTD_TICKS_DESACTIVATED, btdTicks - disabledBTDTicks);
+                S2CPacketUtil.sendIntPowerDataPacket(PL, BTD_TICKS_DESACTIVATED, btdTicks + disabledBTDTicks);
             }
         }
     }
@@ -3073,7 +3072,7 @@ public class PowersKillerQueen extends NewPunchingStand {
 
     public void mandomInteraction() {
         if (inBitesTheDustMode()) {
-            int difference = btdTicks - 120 - disabledBTDTicks;
+            int difference = btdTicks - 120 + disabledBTDTicks;
             if (difference >= 0) {
                 btdTicks = difference;
             }else {
@@ -3081,7 +3080,7 @@ public class PowersKillerQueen extends NewPunchingStand {
                 btdTicks = 0;
             }
             if (self instanceof ServerPlayer PL) {
-                S2CPacketUtil.sendIntPowerDataPacket(PL, BTD_TICKS_DESACTIVATED, btdTicks - disabledBTDTicks);
+                S2CPacketUtil.sendIntPowerDataPacket(PL, BTD_TICKS_DESACTIVATED, btdTicks + disabledBTDTicks);
             }
         }
     }
@@ -3794,10 +3793,12 @@ public class PowersKillerQueen extends NewPunchingStand {
                     this.btdDefuseServer();
                 }
 
-                if (this.currentBombStatus == BITES_THE_DUST) {
-                    detectBitedTheDustCombat();
-                }else if (this.currentBombStatus == BITES_THE_DUST_BIGGER){
-                    detectBitedTheDustDay();
+                if (disabledBTDTicks >= 0) {
+                    if (this.currentBombStatus == BITES_THE_DUST) {
+                        detectBitedTheDustCombat();
+                    } else if (this.currentBombStatus == BITES_THE_DUST_BIGGER) {
+                        detectBitedTheDustDay();
+                    }
                 }
             }
         }
@@ -3820,7 +3821,12 @@ public class PowersKillerQueen extends NewPunchingStand {
                     int timeToDust = bitedTheDust.get(id);
 
                     if (timeToDust == this.btdTicks) {
-                        DamageSource dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, null);;
+                        DamageSource dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, self);
+
+                        if (target instanceof LivingEntity LE && ClientNetworking.getAppropriateConfig().killerQueenSettings.sneakyKilling
+                                && (!LE.hasLineOfSight(this.getSelf()) || LE.distanceTo(self) > 28) && !MainUtil.isBossMob(target)){
+                            dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, null);;
+                        }
 
 
                         if (MainUtil.getReducedDamage(target)) {
@@ -3864,7 +3870,12 @@ public class PowersKillerQueen extends NewPunchingStand {
                     int timeToDust = dayBitedTheDust.get(id);
 
                     if (timeToDust == btdTicks) {
-                        DamageSource dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, null);;
+                        DamageSource dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, self);
+
+                        if (target instanceof LivingEntity LE && ClientNetworking.getAppropriateConfig().killerQueenSettings.sneakyKilling
+                                && (!LE.hasLineOfSight(this.getSelf()) || LE.distanceTo(self) > 28) && !MainUtil.isBossMob(target)){
+                            dmg = ModDamageTypes.of(target.level(), ModDamageTypes.BITES_THE_DUST, null);;
+                        }
 
                         if ((PowerTypes.isExistentiallyElsewhere(target))) {
                             if (((StandUser)target).roundabout$getStandPowers() instanceof
@@ -4234,7 +4245,7 @@ public class PowersKillerQueen extends NewPunchingStand {
     // hightlights entity things :0
     public boolean highlightsEntity(Entity ent,Player player){
         if (inBitesTheDustMode() && bitesTheDustPlantedEntity != null) {
-            if ((ent instanceof Mob || ent instanceof Player) && !(ent instanceof StandEntity)
+            if (isAffectedByBitesTheDust(ent) && self != ent
                     && ent.distanceTo(bitesTheDustPlantedEntity) < btdRange && bitesTheDustPlantedEntity != ent) {
                 LivingEntity LE = (LivingEntity) ent;
 
@@ -4319,7 +4330,7 @@ public class PowersKillerQueen extends NewPunchingStand {
         if (LE != null && LE.getId() != this.getSelf().getId()) {
             Minecraft mc = Minecraft.getInstance();
             if (this.getSelf() instanceof Player && this.getSelf().distanceToSqr(LE) <= 1024
-                    && bitesTheDustPlantedEntity != null && (LE instanceof Mob || LE instanceof Player) && !(LE instanceof StandEntity)) {
+                    && bitesTheDustPlantedEntity != null && isAffectedByBitesTheDust(LE)) {
 
                 float size = 0.3f;
                 ResourceLocation icon = StandIcons.BITES_THE_DUST_TARGET;
@@ -4796,9 +4807,12 @@ public class PowersKillerQueen extends NewPunchingStand {
 
             DamageSource dmg = ModDamageTypes.of(level, ModDamageTypes.EXPLOSIVE_STAND, this.getSelf());
 
-            for (LivingEntity LE : ExplosionUtil.explosionHurtSneakyWithMulti(vPos, dmg, level, damage,
+            for (LivingEntity LE : ExplosionUtil.explosionHurtBaseWithMulti(
+                    config.sneakyKilling,
+                    vPos, dmg, level, damage,
                     0.1f + (0.3f * bombSize), (0.6f + (float)bombSize * 0.9f) * rangeModifier,
                     multiplyPowerByStandConfigMobs(1.5f), multiplyPowerByStandConfigPlayers(1))) {
+
                 if (target != null) {
                     if (LE.getId() == target.getId()) {
                         continue;
@@ -4825,7 +4839,8 @@ public class PowersKillerQueen extends NewPunchingStand {
                 if (isBoss) { hitPoints *= 0.70f; }
                 DamageSource desintegrationDmg = ModDamageTypes.of(level, ModDamageTypes.KQ_EXPLOSION, this.getSelf());;
 
-                if (target instanceof LivingEntity LE && !LE.hasLineOfSight(this.getSelf()) && !isBoss) {
+                if (target instanceof LivingEntity LE && config.sneakyKilling
+                        && (!LE.hasLineOfSight(this.getSelf()) || LE.distanceTo(self) > 28) && !isBoss) {
                     desintegrationDmg = ModDamageTypes.of(level, ModDamageTypes.KQ_EXPLOSION, null);
                 }
 
