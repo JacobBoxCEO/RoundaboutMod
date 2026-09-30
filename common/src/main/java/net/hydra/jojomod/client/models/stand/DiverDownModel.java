@@ -5,12 +5,17 @@ import net.hydra.jojomod.client.models.stand.animations.StandAnimations;
 import net.hydra.jojomod.entity.stand.DiverDownEntity;
 import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.stand.powers.PowersDiverDown;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 public class DiverDownModel<T extends DiverDownEntity> extends StandModel<T>{
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
@@ -219,7 +224,6 @@ public class DiverDownModel<T extends DiverDownEntity> extends StandModel<T>{
         defaultModifiers(pEntity);
         defaultAnimations(pEntity, pAgeInTicks, 1/((float) Power.getBarrageWindup() /20));
 
-        this.animate(pEntity.mobDiveWindup, DiverDownAnimations.mob_dive_windup, pAgeInTicks, 1F);
         this.animate(pEntity.mobDive, DiverDownAnimations.mob_dive, pAgeInTicks, 1F);
         this.animate(pEntity.energyStorageWindup, DiverDownAnimations.energy_storage_windup, pAgeInTicks, 1F);
         this.animate(pEntity.energyStorage, DiverDownAnimations.energy_storage, pAgeInTicks, 1F);
@@ -230,8 +234,14 @@ public class DiverDownModel<T extends DiverDownEntity> extends StandModel<T>{
         this.animate(pEntity.transferWindup, DiverDownAnimations.transfer_windup, pAgeInTicks, 1F);
         this.animate(pEntity.transfer, DiverDownAnimations.transfer, pAgeInTicks, 1F);
         this.animate(pEntity.groundDive, DiverDownAnimations.diverdive, pAgeInTicks, 1F);
-        this.animate(pEntity.diverZip, DiverDownAnimations.diverzip_moving, pAgeInTicks, 1F);
-        this.animate(pEntity.diverZipIdle, DiverDownAnimations.diverzip_idle, pAgeInTicks, 1F);
+        if (pEntity.getAnimation() == DiverDownEntity.DIVER_ZIP_IDLE || pEntity.getAnimation() == DiverDownEntity.DIVER_ZIP) {
+            float partialTick = Mth.clamp(pAgeInTicks - pEntity.tickCount, 0.0F, 1.0F);
+            float movingBlend = pEntity.getDiverZipBlend(partialTick);
+            float idleBlend = 1.0F - movingBlend;
+
+            animateWeighted(pEntity.diverZipIdle, DiverDownAnimations.diverzip_idle, pAgeInTicks, idleBlend);
+            animateWeighted(pEntity.diverZip, DiverDownAnimations.diverzip_moving, pAgeInTicks, movingBlend);
+        }
 
         this.animate(pEntity.hideFists, StandAnimations.HIDE_FISTS, pAgeInTicks, 1F);
     }
@@ -239,5 +249,14 @@ public class DiverDownModel<T extends DiverDownEntity> extends StandModel<T>{
     @Override
     public ModelPart root() {
         return stand;
+    }
+    private final org.joml.Vector3f animationVectorCache = new org.joml.Vector3f();
+
+    private void animateWeighted(AnimationState state, AnimationDefinition animation,
+                                 float animationProgress, float weight) {
+        if (weight <= 0.0F) return;
+        state.updateTime(animationProgress, 1.0F);
+        state.ifStarted(animationState -> KeyframeAnimations.animate(this, animation,
+                animationState.getAccumulatedTime(), weight, animationVectorCache));
     }
     }

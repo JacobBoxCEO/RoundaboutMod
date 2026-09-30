@@ -46,6 +46,13 @@ public class DiverDownBaseRenderer extends StandRenderer<DiverDownEntity> {
     public static final ResourceLocation VOLUME_4 = new ResourceLocation(Roundabout.MOD_ID, "textures/stand/diver_down/volume_4.png");
     public static final ResourceLocation SPINE_ART = new ResourceLocation(Roundabout.MOD_ID, "textures/stand/diver_down/spine_art.png");
 
+    /*UPDATE THE FOLLOWING FILES AS WELL WHENEVER ADDING NEW MODELS:
+    DiverKickEntityRenderer
+    DiverLimbBlockEntityRenderer
+    DiverLegsLayer
+    DiverArmsLayer
+    */
+
     public DiverDownBaseRenderer(EntityRendererProvider.Context context, StandModel<DiverDownEntity> entityModel, float f) {
         super(context, entityModel, f);
         DiverDownDisguiseRenderer.INSTANCE = new DiverDownDisguiseRenderer(context);
@@ -117,7 +124,7 @@ public class DiverDownBaseRenderer extends StandRenderer<DiverDownEntity> {
 
             // Hide while ground piloting (except during ground barrage)
             if (mobEntity.getUser() instanceof IPlayerEntity player && player.roundabout$getControlling() == mobEntity.getId()) {
-                if (mobEntity.getAnimation() != DiverDownEntity.GROUND_BARRAGE) {
+                if (mobEntity.getAnimation() != DiverDownEntity.GROUND_BARRAGE && mobEntity.getAnimation() != DiverDownEntity.CHEST_RUMMAGE) {
                     if (mobEntity.getAnimation() != DiverDownEntity.GROUND_DIVE ||
                             (mobEntity.groundDive.isStarted() && mobEntity.groundDive.getAccumulatedTime() >= 333L)) {
                         return;

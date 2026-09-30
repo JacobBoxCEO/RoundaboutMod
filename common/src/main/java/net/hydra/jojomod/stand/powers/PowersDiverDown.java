@@ -15,6 +15,7 @@ import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.projectile.BoneProjectileEntity;
 import net.hydra.jojomod.entity.stand.*;
+import net.hydra.jojomod.entity.substand.DiverKickEntity;
 import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModEffects;
 import net.hydra.jojomod.event.ModGamerules;
@@ -133,7 +134,8 @@ public class PowersDiverDown extends NewPunchingStand {
             SPRING_LEGS = 78,
             TOGGLE_DAMAGE_REDIRECT = 79,
             GROUND_DIVE_START = 80,
-            GROUND_DIVE_EXIT = 81;
+            GROUND_DIVE_EXIT = 81,
+            DIVER_ARMS = 82;
 
     // for all the move ids accessed elsewhere.
     public static final byte
@@ -1131,12 +1133,33 @@ public class PowersDiverDown extends NewPunchingStand {
             tickSpringLegs();
             if (this.hasDiverLegs && this.submergedTarget instanceof LivingEntity target && target.isAlive()) {
                 double px = target.getX() + (Math.random() - 0.5) * 0.4;
-                double py = target.getY() + 0.35; // At the legs
+                double py = target.getY() + (target.getBbHeight() * 0.35); // At the legs
                 double pz = target.getZ() + (Math.random() - 0.5) * 0.4;
 
                 sendParticlesIfPossible(
                         this.self.level(), ModParticles.ICE_SPARKLE, px, py, pz,
                             2, 0.05, 0.05, 0.05, 0.08);
+            }
+            if (this.hasDiverArms && this.submergedTarget instanceof LivingEntity target && target.isAlive()) {
+                float yawRad = (float) Math.toRadians(submergedTarget.getYRot());
+                float armOffsetRad = yawRad + (float) (Math.PI / 2.0);
+
+                // Distance from center of player to the arms (~0.4 blocks)
+                double armDist = 0.4;
+
+                double offsetX = Math.sin(armOffsetRad) * armDist;
+                double offsetZ = -Math.cos(armOffsetRad) * armDist;
+
+                double armHeight = submergedTarget.getY() + submergedTarget.getBbHeight() * 0.6; // ~Shoulder/Arm height
+
+                // left arm
+                sendParticlesIfPossible(self.level(), ModParticles.ICE_SPARKLE,
+                        submergedTarget.getX() + offsetX, armHeight, submergedTarget.getZ() + offsetZ,
+                        1, 0.05, 0.05, 0.05, 0.08);
+                // right arm
+                sendParticlesIfPossible(self.level(), ModParticles.ICE_SPARKLE,
+                        submergedTarget.getX() - offsetX, armHeight, submergedTarget.getZ() - offsetZ,
+                        1, 0.05, 0.05, 0.05, 0.08);
             }
             // recall stand if target dies, or if they go too far
             if (this.submergedTarget != null) {
@@ -1632,6 +1655,7 @@ public class PowersDiverDown extends NewPunchingStand {
             this.submergedTargetId = -1;
             this.submergedTarget = null;
             this.hasDiverLegs = false;
+            this.hasDiverArms = false;
         } else if (activePower == LIMB_RECALL) {
             this.activeLimbs.clear();
             this.currentLimbIndex = 0;
@@ -1671,7 +1695,12 @@ public class PowersDiverDown extends NewPunchingStand {
     @Override
     public boolean tryBlockPosPower(int move, boolean forced, BlockPos blockPos) {
         if (move == OPEN_CHEST) {
+            StandEntity stand = getStandEntity(this.self);
+            if (stand != null) {
+                turnStandTowards(stand, blockPos);
+            }
             openChest(blockPos);
+            return true;
         } else if (move == DISASSEMBLE_BLOCK) {
             disassembleBlock(blockPos);
         }
@@ -2445,6 +2474,7 @@ public class PowersDiverDown extends NewPunchingStand {
         setPiloting(0);
         tryPowerPacket(GROUND_DIVE_EXIT);
         StandEntity stand = getStandEntity(this.self);
+        this.setPowerNone();
         if (stand != null) {
             // Bring stand back to user
             stand.setPos(this.self.getX(), this.self.getY(), this.self.getZ());
@@ -2651,8 +2681,12 @@ public class PowersDiverDown extends NewPunchingStand {
             return false;
         }
         StandEntity stand = getStandEntity(this.self);
-        if (stand != null && !isPiloting()) {
-            setPiloting(stand.getId());
+        if (stand != null) {
+            if (!isPiloting()) {
+                setPiloting(stand.getId());
+            }
+            turnStandTowards(stand, chestPos);
+            animateStand(DiverDownEntity.CHEST_RUMMAGE);
         }
         this.isOpeningRemoteChest = true;
 
@@ -2662,6 +2696,19 @@ public class PowersDiverDown extends NewPunchingStand {
             serverPlayer.openMenu(menuProvider);
         }
         return true;
+    }
+
+    private void turnStandTowards(StandEntity stand, BlockPos targetPos) {
+        double dx = (targetPos.getX() + 0.5) - stand.getX();
+        double dz = (targetPos.getZ() + 0.5) - stand.getZ();
+        float yaw = (float) (Mth.atan2(dz, dx) * (180.0D / Math.PI)) - 90.0F;
+
+        stand.setYRot(yaw);
+        stand.setYHeadRot(yaw);
+        stand.setYBodyRot(yaw);
+        stand.yRotO = yaw;
+        stand.yHeadRotO = yaw;
+        stand.yBodyRotO = yaw;
     }
 
     // runs get items code on client and server
@@ -2885,6 +2932,7 @@ public class PowersDiverDown extends NewPunchingStand {
             ((StandUser) this.self).rdbt$SetCrawlTicks(0);
             this.self.setSwimming(false);
             this.self.setPose(Pose.STANDING);
+            this.setPowerNone();
             if (inZipMode())
                 setCooldown(PowerIndex.SKILL_3, 180);
         } else {
@@ -2901,6 +2949,8 @@ public class PowersDiverDown extends NewPunchingStand {
             boolean getTog = getStandUserSelf().roundabout$getUniqueStandModeToggle();
             if (toggle != getTog) {
                 if (toggle) {
+                    this.poseStand(OffsetIndex.FOLLOW_NOLEAN);
+                    animateStand(DiverDownEntity.DIVER_ZIP_IDLE);
                     // put sound here
                     playSoundIfPossible(self.level(), null, this.self.blockPosition(),
                             ModSounds.DIVER_DOWN_TRANSFER_EVENT,
@@ -3157,10 +3207,6 @@ public class PowersDiverDown extends NewPunchingStand {
         BlockHitResult blockHit = this.self.level().clip(
                 new ClipContext(eyePos, reachVec, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.self));
 
-        if (blockHit.getType() != HitResult.Type.BLOCK) {
-            return false;
-        }
-
         // startup timer
         this.setActivePower(STORE_KICK_TRAP);
         this.setAttackTimeDuring(0);
@@ -3311,7 +3357,10 @@ public class PowersDiverDown extends NewPunchingStand {
         Level level = this.self.level();
         StandEntity stand = this.getStandEntity(this.self);
         BlockPos spawnPos = pos.relative(face);
-
+        if (!level.isClientSide()) {
+            DiverKickEntity kick = new DiverKickEntity(level, pos, trap.face, ((StandUser) this.self).roundabout$getStandSkin());
+            level.addFreshEntity(kick);
+        }
         for (LivingEntity victim : victims) {
             if (victim instanceof TamableAnimal TA && TA.getOwner() != null && TA.getOwner().is(this.getSelf())) {
                 continue;
@@ -3453,14 +3502,14 @@ public class PowersDiverDown extends NewPunchingStand {
                 SoundSource.PLAYERS, 0.8F, 0.9F);
         this.setActivePower(DIVER_SUBMERGE_START);
         this.setAttackTimeDuring(0);
-        this.poseStand(OffsetIndex.GUARD);
-        animateStand(DiverDownEntity.MOB_DIVE_WINDUP);
+        this.poseStand(OffsetIndex.ATTACK);
+        animateStand(DiverDownEntity.MOB_DIVE);
         return true;
     }
 
     //actually does the dive
     public void completeDiveServer() {
-        if (this.getAttackTimeDuring() >= DIVE_WINDUP_MAX) {
+        if (this.getAttackTimeDuring() > DIVE_WINDUP_MAX) {
             // run the get target method to find a target
             Entity target = getTargetEntity(self, DIVE_REACH);
             if (target instanceof StandEntity stand && stand.getUser() != null) {
@@ -3470,7 +3519,6 @@ public class PowersDiverDown extends NewPunchingStand {
                 this.setAttackTimeDuring(-15);
                 this.setAttackTime(-15);
                 this.poseStand(OffsetIndex.ATTACK);
-                animateStand(DiverDownEntity.MOB_DIVE);
                 return;
             }
             this.submergedTarget = target;
@@ -3479,7 +3527,6 @@ public class PowersDiverDown extends NewPunchingStand {
                 return;
             }
             this.poseStand(OffsetIndex.ATTACK);
-            animateStand(DiverDownEntity.MOB_DIVE);
             this.setAttackTimeDuring(-6);
             // Attach to target entity
             ((StandUser) this.submergedTarget).roundabout$SetDiverUser(this);
@@ -3516,6 +3563,7 @@ public class PowersDiverDown extends NewPunchingStand {
         if (this.submergedTarget == null)
             return false;
         removeDiverLegsFromTarget();
+        removeDiverArmsFromTarget();
         if (this.submergedTarget != null) {
             ((StandUser) this.submergedTarget).roundabout$SetDiverUser(null);
             this.submergedTarget = null;
@@ -3543,6 +3591,7 @@ public class PowersDiverDown extends NewPunchingStand {
 
     public void cancelDiveServer() {
         removeDiverLegsFromTarget();
+        removeDiverArmsFromTarget();
         this.submergedTarget = null;
         this.setPowerNone();
         // sync with client
@@ -3705,6 +3754,10 @@ public class PowersDiverDown extends NewPunchingStand {
                 //comment out when tested
                 //this.self.sendSystemMessage(Component.literal("it's transfering get update from affliciton screen time"));
                 //prepareTransfer();
+                return true;
+            }
+            case DIVER_ARMS -> {
+                diverArms();
                 return true;
             }
             case BONE_BOMB -> {
@@ -4047,13 +4100,13 @@ public class PowersDiverDown extends NewPunchingStand {
     // diver arms start
 
     private void diverArms() {
+        //NOTE FOR FUTURE SELF: YOU CAN ADJUST THE ATTACK DECREASE AND MINING SPEED INCREASE IN PlayerEntity
         if (this.self.level().isClientSide()) return;
         if (this.submergedTarget == null || !this.submergedTarget.isAlive()) return;
 
         this.hasDiverArms = true;
-        ((StandUser) this.submergedTarget).roundabout$setDiverLegs(true);
+        ((StandUser) this.submergedTarget).roundabout$setDiverArms(true); // <-- Changed to arms
 
-        //play sound here, replace entity legs with diver down legs
         playSoundIfPossible(self.level(), null, submergedTarget.blockPosition(),
                 ModSounds.DIVER_DOWN_TRANSFER_EVENT,
                 SoundSource.PLAYERS, 0.8F, 1.2F);
@@ -4063,10 +4116,10 @@ public class PowersDiverDown extends NewPunchingStand {
     private void removeDiverArmsFromTarget() {
         if (!this.hasDiverArms) return;
         if (this.self != null) {
-            ((StandUser) this.self).roundabout$setDiverLegs(false);
+            ((StandUser) this.self).roundabout$setDiverArms(false); // <-- Changed to arms
         }
         if (this.submergedTarget != null) {
-            ((StandUser) this.submergedTarget).roundabout$setDiverLegs(false);
+            ((StandUser) this.submergedTarget).roundabout$setDiverArms(false); // <-- Changed to arms
         }
         this.hasDiverArms = false;
     }
@@ -4732,6 +4785,7 @@ public class PowersDiverDown extends NewPunchingStand {
     public void onStandSummon(boolean desummon) {
         if (desummon) {
             removeDiverLegsFromTarget();
+            removeDiverArmsFromTarget();
             recallLimbs();
             toggleZip(false);
             if (isDiveActive()) {
