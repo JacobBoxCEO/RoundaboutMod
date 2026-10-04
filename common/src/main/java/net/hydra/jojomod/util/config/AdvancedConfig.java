@@ -327,6 +327,7 @@ public class AdvancedConfig implements Cloneable {
     );
     public Set<String> standDisassemblyBlacklist = new HashSet<>(
             Arrays.asList(
+                    "roundabout:melon_parfait"
             )
     );
     public Set<String> standBlockExplosionBlacklist = new HashSet<>(

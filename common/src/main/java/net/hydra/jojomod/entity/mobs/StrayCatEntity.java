@@ -131,6 +131,7 @@ public class StrayCatEntity extends TamableAnimal implements RangedAttackMob {
             this.setBreed(tag.getByte(TAG_SKIN));
         }
     }
+
     @Override
     public boolean isInLove() {
         return false;
@@ -283,6 +284,9 @@ public class StrayCatEntity extends TamableAnimal implements RangedAttackMob {
     }
 
     public static void tryToSpawnStrayCat(Cat entity) {
+        if (entity == null){
+            return;
+        }
         Level level = entity.level();
         BlockPos bPos = entity.getOnPos();
 
@@ -557,7 +561,7 @@ public class StrayCatEntity extends TamableAnimal implements RangedAttackMob {
 
     @Override
     public void performRangedAttack(LivingEntity livingEntity, float v) {
-        if (this.getSleeping() || this.getInterested()) {
+        if (this.getSleeping() || this.getInterested() || livingEntity == null) {
             return;
         }
 
@@ -565,7 +569,9 @@ public class StrayCatEntity extends TamableAnimal implements RangedAttackMob {
                 && (this.isOwnedBy(livingEntity) || this.getOwner().isAlliedTo(livingEntity)
                 || livingEntity instanceof OwnableEntity OE && OE.getOwner() != null && this.getOwner().is(OE.getOwner()))) {
             this.setTarget(null);
-            if (this.getLastAttacker().is(livingEntity)) {
+
+            LivingEntity lastAt = this.getLastAttacker();
+            if (lastAt !=null && lastAt.is(livingEntity)) {
                 this.setLastHurtByMob(null);
             }
 

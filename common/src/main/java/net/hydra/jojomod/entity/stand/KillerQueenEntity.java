@@ -81,11 +81,15 @@ public class KillerQueenEntity extends FollowingStandEntity {
     		STARDUST = 19,
             MINUET = 20,
             BROWN = 21,
-            GREY = 22;
+            GREY = 22,
+            SAMURAI = 23,
+            SPIRIT = 24;
 
     public final AnimationState lid_open = new AnimationState();
     public final AnimationState hideFists = new AnimationState();
     public final AnimationState hideBubble = new AnimationState();
+    public final AnimationState hideExtra = new AnimationState();
+    public final AnimationState hideSwordInHand = new AnimationState();
     public final AnimationState bubbleSpin = new AnimationState();
     public final AnimationState kick_barrage_windup = new AnimationState();
     public final AnimationState finalKickWindup = new AnimationState();
@@ -95,7 +99,6 @@ public class KillerQueenEntity extends FollowingStandEntity {
     public final AnimationState itemGrab = new AnimationState();
     public final AnimationState itemThrow = new AnimationState();
     public final AnimationState detonate = new AnimationState();
-    public final AnimationState thirdBomb = new AnimationState();
     public final AnimationState mobBombPlant= new AnimationState();
     public final AnimationState mobBombPlant2 = new AnimationState();
     public final AnimationState bubbleLaunch = new AnimationState();
@@ -132,6 +135,24 @@ public class KillerQueenEntity extends FollowingStandEntity {
         super.setupAnimationStates();
         if (this.getUser() != null) {
             byte animation = this.getAnimation();
+
+            boolean isSamurai = getSkin() == SAMURAI || getSkin() == SPIRIT;
+
+            if (isSamurai) {
+                hideExtra.stop();
+
+                if (getAnimation() != IMPALE && getAnimation() != KICK_CHARGE
+                        && getAnimation() != KICK && getAnimation() !=HEAVY_STRIKE) {
+                    hideSwordInHand.startIfStopped(tickCount);
+                }else {
+                    hideSwordInHand.stop();
+                }
+
+            }else {
+                hideExtra.startIfStopped(tickCount);
+            }
+
+
 
             if (getBubbleShieldActive()) {
                 bubbleSpin.startIfStopped(tickCount);

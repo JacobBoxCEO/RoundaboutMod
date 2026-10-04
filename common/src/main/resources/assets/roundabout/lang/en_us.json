@@ -151,6 +151,9 @@
   "block.roundabout.chess_piece": "Chess Piece",
   "block.roundabout.gambling_table": "Gambling Table",
   "container.roundabout.gambling_table": "Gambling Table",
+  "gui.roundabout.gambling_table.select_game": "Select a game",
+  "gui.roundabout.gambling_table.game.coin_drop": "Coin Drop",
+  "gui.roundabout.gambling_table.game.waiting": "Waiting for host",
 
   "item.roundabout.exp_bishop": "Experience Bishop",
 
@@ -241,6 +244,7 @@
   "item.roundabout.max_anubis_disc.desc": "Anubis",
   "item.roundabout.tusk_disc.desc": "Tusk",
   "text.roundabout.tusk_nail_color": "Change Nail Color",
+  "text.roundabout.killer_queen_remove_stray_cat": "Remove Stray Cat",
   "item.roundabout.max_tusk_disc.desc": "Tusk",
   "item.roundabout.achtung_baby_disc.desc": "Achtung Baby",
   "item.roundabout.survivor_disc.desc": "Survivor",
@@ -1150,6 +1154,7 @@
   "death.attack.distortion_virus": "%1$s was consumed by the Distortion Virus.",
   "death.attack.diver_redirection": "%1$s died for the sake of others",
   "death.attack.diver_redirection.player": "%1$s died for the sake of %2$s",
+  "death.attack.brain_dead": "%1$s stopped thinking",
 
   "item.glaive.charge_power": "Charge Attack",
 
@@ -1572,6 +1577,7 @@
 
   "sounds.roundabout.summon_killer_queen": "Stand summoned",
   "sounds.roundabout.summon_creeper_queen": "Creeper Queen Summon",
+  "sounds.roundabout.summon_samurai_queen": "Samurai Summon",
   "sounds.roundabout.kq_minesweeper_redirect": "[Bomb Redirecting]",
   "sounds.roundabout.kq_minesweeper_start": "[MINESWEEPER START]",
   "sounds.roundabout.killer_queen_barrage": "Shibabababa!",
@@ -1621,6 +1627,11 @@
   "sounds.roundabout.kq_block_plant": "Block planted",
   "sounds.roundabout.kq_mob_plant": "Mob planted",
   "sounds.roundabout.kq_plant_windup": "Mob plant windup...",
+  "sounds.roundabout.kq_samurai_whoosh": "Whoosh",
+  "sounds.roundabout.kq_samurai_slash": "Sword Hit",
+  "sounds.roundabout.kq_samurai_stab": "Sword Impale",
+  "sounds.roundabout.kq_samurai_sheathe": "Sword unsheathe",
+  "sounds.roundabout.kq_samurai_sha": "Teapot release",
 
   "sounds.roundabout.btd_normal_reset": "Bites the dust Combat",
   "sounds.roundabout.btd_full_reset": "Bites the dust Day",
@@ -1898,6 +1909,9 @@
 
   "ability.roundabout.sweep_kick": "Sweep/Stomp",
   "ability.roundabout.sweep_kick.desc": "Throws a kick in a short range directly in front of you. The knockback is quite high. If used in the air, it instead makes you slam into the ground, briefly dazing mobs it hits.",
+
+  "ability.roundabout.spike_stomp": "Spike Stomp",
+  "ability.roundabout.spike_stomp.desc": "After falling for enough time, activating this skill makes you slam into the ground, briefly dazing mobs it hits and inflicting bleed.",
 
   "ability.roundabout.hair_grab": "Hair Grab",
   "ability.roundabout.hair_grab.desc": "Pulls a mob in towards you.",
@@ -3051,6 +3065,8 @@
   "skins.roundabout.killer_queen.minuet": "Minuet",
   "skins.roundabout.killer_queen.grey": "Grey",
   "skins.roundabout.killer_queen.brown": "Brown",
+  "skins.roundabout.killer_queen.samurai": "Samurai",
+  "skins.roundabout.killer_queen.spirit": "Spirit",
 
   "skins.roundabout.diver_down.base": "Part 6",
   "skins.roundabout.diver_down.betadiver": "Beta",
@@ -3070,7 +3086,7 @@
   "skins.roundabout.diver_down.manga": "Manga",
   "skins.roundabout.diver_down.volume_4": "Volume 4",
   "skins.roundabout.diver_down.spine_art": "Spine Art",
-  "skins.roundabout.diver_down.holy_diver": "Holy Diver",
+  "skins.roundabout.diver_down.world_diver": "The World",
 
   "skins.roundabout.20_centuryboy.manga": "Manga",
   "skins.roundabout.20_centuryboy.bedrock": "Bedrock",
@@ -3282,8 +3298,8 @@
   "unlock_skin.roundabout.white_album.yuki": "Yuki-onna Skin Unlocked!",
   "unlock_skin.roundabout.green_day.silence": "Silence Skin Absorbed",
   "unlock_skin.roundabout.planet_waves_cosmic": "Cosmic Skin Unlocked",
-  "unlock_skin.roundabout.killer_queen.minesweeper": "Killer Queen: Minesweeper Skin Unlocked",
-  "unlock_skin.roundabout.diver_down.holy_diver": "Diver Down: Holy Diver Skin Unlocked",
+  "unlock_skin.roundabout.killer_queen.samurai": "Samurai Skins Unlocked!",
+  "unlock_skin.roundabout.diver_down.scuba_diver": "Diver Down: Scuba Diver Skin Unlocked",
   "unlock_skin.roundabout.purple_haze.plague": "Purple Haze: Plague Skin Unlocked",
 
   "justice.morph.player": "Player",
@@ -3336,6 +3352,7 @@
   "roundabout.pose.jotaro": "Stand Proud",
   "roundabout.pose.jonathan": "The Hero",
   "roundabout.pose.sitting": "Sitting",
+  "roundabout.pose.anasui": "The Diver",
   "roundabout.pose.none": "Strike Pose!",
 
   "roundabout.soft_and_wet_plunder.none": "Plunder",
@@ -4112,6 +4129,8 @@
   "config.roundabout.getMiningTierDiverDown.desc": "Tier 0 is the default, it does not replace tools for harvesting blocks. Tier 1 is wood tier, tier 2 is stone tier, tier 3 is iron tier, and tier 4 is diamond tier.",
   "config.roundabout.customDiverDownWorkbench.name": "Custom Workbench Textures",
   "config.roundabout.customDiverDownWorkbench.desc": "Enables the custom wokrbench textures, disable this if something breaks.",
+  "config.roundabout.forceThirdPersonInGroundDive.name": "Force Third Person in Ground Dive",
+  "config.roundabout.forceThirdPersonInGroundDive.desc": "Automatically switches to third person while in ground dive.",
 
   "config.roundabout.rattAttackBonusOnMobs.name": "Bonus Mob Damage",
   "config.roundabout.rattAttackBonusOnMobs.desc": "How much bonus damage Ratt darts deal to a mob.",
@@ -4717,8 +4736,8 @@
   "config.roundabout.getMiningTierTheWorld.desc": "Tier 0 is the default, it does not replace tools for harvesting blocks. Tier 1 is wood tier, tier 2 is stone tier, tier 3 is iron tier, and tier 4 is diamond tier.",
   "config.roundabout.oxygenTankAdditionalTicks.name": "Oxygen Tank Ticks",
   "config.roundabout.oxygenTankAdditionalTicks.desc": "How many ticks of oxygen do you want saved in The World's tank? The default, 300, is 15 seconds worth of extra underwater breathing.",
-  "config.roundabout.assaultCooldown.name": "Assault Cooldown",
-  "config.roundabout.assaultCooldown.desc": "After assault hits its target, set the resulting cooldown. (default is 40 ticks or 2 seconds)",
+  "config.roundabout.assaultCooldownv2.name": "Assault Cooldown",
+  "config.roundabout.assaultCooldownv2.desc": "After assault hits its target, set the resulting cooldown. (default is 40 ticks or 2 seconds)",
   "config.roundabout.assaultInterruptCooldown.name": "Assault Interrupt Cooldown",
   "config.roundabout.assaultInterruptCooldown.desc": "If you are hit before assault connects, this cooldown is incurred. (default is 60 ticks or 3 seconds)",
 
