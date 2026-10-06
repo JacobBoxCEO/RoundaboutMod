@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.hydra.jojomod.Roundabout;
-import net.hydra.jojomod.chocolatedisco.ChocolateDiscoEntity;
 import net.hydra.jojomod.entity.*;
 import net.hydra.jojomod.entity.mobs.AnubisGuardian;
 import net.hydra.jojomod.entity.mobs.StrayCatEntity;
@@ -39,16 +38,6 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class FabricEntities {
-
-        public static final EntityType<ChocolateDiscoEntity> CHOCOLATE_DISCO =
-                Registry.register(
-                        BuiltInRegistries.ENTITY_TYPE,
-                        Roundabout.location("chocolate_disco"),
-                        EntityType.Builder.of(ChocolateDiscoEntity::new, MobCategory.MISC)
-                                .sized(0.6F, 2.0F)
-                                .clientTrackingRange(10)
-                                .build(Roundabout.MOD_ID + ":chocolate_disco")
-                );
 
         public static final EntityType<TerrierEntity> TERRIER_DOG =
                 Registry.register(
@@ -722,6 +711,13 @@ public class FabricEntities {
                     EntityType.Builder.of(DiverDownWorldEntity::new, MobCategory.MISC).
                             sized(0.75f, 2.05f).clientTrackingRange(14).build(Roundabout.MOD_ID+":diver_down_world")
             );
+    public static final EntityType<DiverDrownedEntity> DIVER_DROWNED =
+            Registry.register(
+                    BuiltInRegistries.ENTITY_TYPE,
+                    Roundabout.location("diver_drowned"),
+                    EntityType.Builder.of(DiverDrownedEntity::new, MobCategory.MISC).
+                            sized(0.75f, 2.05f).clientTrackingRange(14).build(Roundabout.MOD_ID+":diver_drowned")
+            );
     public static final EntityType<DiverKickEntity> DIVER_KICK =
             Registry.register(
                     BuiltInRegistries.ENTITY_TYPE,
@@ -1254,7 +1250,6 @@ public class FabricEntities {
             );
 
     public static void register() {
-                FabricDefaultAttributeRegistry.register(CHOCOLATE_DISCO, net.hydra.jojomod.entity.stand.StandEntity.createStandAttributes());
                 /*Common Code Bridge*/
                 ModEntities.THE_WORLD = THE_WORLD;
                 ModEntities.KING_CRIMSON = KING_CRIMSON;
@@ -1311,6 +1306,7 @@ public class FabricEntities {
                 ModEntities.DIVER_DOWN = DIVER_DOWN;
                 ModEntities.DIVER_DOWN_BETA = DIVER_DOWN_BETA;
         ModEntities.DIVER_DOWN_WORLD = DIVER_DOWN_WORLD;
+        ModEntities.DIVER_DROWNED = DIVER_DROWNED;
                 ModEntities.DIVER_KICK = DIVER_KICK;
                 ModEntities.SILVER_CHARIOT = SILVER_CHARIOT;
                 ModEntities.THROWN_HARPOON = THROWN_HARPOON;
@@ -1527,6 +1523,7 @@ public class FabricEntities {
                 FabricDefaultAttributeRegistry.register(DIVER_DOWN, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(DIVER_DOWN_BETA, StandEntity.createStandAttributes());
         FabricDefaultAttributeRegistry.register(DIVER_DOWN_WORLD, StandEntity.createStandAttributes());
+        FabricDefaultAttributeRegistry.register(DIVER_DROWNED, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(SILVER_CHARIOT, StandEntity.createStandAttributes());
 
 
