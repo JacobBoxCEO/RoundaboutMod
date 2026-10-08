@@ -284,10 +284,10 @@ public abstract class ConfigManager {
                 }
             }
         }
-        if (getAdvancedConfig().occultChargeEffectsToBanishv2 != null)
+        if (getAdvancedConfig().occultChargeEffectsToBanishv3 != null)
         {
             MainUtil.occultChargeEffectsToBanish.clear();
-            MainUtil.occultChargeEffectsToBanish.addAll(getAdvancedConfig().occultChargeEffectsToBanishv2);
+            MainUtil.occultChargeEffectsToBanish.addAll(getAdvancedConfig().occultChargeEffectsToBanishv3);
         }
         if (getAdvancedConfig().naturalStandUserMobBlacklist != null)
         {

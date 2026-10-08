@@ -1250,7 +1250,7 @@ public class MainUtil {
 
     public static void extractDiscData(LivingEntity ent, StandDiscItem SD, ItemStack stack) {
         StandUser user = ((StandUser) ent);
-        CompoundTag $$4 = stack.getTagElement("Memory");
+        CompoundTag $$4 = stack.getOrCreateTagElement("Memory");
         if ($$4 != null) {
             ((StandUser) ent).roundabout$getStandPowers().readAdditionalSaveData($$4);
             if (SD instanceof MaxStandDiscItem) {
