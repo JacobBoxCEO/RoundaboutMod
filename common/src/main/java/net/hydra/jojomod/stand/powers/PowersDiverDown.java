@@ -707,7 +707,9 @@ public class PowersDiverDown extends NewPunchingStand {
             }
 
             // Ability 3 (C)
-            if (isHoldingSneak()) {
+            if (isGuarding()){
+                setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
+            } else if (isHoldingSneak()) {
                 if (canExecuteMoveWithLevel(getDiverZipLevel())) {
                     setSkillIcon(context, x, y, 3, StandIcons.DIVER_DOWN_ZIP, PowerIndex.SKILL_3);
                 } else {
@@ -3654,7 +3656,8 @@ public class PowersDiverDown extends NewPunchingStand {
      * handles the damage transfer ability
      */
     public void onSubmergedTargetHurt(DamageSource source, float amount) {
-        if (!this.damageRedirectionEnabled || this.isTransferringDamage || !isDiveActive() || isSelfDive())
+        if (!this.damageRedirectionEnabled || this.isTransferringDamage
+                || !isDiveActive() || isSelfDive() || !MainUtil.isSpecialDamage(source))
             return;
         this.isTransferringDamage = true;
         try {
@@ -4485,11 +4488,12 @@ public class PowersDiverDown extends NewPunchingStand {
             if (!effect.getEffect().isInstantenous()) {
                 newDuration = (int) (effect.getDuration() + 600); // extra 30 seconds
             }
+            int newAmplifier = effect.getAmplifier() + ClientNetworking.getAppropriateConfig().diverDownSettings.potionStrengthBoost;
 
             MobEffectInstance boostedEffect = new MobEffectInstance(
                     effect.getEffect(),
                     newDuration,
-                    effect.getAmplifier(),
+                    newAmplifier,
                     effect.isAmbient(),
                     effect.isVisible(),
                     effect.showIcon()
@@ -5232,6 +5236,14 @@ public class PowersDiverDown extends NewPunchingStand {
         if (this.attackTimeDuring > -1 && this.attackTimeDuring == 5) {
             this.standPhasePunch();
         }
+    }
+
+    // Need to override this to clear spring legs and ribcage trap when swapping stands
+    @Override
+    public void onStandSwitch(){
+        clearRibcageTrap();
+        clearSpringLegs();
+        super.onStandSwitch();
     }
 
     // WIP FEATURES BELOW HERE, DELETE WHEN DONE

@@ -1,6 +1,8 @@
-package net.hydra.jojomod.mixin.forge;
+package net.hydra.jojomod.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.hydra.jojomod.block.CoffinBlock;
+import net.hydra.jojomod.block.CoffinBlockEntity;
 import net.hydra.jojomod.block.handBlock.HandBlock;
 import net.hydra.jojomod.block.handBlock.HandBlockEntity;
 import net.hydra.jojomod.registry.ForgeBlocks;
@@ -10,44 +12,46 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+public class DynamicItemRendering extends BlockEntityWithoutLevelRenderer {
 
-//@Mixin(BlockEntityWithoutLevelRenderer.class)
-public class DynamicItemRenderingMixin  {
+    public static DynamicItemRendering INSTANCE = null;
 
-    //public static final DynamicItemRendering INSTANCE = new DynamicItemRendering();
+    public static DynamicItemRendering getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new DynamicItemRendering(
+                    Minecraft.getInstance().getBlockEntityRenderDispatcher(),
+                    Minecraft.getInstance().getEntityModels()
+            );
+        }
+        return INSTANCE;
+    }
 
     private final Minecraft client = Minecraft.getInstance();
-    /*private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-    private final EntityModelSet entityModelSet;*/
+    private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+    private final EntityModelSet entityModelSet;
+
 
     private final HandBlockEntity HAND_BLOCK_ENTITY =
             new HandBlockEntity(BlockPos.ZERO, ForgeBlocks.HAND_BLOCK.get().defaultBlockState());
-    /*
-    public DynamicItemRenderingMixin(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
+    private final CoffinBlockEntity COFFIN_BLOCK_ENTITY =
+            new CoffinBlockEntity(BlockPos.ZERO, ForgeBlocks.COFFIN_BLOCK.get().defaultBlockState());
+
+
+    public DynamicItemRendering(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
+        super(p_172550_, p_172551_);
         blockEntityRenderDispatcher = p_172550_;
         entityModelSet = p_172551_;
     }
-    */
 
-    /*
-   @Override
-   public void renderByItem(ItemStack itemStack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
-
-   */
-   // @Inject(method = "renderByItem", at = @At(value = "HEAD"), cancellable = true)
-    public void roundabout$renderByItem(ItemStack itemStack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay, CallbackInfo ci) {
+    @Override
+    public void renderByItem(ItemStack itemStack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         Item item = itemStack.getItem();
         if (item instanceof BlockItem BItem) {
             Block block = BItem.getBlock();
@@ -58,11 +62,13 @@ public class DynamicItemRenderingMixin  {
             if (block instanceof HandBlock) {
                 blockEntity = HAND_BLOCK_ENTITY;
                 ((HandBlockEntity)blockEntity).setStoredStack(itemStack);
+            } else if (block instanceof CoffinBlock) {
+                blockEntity = COFFIN_BLOCK_ENTITY;
             }else {
                 return;
             }
 
-            Minecraft.getInstance().getBlockEntityRenderDispatcher().renderItem(blockEntity, poseStack, bufferSource, combinedLight, combinedOverlay);
+            blockEntityRenderDispatcher.renderItem(blockEntity, poseStack, bufferSource, combinedLight, combinedOverlay);
         }
 
     }
