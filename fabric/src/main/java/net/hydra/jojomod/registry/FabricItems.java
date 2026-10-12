@@ -55,6 +55,8 @@ public class FabricItems {
             new StandDiscItem(new Item.Properties().stacksTo(1), new PowersJustice(null)));
     public static Item MAX_STAND_DISC_JUSTICE= registerItem("max_justice_disc",
             new MaxStandDiscItem(new Item.Properties().stacksTo(1), new PowersJustice(null)));
+    public static Item STAND_DISC_KING_NOTHING = registerItem("king_nothing_disc",
+            new StandDiscItem(new Item.Properties().stacksTo(1), new PowersKingNothing(null)));
 
     /*public static Item STAND_DISC_D4C = registerItem("d4c_disc",
             new StandDiscItem(new Item.Properties().stacksTo(1), new PowersD4C(null)));

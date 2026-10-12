@@ -87,6 +87,7 @@ public class ModItems {
     public static Item MAX_STAND_DISC_CREAM;
     public static Item STAND_DISC_EMPEROR;
     public static Item MAX_STAND_DISC_EMPEROR;
+    public static Item STAND_DISC_KING_NOTHING;
     public static Item STAND_DISC;
     public static Item SIGHT_DISC;
     public static Item MEMORY_DISC;
