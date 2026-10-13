@@ -2,6 +2,7 @@ package net.hydra.jojomod.stand.powers;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.block.FogBlock;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
@@ -13,7 +14,9 @@ import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -30,9 +33,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class PowersKingNothing extends NewDashPreset {
-
-    private static final byte
-            MEMORIZE_BLOCK = 54;
 
     public PowersKingNothing(LivingEntity self) {
         super(self);
@@ -56,20 +56,17 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void addAdditionalSaveData(CompoundTag $$0) {
         super.addAdditionalSaveData($$0);
-        $$0.putInt("memorizedBlock", Item.getId(memorizedBlock.asItem()));
+        $$0.putString("memorizedBlock", BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag $$0) {
         super.readAdditionalSaveData($$0);
         if ($$0.contains("memorizedBlock")) {
-            Item potentialBlock = Item.byId($$0.getInt("memorizedBlock"));
-            if (potentialBlock instanceof BlockItem bi){
-                this.memorizedBlock = bi.getBlock();
-                return;
-            }
+            memorizedBlock = BuiltInRegistries.BLOCK.get(
+                    new ResourceLocation($$0.getString("memorizedBlock")));
         }
-        resetMemorizedScentData();
+        else resetMemorizedScentData();
     }
 
     private void resetMemorizedScentData() {
@@ -178,7 +175,7 @@ public class PowersKingNothing extends NewDashPreset {
                 //TODO implement this
             }
             case SKILL_3_CROUCH -> {
-                //TODO implement this
+                this.tryFormPredict();
             }
             case SKILL_4_NORMAL, SKILL_4_CROUCH -> {
                 this.tryMemorize();
@@ -186,6 +183,12 @@ public class PowersKingNothing extends NewDashPreset {
         }
         super.powerActivate(context);
     }
+
+    public void tryFormPredict() {
+        getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_3_SNEAK, true);
+        tryPower(PowerIndex.POWER_3_SNEAK);
+    }
+
     public void tryMemorize() {
         float range = 5f;
         Vec3 vec3d = this.getSelf().getEyePosition(0);
@@ -195,34 +198,49 @@ public class PowersKingNothing extends NewDashPreset {
                 ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, this.getSelf()));
         if (blockHit.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = blockHit.getBlockPos();
-            getStandUserSelf().roundabout$tryBlockPosPower(MEMORIZE_BLOCK, true, pos);
-            tryBlockPosPowerPacket(MEMORIZE_BLOCK, pos);
+            getStandUserSelf().roundabout$tryBlockPosPower(PowerIndex.POWER_4, true, pos);
+            tryBlockPosPowerPacket(PowerIndex.POWER_4, pos);
         }
     }
 
     @Override
     public boolean tryBlockPosPower(int move, boolean forced, BlockPos blockPos) {
-        if (move == MEMORIZE_BLOCK) {
+        if (move == PowerIndex.POWER_4) {
             memorizeBlock(blockPos);
         }
         return super.tryBlockPosPower(move, forced, blockPos);
     }
 
     @Override
-    public boolean tryIntPower(int move, boolean forced, int chargeTime) {
-        return super.tryIntPower(move, forced, chargeTime);
+    public boolean setPowerOther(int move, int lastMove) {
+        switch (move) {
+            case PowerIndex.POWER_3_SNEAK -> {
+                return formPredict();
+            }
+        }
+        return super.setPowerOther(move, lastMove);
     }
 
-    @Override
-    public boolean tryPower(int move, boolean forced) {
-        return super.tryPower(move, forced);
+    private boolean formPredict() {
+        Item held = getSelf().getMainHandItem().getItem();
+        if (held instanceof BlockItem bi) {
+            Block block = bi.getBlock();
+            if (isMemorizableBlock(block))
+                setMemorizedScent(block);
+        }
+        return true;
     }
 
     private void memorizeBlock(BlockPos blockPos) {
-        BlockState state = this.getSelf().level().getBlockState(blockPos);
-        if (state.getBlock().asItem().equals(Items.AIR) ||
-                state.getBlock() instanceof FogBlock) return;
-        setMemorizedScent(state.getBlock());
+        Block block = this.getSelf().level().getBlockState(blockPos).getBlock();
+        if (!isMemorizableBlock(block)) return;
+        setMemorizedScent(block);
+    }
+
+    private static boolean isMemorizableBlock(Block block) {
+        return !block.asItem().equals(Items.AIR) &&
+                !(block instanceof FogBlock) &&
+                block.defaultDestroyTime() >= 0;
     }
 
     private void setMemorizedScent(Block memorizedBlock) {
