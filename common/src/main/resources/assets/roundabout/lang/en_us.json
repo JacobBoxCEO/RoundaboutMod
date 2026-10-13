@@ -215,6 +215,7 @@
   "item.roundabout.max_diver_down_disc": "Stand Disc+",
   "item.roundabout.whitesnake_disc": "Stand Disc",
   "item.roundabout.max_whitesnake_disc": "Stand Disc+",
+  "item.roundabout.king_nothing_disc": "Stand Disc",
   "item.roundabout.d4c_disc.desc": "D4C",
   "item.roundabout.silver_chariot_disc.desc": "Silver Chariot",
   "item.roundabout.green_day_disc.desc": "Green Day",
@@ -262,6 +263,7 @@
   "item.roundabout.california_king_bed_disc.desc.short": "CA King Bed",
   "item.roundabout.king_crimson_disc.desc": "King Crimson",
   "item.roundabout.whitesnake_disc.desc": "Whitesnake",
+  "item.roundabout.king_nothing_disc.desc": "King Nothing",
   "item.roundabout.none_disc.desc": "None",
 
   "item.roundabout.memory_disc": "Memory Disc",

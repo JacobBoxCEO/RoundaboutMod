@@ -12,10 +12,13 @@ import net.hydra.jojomod.event.powers.CooldownInstance;
 import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
+import net.hydra.jojomod.util.MainUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
@@ -221,14 +224,22 @@ public class PowersKingNothing extends NewDashPreset {
         return super.setPowerOther(move, lastMove);
     }
 
-    private boolean formPredict() {
-        Item held = getSelf().getMainHandItem().getItem();
-        if (held instanceof BlockItem bi) {
-            Block block = bi.getBlock();
-            if (isMemorizableBlock(block))
-                setMemorizedScent(block);
-        }
+    public boolean formPredict() {
+        Item held = this.getSelf().getMainHandItem().getItem();
+        Block potentialBlock = getFormPrediction(held);
+        if (potentialBlock != null) setMemorizedScent(potentialBlock);
         return true;
+    }
+
+    public Block getFormPrediction(Item item) {
+        if (MainUtil.KING_NOTHING_FORM_PREDICT.get(item) != null) {
+            return MainUtil.KING_NOTHING_FORM_PREDICT.get(item);
+        }
+        else if (item instanceof BlockItem bi) {
+            Block potentialBlock = bi.getBlock();
+            if (isMemorizableBlock(potentialBlock)) return potentialBlock;
+        }
+        return null;
     }
 
     private void memorizeBlock(BlockPos blockPos) {
@@ -248,4 +259,18 @@ public class PowersKingNothing extends NewDashPreset {
         saveDiscAndSync();
     }
 
+    @Override
+    public boolean isWip() {
+        return true;
+    }
+
+    @Override
+    public Component ifWipListDev() {
+        return Component.literal("JacobBoxCEO").withStyle(ChatFormatting.DARK_GREEN);
+    }
+
+    @Override
+    public Component ifWipListDevStatus() {
+        return Component.translatable(  "roundabout.dev_status.active").withStyle(ChatFormatting.DARK_PURPLE);
+    }
 }

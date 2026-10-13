@@ -18,6 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.zetalasis.hjson.JsonValue;
@@ -134,6 +135,36 @@ public abstract class ConfigManager {
 
                 } catch (Exception e) {
                     Roundabout.LOGGER.error("Failed to parse freezable block entry '{}'", entry, e);
+                }
+            }
+        }
+
+        if (getAdvancedConfig().kingNothingFormPredictions != null) {
+            MainUtil.KING_NOTHING_FORM_PREDICT.clear();
+            for (String entry : getAdvancedConfig().kingNothingFormPredictions) {
+                try {
+                    String[] split = entry.split(":");
+
+                    if (split.length != 4) {
+                        Roundabout.LOGGER.warn("Invalid form predict entry: {}", entry);
+                        continue;
+                    }
+
+                    ResourceLocation sourceId = new ResourceLocation(split[0], split[1]);
+                    Item sourceItem = BuiltInRegistries.ITEM.get(sourceId);
+                    if (sourceItem.equals(Items.AIR)) {
+                        Roundabout.LOGGER.warn("Invalid form predict input: {}", sourceId);
+                        continue;
+                    }
+                    ResourceLocation targetId = new ResourceLocation(split[2], split[3]);
+                    Block targetBlock = BuiltInRegistries.BLOCK.get(targetId);
+                    if (targetBlock.asItem().equals(Items.AIR) || targetBlock.equals(Blocks.AIR)) {
+                        Roundabout.LOGGER.warn("Invalid form predict output: {}", targetId);
+                        continue;
+                    }
+                    MainUtil.KING_NOTHING_FORM_PREDICT.put(sourceItem, targetBlock);
+                } catch (Exception e) {
+                    Roundabout.LOGGER.error("Failed to parse form predict entry '{}'", entry, e);
                 }
             }
         }
