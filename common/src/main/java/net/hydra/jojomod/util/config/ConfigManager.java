@@ -26,7 +26,9 @@ import net.zetalasis.hjson.JsonValue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class ConfigManager {
     public static final Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -158,13 +160,50 @@ public abstract class ConfigManager {
                     }
                     ResourceLocation targetId = new ResourceLocation(split[2], split[3]);
                     Block targetBlock = BuiltInRegistries.BLOCK.get(targetId);
-                    if (targetBlock.asItem().equals(Items.AIR) || targetBlock.equals(Blocks.AIR)) {
+                    if (targetBlock.asItem().equals(Items.AIR) || targetBlock.equals(Blocks.AIR)
+                            || targetBlock.defaultDestroyTime() < 0) {
                         Roundabout.LOGGER.warn("Invalid form predict output: {}", targetId);
                         continue;
                     }
                     MainUtil.KING_NOTHING_FORM_PREDICT.put(sourceItem, targetBlock);
                 } catch (Exception e) {
                     Roundabout.LOGGER.error("Failed to parse form predict entry '{}'", entry, e);
+                }
+            }
+        }
+
+        if (getAdvancedConfig().kingNothingBlockGroups != null) {
+            MainUtil.KING_NOTHING_BLOCK_GROUPS.clear();
+            MainUtil.KING_NOTHING_BLOCK_KEYS.clear();
+            for (String entry : getAdvancedConfig().kingNothingBlockGroups) {
+                try {
+                    String[] split = entry.split(":");
+                    if (split.length < 4 && split.length % 2 != 0) {
+                        Roundabout.LOGGER.warn("Invalid block group entry: {}", entry);
+                        continue;
+                    }
+                    Set<Block> group = new HashSet<>();
+                    ResourceLocation sourceId = new ResourceLocation(split[0],split[1]);
+                    Block sourceBlock = BuiltInRegistries.BLOCK.get(sourceId);
+                    if (sourceBlock.asItem().equals(Items.AIR) || sourceBlock.equals(Blocks.AIR)
+                            || sourceBlock.defaultDestroyTime() < 0) {
+                        Roundabout.LOGGER.warn("Invalid block group key: {}", sourceBlock);
+                        continue;
+                    }
+                    for (int i = 0; i < split.length; i += 2) {
+                        ResourceLocation targetId = new ResourceLocation(split[i], split[i + 1]);
+                        Block targetBlock = BuiltInRegistries.BLOCK.get(targetId);
+                        if (targetBlock.asItem().equals(Items.AIR) || targetBlock.equals(Blocks.AIR)
+                                || targetBlock.defaultDestroyTime() < 0) {
+                            Roundabout.LOGGER.warn("Invalid block group value: {}", targetBlock);
+                            continue;
+                        }
+                        MainUtil.KING_NOTHING_BLOCK_KEYS.put(targetBlock, sourceBlock);
+                        group.add(targetBlock);
+                    }
+                    MainUtil.KING_NOTHING_BLOCK_GROUPS.put(sourceBlock, group);
+                } catch (Exception e) {
+                    Roundabout.LOGGER.error("Failed to parse block group entry '{}'", entry, e);
                 }
             }
         }

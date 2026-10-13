@@ -142,8 +142,10 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public boolean isAttackIneptVisually(byte activeP, int slot) {
-        if (isHoldingSneak() && this.getSelf().getMainHandItem() == ItemStack.EMPTY) {
-            return slot != 4;
+        if (slot != 4) {
+            if (isHoldingSneak()) {
+                if (slot == 3) return getFormPrediction(getSelf().getMainHandItem().getItem()) == null;
+            }
         }
         return super.isAttackIneptVisually(activeP, slot);
     }

@@ -249,6 +249,8 @@ public class MainUtil {
     public static final Map<Block, Float> PURPLE_HAZE_DECAY_RATE = new HashMap<>();
 
     public static final Map<Item, Block> KING_NOTHING_FORM_PREDICT = new HashMap<>();
+    public static final Map<Block, Set<Block>> KING_NOTHING_BLOCK_GROUPS = new HashMap<>();
+    public static final Map<Block, Block> KING_NOTHING_BLOCK_KEYS = new HashMap<>();
 
     public static final Map<Item, List<MobEffect>> foodCuresThat = new HashMap<>();
     public static final Map<Item, List<MobEffect>> foodAddsThat = new HashMap<>();
