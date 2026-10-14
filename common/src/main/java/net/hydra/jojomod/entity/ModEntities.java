@@ -89,6 +89,7 @@ public class ModEntities {
     public static EntityType<WalkingHeartEntity> WALKING_HEART;
     public static EntityType<JusticePirateEntity> JUSTICE_PIRATE;
     public static EntityType<DarkMirageEntity> DARK_MIRAGE;
+    public static EntityType<KingNothingEntity> KING_NOTHING;
     public static EntityType<TuskEntity> TUSK_A1;
     public static EntityType<TuskEntity> TUSK_A2;
     public static EntityType<TuskEntity> TUSK_A3;

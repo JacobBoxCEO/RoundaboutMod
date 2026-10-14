@@ -48,7 +48,7 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public StandEntity getNewStandEntity() {
-        return ModEntities.THE_WORLD.create(this.getSelf().level());
+        return ModEntities.KING_NOTHING.create(this.getSelf().level());
     }
 
     @Override

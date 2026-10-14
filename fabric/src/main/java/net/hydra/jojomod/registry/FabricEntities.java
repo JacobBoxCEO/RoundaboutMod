@@ -655,6 +655,13 @@ public class FabricEntities {
                         EntityType.Builder.of(DarkMirageEntity::new, MobCategory.MISC).
                                 sized(ModEntities.justiceWidth, ModEntities.justiceHeight).clientTrackingRange(14).build(Roundabout.MOD_ID+":dark_mirage")
                 );
+        public static final EntityType<KingNothingEntity> KING_NOTHING =
+                Registry.register(
+                        BuiltInRegistries.ENTITY_TYPE,
+                        Roundabout.location("king_nothing"),
+                        EntityType.Builder.of(KingNothingEntity::new, MobCategory.MISC)
+                                .sized(0.75f, 2.05f).clientTrackingRange(14).build(Roundabout.MOD_ID+":king_nothing")
+                );
     public static final EntityType<TuskEntity> TUSK_A1 =
             Registry.register(
                     BuiltInRegistries.ENTITY_TYPE,
@@ -1305,6 +1312,7 @@ public class FabricEntities {
                 ModEntities.PEARL_JAM = PEARL_JAM;
                 ModEntities.JUSTICE_PIRATE = JUSTICE_PIRATE;
                 ModEntities.DARK_MIRAGE = DARK_MIRAGE;
+                ModEntities.KING_NOTHING = KING_NOTHING;
                 ModEntities.TUSK_A1 = TUSK_A1;
                 ModEntities.TUSK_A2 = TUSK_A2;
                 ModEntities.TUSK_A3 = TUSK_A3;
@@ -1509,6 +1517,7 @@ public class FabricEntities {
                 FabricDefaultAttributeRegistry.register(JUSTICE, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(JUSTICE_PIRATE, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(DARK_MIRAGE, StandEntity.createStandAttributes());
+                FabricDefaultAttributeRegistry.register(KING_NOTHING, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A1, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A2, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A3, StandEntity.createStandAttributes());

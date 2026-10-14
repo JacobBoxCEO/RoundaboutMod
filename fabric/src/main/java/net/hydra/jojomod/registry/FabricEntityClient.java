@@ -101,6 +101,7 @@ public class FabricEntityClient {
         EntityRendererRegistry.register(FabricEntities.PEARL_JAM, PearlJamRenderer::new);
         EntityRendererRegistry.register(FabricEntities.WALKING_HEART, WalkingHeartRenderer::new);
         EntityRendererRegistry.register(FabricEntities.DARK_MIRAGE, DarkMirageRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.KING_NOTHING, KingNothingRenderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A1, TuskAct1Renderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A2, TuskAct2Renderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A3, TuskAct3Renderer::new);
@@ -292,6 +293,7 @@ public class FabricEntityClient {
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.SANTA_SABBATH_LAYER, BlackSantaSabbathModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.COWBOY_SABBATH_LAYER, CowboySabbathModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.DARK_MIRAGE_LAYER, DarkMirageModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A1_LAYER, TuskAct1Model::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A2_LAYER, TuskAct2Model::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A3_LAYER, TuskAct3Model::createBodyLayer);
