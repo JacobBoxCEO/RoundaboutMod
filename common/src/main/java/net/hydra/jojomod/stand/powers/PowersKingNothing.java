@@ -19,6 +19,7 @@ import net.hydra.jojomod.event.powers.CooldownInstance;
 import net.hydra.jojomod.event.powers.DamageHandler;
 import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.event.powers.StandUser;
+import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
@@ -41,10 +42,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -162,10 +160,15 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean isAttackIneptVisually(byte activeP, int slot) {
         if (slot != 4) {
             if (isHoldingSneak()) {
+                if (slot == 2) return !isGrabbable(getSelf().getMainHandItem());
                 if (slot == 3) return getFormPrediction(getSelf().getMainHandItem().getItem()) == null;
             }
         }
         return super.isAttackIneptVisually(activeP, slot);
+    }
+
+    public boolean powersAreUnusable() {
+        return getActivePower() == PowerIndex.POWER_2;
     }
 
     public void renderItem(GuiGraphics context, int x, int y, int slot){
@@ -224,7 +227,7 @@ public class PowersKingNothing extends NewDashPreset {
                             stand.setPos(yes);
                         }
 
-                        if ((stand.isTechnicallyInImpassableWall() && this.getActivePower() != PowerIndex.POWER_1_BONUS) ||
+                        if ((stand.isTechnicallyInImpassableWall()) ||
                                 stand.position().distanceTo(this.getSelf().position()) > 15){
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
                             this.setCooldown(PowerIndex.SKILL_2, 5);
@@ -298,11 +301,22 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void phaseGrabClient(){
-        if ((this.getActivePower() != PowerIndex.POWER_2 && this.getActivePower() != PowerIndex.POWER_2_SNEAK)) {
+        if ((this.getActivePower() != PowerIndex.POWER_2)) {
             if (!this.onCooldown(PowerIndex.SKILL_2)) {
-                ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.POWER_2, true);
+                this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2, true);
                 tryPowerPacket(PowerIndex.POWER_2);
             }
+        }
+        else {
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+            tryPowerPacket(PowerIndex.NONE);
+        }
+    }
+
+    public void phaseInteractClient() {
+        if (this.getActivePower() != PowerIndex.POWER_2) {
+            getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
+            tryPowerPacket(PowerIndex.POWER_2_SNEAK);
         }
     }
 
@@ -329,6 +343,63 @@ public class PowersKingNothing extends NewDashPreset {
             return true;
         }
         return false;
+    }
+
+    public boolean phaseInteract() {
+        StandEntity stand = getStandEntity(this.self);
+        if (Objects.nonNull(stand)) {
+            if (this.inventoryGrab()) {
+                animateStand(StandEntity.PHASE_GRAB);
+                this.attackTimeDuring = 0;
+                stand.setFadePercent(50);
+                this.setActivePower(PowerIndex.POWER_2);
+                this.poseStand(OffsetIndex.LOOSE);
+
+                Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360),(this.getSelf().getXRot()));
+                Direction gdir = ((IGravityEntity)this.self).roundabout$getGravityDirection();
+                Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec,gdir);
+                Vec3 threeVec = new Vec3(0,0.25,0);
+                threeVec = RotationUtil.vecPlayerToWorld(threeVec,gdir);
+
+                stand.setYRot(twoVec.x);
+                stand.setXRot(twoVec.y);
+                moveVec = DamageHandler.getRotationVector(
+                        twoVecGrav.y, (float) (twoVecGrav.x)).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+                stand.setPos(this.getSelf().position().add(moveVec));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean inventoryGrab() {
+        if (!this.getSelf().level().isClientSide()) {
+            StandEntity standEntity = ((StandUser) this.getSelf()).roundabout$getStand();
+            if (standEntity != null && standEntity.isAlive() && !standEntity.isRemoved() &&
+                    this.getSelf() instanceof Player) {
+                ItemStack stack = ((Player)this.getSelf()).getMainHandItem();
+                if (isGrabbable(stack)) {
+                    standEntity.canAcquireHeldItem = true;
+                    standEntity.setHeldItem(stack.copyWithCount(1));
+                    playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
+                    stack.shrink(1);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isGrabbable(ItemStack stack) {
+        return !stack.isEmpty() &&
+                !(MainUtil.isItemGrabBlacklisted(stack)) &&
+                !(stack.getItem() instanceof BlockItem
+                        && (MainUtil.isBlockBlacklisted(((BlockItem) stack.getItem()).getBlock().defaultBlockState()) ||
+                        ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock ||
+                        ((BlockItem) stack.getItem()).getBlock() instanceof FancyLighterBlock)) &&
+                !(stack.getItem() instanceof BoatItem) &&
+                !(stack.getItem() instanceof MinecartItem) &&
+                !(stack.getItem() instanceof RoadRollerItem);
     }
 
     public void tryPhaseItemGrab(StandEntity stand, AABB bb1, AABB bb2){
@@ -438,6 +509,9 @@ public class PowersKingNothing extends NewDashPreset {
             case PowerIndex.POWER_2 -> {
                 return phaseGrab();
             }
+            case PowerIndex.POWER_2_SNEAK -> {
+                return phaseInteract();
+            }
             case PowerIndex.POWER_3_SNEAK -> {
                 return formPredict();
             }
@@ -465,8 +539,7 @@ public class PowersKingNothing extends NewDashPreset {
 
     private void memorizeBlock(BlockPos blockPos) {
         Block block = this.getSelf().level().getBlockState(blockPos).getBlock();
-        if (!isMemorizableBlock(block)) return;
-        setMemorizedScent(block);
+        if (isMemorizableBlock(block)) setMemorizedScent(block);
     }
 
     private static boolean isMemorizableBlock(Block block) {
