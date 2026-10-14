@@ -3,37 +3,55 @@ package net.hydra.jojomod.stand.powers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.hydra.jojomod.Roundabout;
+import net.hydra.jojomod.access.IGravityEntity;
+import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
+import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.stand.StandEntity;
+import net.hydra.jojomod.event.ModGamerules;
+import net.hydra.jojomod.event.index.OffsetIndex;
+import net.hydra.jojomod.event.index.PacketDataIndex;
 import net.hydra.jojomod.event.index.PowerIndex;
+import net.hydra.jojomod.event.index.PowerTypes;
 import net.hydra.jojomod.event.powers.CooldownInstance;
+import net.hydra.jojomod.event.powers.DamageHandler;
 import net.hydra.jojomod.event.powers.StandPowers;
+import net.hydra.jojomod.event.powers.StandUser;
+import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
 import net.hydra.jojomod.util.MainUtil;
+import net.hydra.jojomod.util.S2CPacketUtil;
+import net.hydra.jojomod.util.gravity.RotationUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PowersKingNothing extends NewDashPreset {
 
@@ -164,6 +182,91 @@ public class PowersKingNothing extends NewDashPreset {
         context.renderItem(clock, x+1, y+1);  // Draw the item itself
     }
 
+    public Vec3 moveVec = Vec3.ZERO;
+
+    @Override
+    public void tickPowerEnd() {
+        super.tickPowerEnd();
+        if (this.getActivePower() == PowerIndex.POWER_2){
+            /**Tick Phase Grab*/
+            if (!this.getSelf().level().isClientSide()) {
+                if (this.attackTimeDuring == 108) {
+                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                } else if (this.attackTimeDuring >= 0) {
+                    StandEntity stand = getStandEntity(this.self);
+                    if (Objects.nonNull(stand)) {
+                        AABB BB1 = stand.getBoundingBox();
+                        Vec3 vec3d = this.getSelf().getEyePosition(0);
+                        Vec3 vec3d2 = this.getSelf().getViewVector(0);
+                        Vec3 vec3d3 = vec3d.add(vec3d2.x * 20, vec3d2.y * 20, vec3d2.z * 20);
+                        double mag = 0.18F;
+
+                        moveVec = moveVec.add(
+                                vec3d3.subtract(this.getSelf().position().add(moveVec)).normalize().scale(mag)
+                        );
+                        Vec3 yes = this.getSelf().position().add(moveVec);
+                        double post = stand.position().distanceTo(vec3d3);
+                        if (post< 1.5){
+                            stand.setYRot(this.getSelf().getYHeadRot() % 360);
+                            stand.setXRot(this.getSelf().getXRot());
+                        } else {
+                            Direction gdir = ((IGravityEntity)this.self).roundabout$getGravityDirection();
+                            Vec2 grot = new Vec2(getLookAtPlaceYaw(stand,vec3d3),
+                                    getLookAtPlacePitch(stand,vec3d3)
+                            );
+                            grot =  RotationUtil.rotWorldToPlayer(grot,gdir);
+                            stand.setYRot(grot.x);
+                            stand.setXRot(grot.y);
+                        }
+                        if (post < 0.4){
+                            stand.setPos(vec3d3);
+                        } else {
+                            stand.setPos(yes);
+                        }
+
+                        if ((stand.isTechnicallyInImpassableWall() && this.getActivePower() != PowerIndex.POWER_1_BONUS) ||
+                                stand.position().distanceTo(this.getSelf().position()) > 15){
+                            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
+                            this.setCooldown(PowerIndex.SKILL_2, 5);
+                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                            return;
+                        }
+
+
+
+                        Vec3 vec3dST = stand.getEyePosition(0);
+                        Vec3 vec3d2ST = stand.getViewVector(0);
+                        Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
+
+                        if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE))
+                        {
+                            BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
+                                    ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, stand));
+                            BlockPos bpos = blockHit.getBlockPos();
+                            BlockState state = stand.level().getBlockState(bpos);
+                            if (!state.isAir()) {
+                                Block blk = state.getBlock();
+                                if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
+                                        || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
+                                        || (blk instanceof FenceGateBlock))
+                                        && this.getSelf() instanceof Player PE) {
+                                    blk.use(state, this.getSelf().level(), bpos, PE, PE.getUsedItemHand(), blockHit);
+                                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                                    return;
+                                }
+                            }
+                        }
+
+                        AABB BB2 = stand.getBoundingBox();
+                        if (this.attackTimeDuring > 2) {
+                            tryPhaseItemGrab(stand, BB1, BB2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void powerActivate(PowerContext context) {
         switch (context) {
@@ -174,7 +277,7 @@ public class PowersKingNothing extends NewDashPreset {
                 //TODO implement this
             }
             case SKILL_2_NORMAL -> {
-                //TODO implement this
+                phaseGrabClient();
             }
             case SKILL_2_CROUCH -> {
                 //TODO implement this
@@ -192,6 +295,119 @@ public class PowersKingNothing extends NewDashPreset {
     public void tryFormPredict() {
         getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_3_SNEAK, true);
         tryPower(PowerIndex.POWER_3_SNEAK);
+    }
+
+    public void phaseGrabClient(){
+        if ((this.getActivePower() != PowerIndex.POWER_2 && this.getActivePower() != PowerIndex.POWER_2_SNEAK)) {
+            if (!this.onCooldown(PowerIndex.SKILL_2)) {
+                ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.POWER_2, true);
+                tryPowerPacket(PowerIndex.POWER_2);
+            }
+        }
+    }
+
+    public boolean phaseGrab() {
+        StandEntity stand = getStandEntity(this.self);
+        if (Objects.nonNull(stand)) {
+            animateStand(StandEntity.PHASE_GRAB);
+            this.attackTimeDuring = 0;
+            stand.setFadePercent(50);
+            this.setActivePower(PowerIndex.POWER_2);
+            this.poseStand(OffsetIndex.LOOSE);
+
+            Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360),(this.getSelf().getXRot()));
+            Direction gdir = ((IGravityEntity)this.self).roundabout$getGravityDirection();
+            Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec,gdir);
+            Vec3 threeVec = new Vec3(0,0.25,0);
+            threeVec = RotationUtil.vecPlayerToWorld(threeVec,gdir);
+
+            stand.setYRot(twoVec.x);
+            stand.setXRot(twoVec.y);
+            moveVec = DamageHandler.getRotationVector(
+                    twoVecGrav.y, (float) (twoVecGrav.x)).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+            stand.setPos(this.getSelf().position().add(moveVec));
+            return true;
+        }
+        return false;
+    }
+
+    public void tryPhaseItemGrab(StandEntity stand, AABB bb1, AABB bb2){
+        bb1 = bb1.inflate(1.6F);
+        bb2 = bb2.inflate(1.6F);
+
+        AABB $$2 = bb1.minmax(bb2);
+        List<Entity> $$3 = stand.level().getEntities(stand, $$2);
+        if (!$$3.isEmpty()) {
+            for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
+                Entity $$5 = $$3.get($$4);
+                if ($$5 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$5)){
+                    if (!(IE.getItem().getItem() instanceof BlockItem BI && BI.getBlock() instanceof ShulkerBoxBlock && BI.getBlock() instanceof FancyLighterBlock)){
+                        stand.canAcquireHeldItem = true;
+                        stand.setHeldItem(IE.getItem().copyWithCount(1));
+                        playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
+                        this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+                        this.setAttackTimeDuring(0);
+                        poseStand(OffsetIndex.FOLLOW_NOLEAN);
+                        this.addItem(getStandUserSelf().roundabout$getStand());
+                        animateStand(StandEntity.IDLE);
+
+                        IE.getItem().shrink(1);
+                        itemNearby(IE.getId());
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    public void addItem(StandEntity standEntity){
+        addItemLight(standEntity);
+
+        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+        this.setCooldown(PowerIndex.SKILL_2, ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+    }
+
+    public void addItemLight(StandEntity standEntity){
+        if (canAddItem(standEntity.getHeldItem(), ((Player) this.getSelf()).getInventory())) {
+            ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
+        } else {
+            ItemEntity $$4 = new ItemEntity(this.getSelf().level(), this.getSelf().getX(),
+                    this.getSelf().getY() + this.getSelf().getEyeHeight(), this.getSelf().getZ(),
+                    standEntity.getHeldItem());
+            $$4.setPickUpDelay(40);
+            $$4.setThrower(this.getSelf().getUUID());
+            PowerTypes.copyPlaneOfExisting(self,$$4);
+            this.getSelf().level().addFreshEntity($$4);
+        }
+    }
+
+    public boolean canAddItem(ItemStack itemStack, Inventory inventory) {
+        boolean bl = false;
+        for (ItemStack itemStack2 : inventory.items) {
+            if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack) || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
+            bl = true;
+            break;
+        }
+        return bl;
+    }
+
+    public final void itemNearby(int id) {
+        if (!this.self.level().isClientSide) {
+            ServerLevel serverWorld = ((ServerLevel) this.self.level());
+            Vec3 userLocation = new Vec3(this.self.getX(),  this.self.getY(), this.self.getZ());
+            for (int j = 0; j < serverWorld.players().size(); ++j) {
+                ServerPlayer serverPlayerEntity = ((ServerLevel) this.self.level()).players().get(j);
+
+                if (((ServerLevel) serverPlayerEntity.level()) != serverWorld) {
+                    continue;
+                }
+
+                BlockPos blockPos = serverPlayerEntity.blockPosition();
+                if (blockPos.closerToCenterThan(userLocation, 100)) {
+                    S2CPacketUtil.sendGenericIntToClientPacket(serverPlayerEntity, PacketDataIndex.S2C_INT_GRAB_ITEM,id);
+                }
+            }
+        }
     }
 
     public void tryMemorize() {
@@ -219,6 +435,9 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public boolean setPowerOther(int move, int lastMove) {
         switch (move) {
+            case PowerIndex.POWER_2 -> {
+                return phaseGrab();
+            }
             case PowerIndex.POWER_3_SNEAK -> {
                 return formPredict();
             }
