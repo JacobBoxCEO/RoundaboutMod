@@ -194,7 +194,7 @@ public abstract class ConfigManager {
                         ResourceLocation targetId = new ResourceLocation(split[i], split[i + 1]);
                         Block targetBlock = BuiltInRegistries.BLOCK.get(targetId);
                         if (targetBlock.asItem().equals(Items.AIR) || targetBlock.equals(Blocks.AIR)
-                                || targetBlock.defaultDestroyTime() < 0) {
+                                || targetBlock.defaultDestroyTime() < 0 || group.contains(targetBlock)) {
                             Roundabout.LOGGER.warn("Invalid block group value: {}", targetBlock);
                             continue;
                         }

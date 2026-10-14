@@ -257,7 +257,9 @@ public class AdvancedConfig implements Cloneable {
 
     public Set<String> kingNothingFormPredictions = new HashSet<>(
             Arrays.asList(
-                    "minecraft:raw_iron:minecraft:iron_ore"
+                    "minecraft:raw_iron:minecraft:iron_ore",
+                    "minecraft:iron_ingot:minecraft:iron_ore",
+                    "minecraft:iron_block:minecraft:iron_ore"
             )
     );
 
