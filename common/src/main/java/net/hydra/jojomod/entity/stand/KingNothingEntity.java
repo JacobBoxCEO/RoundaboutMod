@@ -1,6 +1,7 @@
 package net.hydra.jojomod.entity.stand;
 
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 
@@ -17,4 +18,19 @@ public class KingNothingEntity extends FollowingStandEntity {
     }
 
     public static final byte MANGA = 1;
+
+    @Override
+    public ItemStack getMainHandItem() {
+        return getHeldItem();
+    }
+
+    @Override
+    public ItemStack getItemBySlot(EquipmentSlot $$0) {
+        if ($$0.equals(EquipmentSlot.MAINHAND)) {
+            return getHeldItem();
+        }
+        return super.getItemBySlot($$0);
+    }
+
+
 }

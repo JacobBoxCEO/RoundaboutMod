@@ -7,6 +7,7 @@ import net.hydra.jojomod.access.IGravityEntity;
 import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
 import net.hydra.jojomod.client.ClientNetworking;
+import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.stand.StandEntity;
@@ -15,10 +16,7 @@ import net.hydra.jojomod.event.index.OffsetIndex;
 import net.hydra.jojomod.event.index.PacketDataIndex;
 import net.hydra.jojomod.event.index.PowerIndex;
 import net.hydra.jojomod.event.index.PowerTypes;
-import net.hydra.jojomod.event.powers.CooldownInstance;
-import net.hydra.jojomod.event.powers.DamageHandler;
-import net.hydra.jojomod.event.powers.StandPowers;
-import net.hydra.jojomod.event.powers.StandUser;
+import net.hydra.jojomod.event.powers.*;
 import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
@@ -27,6 +25,8 @@ import net.hydra.jojomod.util.MainUtil;
 import net.hydra.jojomod.util.S2CPacketUtil;
 import net.hydra.jojomod.util.gravity.RotationUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,13 +36,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,6 +81,9 @@ public class PowersKingNothing extends NewDashPreset {
     public void addAdditionalSaveData(CompoundTag $$0) {
         super.addAdditionalSaveData($$0);
         $$0.putString("memorizedBlock", BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString());
+        if (!$$0.getString("memorizedBlock").equals(BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString())) {
+            Roundabout.LOGGER.debug("SOMETHING WENT WRONG SAVING DATA FUCK");
+        }
     }
 
     @Override
@@ -135,17 +143,19 @@ public class PowersKingNothing extends NewDashPreset {
 
     private Block memorizedBlock = null;
 
-    public ItemStack getMemorizedItemStack() {
-        return new ItemStack(memorizedBlock.asItem());
+    public ItemStack getMemorizedScentIcon() {
+        return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
+                new ItemStack(memorizedBlock.asItem()) :
+                new ItemStack(MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock));
     }
 
     @Override
     public void renderIcons(GuiGraphics context, int x, int y) {
         if (isHoldingSneak()) {
             setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_1_SNEAK);
-            setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2_SNEAK);
+            setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2);
             setSkillIcon(context, x, y,3, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_3);
-            renderItem(context, x, y,4);
+            renderScentIcon(context, x, y);
         }
         else {
             setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_BLOCK, PowerIndex.SKILL_1);
@@ -171,18 +181,58 @@ public class PowersKingNothing extends NewDashPreset {
         return getActivePower() == PowerIndex.POWER_2;
     }
 
-    public void renderItem(GuiGraphics context, int x, int y, int slot){
+    public void renderScentIcon(GuiGraphics context, int x, int y){
         RenderSystem.enableBlend();
         context.setColor(1f, 1f, 1f, 1f);
         CooldownInstance cd = null;
-        x += slot * 25;
+        if (!getPowerCooldowns().isEmpty() && getPowerCooldowns().size() >= PowerIndex.SKILL_4){
+            cd = getPowerCooldowns().get(PowerIndex.SKILL_4);
+        }
+        x += 100;
         y-=1;
-        RenderSystem.enableBlend();
-        context.blit(StandIcons.NOVELTY_ICON,x-3,y-3,0, 0, squareWidth, squareHeight, squareWidth, squareHeight);
 
         RenderSystem.enableBlend();
-        ItemStack clock = getMemorizedItemStack();
-        context.renderItem(clock, x+1, y+1);  // Draw the item itself
+        context.blit(getIconYes(4),x-3,y-3,0, 0, squareWidth, squareHeight, squareWidth, squareHeight);
+
+        ItemStack block = getMemorizedScentIcon();
+        RenderSystem.enableBlend();
+        Font renderer = Minecraft.getInstance().font;
+        Component special4Key = KeyInputRegistry.abilityFourKey.getTranslatedKeyMessage();
+        special4Key = fixKey(special4Key);
+        //true? false? it doesn't matter, for this text will render below the item no matter what i try :(
+        context.drawString(renderer, special4Key,x-1,y+11,0xffffff,false);
+        RenderSystem.enableBlend();
+        if ((cd != null && (cd.time >= 0)) || isAttackIneptVisually(PowerIndex.SKILL_4,4)){
+            context.setColor(0.62f, 0.62f, 0.62f, 0.8f);
+            context.renderFakeItem(block, x+1, y+1);
+            if ((cd != null && (cd.time >= 0))) {
+                float blit = (20*(1-((float) (1+cd.time) /(1+cd.maxTime))));
+                int b = Math.round(blit);
+                RenderSystem.enableBlend();
+                context.setColor(1f, 1f, 1f, 1f);
+
+                ResourceLocation COOLDOWN_TEX = StandIcons.COOLDOWN_ICON;
+
+                if (cd.isFrozen())
+                    COOLDOWN_TEX = StandIcons.FROZEN_COOLDOWN_ICON;
+
+                context.blit(COOLDOWN_TEX, x - 1, y - 1 + b, 0, b, 20, 20-b, 20, 20);
+                int num = ((int)(Math.floor((double) cd.time /20)+1));
+                int offset = x+3;
+                if (num <=9){
+                    offset = x+7;
+                }
+                //If 100 or more seconds long shift to the left
+                if (num >= 100){
+                    offset = offset-3;
+                }
+
+                if (!cd.isFrozen())
+                    context.drawString(Minecraft.getInstance().font, ""+num,offset,y,0xffffff,true);
+
+            }
+            context.setColor(1f, 1f, 1f, 0.9f);
+        } else context.renderItem(block, x + 1, y + 1);
     }
 
     public Vec3 moveVec = Vec3.ZERO;
@@ -227,22 +277,23 @@ public class PowersKingNothing extends NewDashPreset {
                             stand.setPos(yes);
                         }
 
+                        boolean isHoldingItem = !stand.getHeldItem().equals(ItemStack.EMPTY);
+
                         if ((stand.isTechnicallyInImpassableWall()) ||
                                 stand.position().distanceTo(this.getSelf().position()) > 15){
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
                             this.setCooldown(PowerIndex.SKILL_2, 5);
-                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                             return;
                         }
 
 
-
-                        Vec3 vec3dST = stand.getEyePosition(0);
-                        Vec3 vec3d2ST = stand.getViewVector(0);
-                        Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
-
-                        if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE))
+                        if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
+                                && !isHoldingItem)
                         {
+                            Vec3 vec3d2ST = stand.getViewVector(0);
+                            Vec3 vec3dST = stand.getEyePosition(0);
+                            Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
                             BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
                                     ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, stand));
                             BlockPos bpos = blockHit.getBlockPos();
@@ -254,7 +305,7 @@ public class PowersKingNothing extends NewDashPreset {
                                         || (blk instanceof FenceGateBlock))
                                         && this.getSelf() instanceof Player PE) {
                                     blk.use(state, this.getSelf().level(), bpos, PE, PE.getUsedItemHand(), blockHit);
-                                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                                     return;
                                 }
                             }
@@ -262,7 +313,12 @@ public class PowersKingNothing extends NewDashPreset {
 
                         AABB BB2 = stand.getBoundingBox();
                         if (this.attackTimeDuring > 2) {
-                            tryPhaseItemGrab(stand, BB1, BB2);
+                            if (!isHoldingItem) {
+                                tryPhaseItemGrab(stand, BB1, BB2);
+                            }
+                            else {
+                                tryPhaseAttack(stand, BB1, BB2);
+                            }
                         }
                     }
                 }
@@ -279,25 +335,17 @@ public class PowersKingNothing extends NewDashPreset {
             case SKILL_1_CROUCH -> {
                 //TODO implement this
             }
-            case SKILL_2_NORMAL -> {
-                phaseGrabClient();
-            }
-            case SKILL_2_CROUCH -> {
-                //TODO implement this
-            }
-            case SKILL_3_CROUCH -> {
-                this.tryFormPredict();
-            }
-            case SKILL_4_NORMAL, SKILL_4_CROUCH -> {
-                this.tryMemorize();
-            }
+            case SKILL_2_NORMAL -> phaseGrabClient();
+            case SKILL_2_CROUCH -> phaseInteractClient();
+            case SKILL_3_CROUCH -> this.tryFormPredict();
+            case SKILL_4_NORMAL, SKILL_4_CROUCH -> this.tryMemorize();
         }
         super.powerActivate(context);
     }
 
     public void tryFormPredict() {
         getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_3_SNEAK, true);
-        tryPower(PowerIndex.POWER_3_SNEAK);
+        tryPowerPacket(PowerIndex.POWER_3_SNEAK);
     }
 
     public void phaseGrabClient(){
@@ -308,15 +356,21 @@ public class PowersKingNothing extends NewDashPreset {
             }
         }
         else {
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-            tryPowerPacket(PowerIndex.NONE);
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+            tryPowerPacket(PowerIndex.EXTRA);
         }
     }
 
     public void phaseInteractClient() {
         if (this.getActivePower() != PowerIndex.POWER_2) {
-            getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
-            tryPowerPacket(PowerIndex.POWER_2_SNEAK);
+            if (!this.onCooldown(PowerIndex.SKILL_2)) {
+                getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
+                tryPowerPacket(PowerIndex.POWER_2_SNEAK);
+            }
+        }
+        else {
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+            tryPowerPacket(PowerIndex.EXTRA);
         }
     }
 
@@ -383,10 +437,10 @@ public class PowersKingNothing extends NewDashPreset {
                     standEntity.setHeldItem(stack.copyWithCount(1));
                     playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
                     stack.shrink(1);
+                    return true;
                 }
             }
         }
-
         return false;
     }
 
@@ -412,14 +466,15 @@ public class PowersKingNothing extends NewDashPreset {
             for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
                 Entity $$5 = $$3.get($$4);
                 if ($$5 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$5)){
-                    if (!(IE.getItem().getItem() instanceof BlockItem BI && BI.getBlock() instanceof ShulkerBoxBlock && BI.getBlock() instanceof FancyLighterBlock)){
+                    if (!(IE.getItem().getItem() instanceof BlockItem BI &&
+                            (BI.getBlock() instanceof ShulkerBoxBlock ||
+                                    BI.getBlock() instanceof FancyLighterBlock))){
                         stand.canAcquireHeldItem = true;
                         stand.setHeldItem(IE.getItem().copyWithCount(1));
                         playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
-                        this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+                        this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
-                        this.addItem(getStandUserSelf().roundabout$getStand());
                         animateStand(StandEntity.IDLE);
 
                         IE.getItem().shrink(1);
@@ -431,11 +486,60 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    public void addItem(StandEntity standEntity){
-        addItemLight(standEntity);
+    public void tryPhaseAttack(StandEntity stand, AABB bb1, AABB bb2) {
+        bb1 = bb1.inflate(1.6F);
+        bb2 = bb2.inflate(1.6F);
 
-        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-        this.setCooldown(PowerIndex.SKILL_2, ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+        AABB $$2 = bb1.minmax(bb2);
+        List<Entity> $$3 = stand.level().getEntities(stand, $$2);
+        if (!$$3.isEmpty()) {
+            for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
+                Entity $$5 = $$3.get($$4);
+                if (!$$5.equals(stand) && !$$5.equals(getSelf()) &&
+                        stand.getSensing().hasLineOfSight($$5)){
+                    if ($$5.isAttackable()){
+                        ItemStack held = stand.getHeldItem();
+
+                        $$5.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, this.getSelf(), this.getSelf()),
+                                getDamage(held, $$5, stand));
+                        playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 1.7F, 1.3F);
+                        if (held.isDamageableItem()) {
+                            held.setDamageValue(held.getDamageValue() + 1);
+                        }
+                        this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+                        this.setAttackTimeDuring(0);
+                        poseStand(OffsetIndex.FOLLOW_NOLEAN);
+                        animateStand(StandEntity.IDLE);
+
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private float getDamage(ItemStack stack, Entity ent, StandEntity stand) {
+        float damage = 1;
+        if (stand != null) damage = (float) stand.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1;
+        if (damage != 1) {
+            if (ent instanceof LivingEntity){
+                damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity)ent).getMobType());
+            } else {
+                damage += EnchantmentHelper.getDamageBonus(stack, MobType.UNDEFINED);
+            }
+        }
+        return damage;
+    }
+
+    public void addItem(StandEntity standEntity){
+        if (!this.getSelf().level().isClientSide()) {
+            addItemLight(standEntity);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+        }
+        this.getStandEntity(this.getSelf()).setHeldItem(ItemStack.EMPTY);
     }
 
     public void addItemLight(StandEntity standEntity){
@@ -513,26 +617,40 @@ public class PowersKingNothing extends NewDashPreset {
                 return phaseInteract();
             }
             case PowerIndex.POWER_3_SNEAK -> {
-                return formPredict();
+                return this.formPredict();
+            }
+            case PowerIndex.EXTRA -> {
+                return this.exitPhaseGrab();
             }
         }
         return super.setPowerOther(move, lastMove);
     }
 
+    public boolean exitPhaseGrab() {
+        if (!getSelf().level().isClientSide()) {
+            addItem(getStandEntity(getSelf()));
+        }
+        else getStandEntity(getSelf()).setHeldItem(ItemStack.EMPTY);
+        this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+        tryPowerPacket(PowerIndex.NONE);
+        return true;
+    }
+
+    @Override
+    public boolean setPowerNone() {
+        return super.setPowerNone();
+    }
+
     public boolean formPredict() {
         Item held = this.getSelf().getMainHandItem().getItem();
         Block potentialBlock = getFormPrediction(held);
-        if (potentialBlock != null) setMemorizedScent(potentialBlock);
+        if (potentialBlock != null) this.setMemorizedScent(potentialBlock);
         return true;
     }
 
     public Block getFormPrediction(Item item) {
         if (MainUtil.KING_NOTHING_FORM_PREDICT.get(item) != null) {
             return MainUtil.KING_NOTHING_FORM_PREDICT.get(item);
-        }
-        else if (item instanceof BlockItem bi) {
-            Block potentialBlock = bi.getBlock();
-            if (isMemorizableBlock(potentialBlock)) return potentialBlock;
         }
         return null;
     }

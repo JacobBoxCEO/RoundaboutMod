@@ -259,15 +259,85 @@ public class AdvancedConfig implements Cloneable {
 
     public Set<String> kingNothingFormPredictions = new HashSet<>(
             Arrays.asList(
+                    "minecraft:coal:minecraft:coal_ore",
                     "minecraft:raw_iron:minecraft:iron_ore",
                     "minecraft:iron_ingot:minecraft:iron_ore",
-                    "minecraft:iron_block:minecraft:iron_ore"
+                    "minecraft:iron_pickaxe:minecraft:iron_ore",
+                    "minecraft:iron_hoe:minecraft:iron_ore",
+                    "minecraft:iron_shovel:minecraft:iron_ore",
+                    "minecraft:iron_sword:minecraft:iron_ore",
+                    "minecraft:iron_axe:minecraft:iron_ore",
+                    "minecraft:iron_helmet:minecraft:iron_ore",
+                    "minecraft:iron_chestplate:minecraft:iron_ore",
+                    "minecraft:iron_leggings:minecraft:iron_ore",
+                    "minecraft:iron_boots:minecraft:iron_ore",
+                    "minecraft:iron_horse_armor:minecraft:iron_ore",
+                    "minecraft:raw_copper:minecraft:copper_ore",
+                    "minecraft:copper_ingot:minecraft:copper_ore",
+                    "minecraft:raw_gold:minecraft:gold_ore",
+                    "minecraft:gold_ingot:minecraft:gold_ore",
+                    "minecraft:golden_pickaxe:minecraft:gold_ore",
+                    "minecraft:golden_hoe:minecraft:gold_ore",
+                    "minecraft:golden_shovel:minecraft:gold_ore",
+                    "minecraft:golden_sword:minecraft:gold_ore",
+                    "minecraft:golden_axe:minecraft:gold_ore",
+                    "minecraft:golden_helmet:minecraft:gold_ore",
+                    "minecraft:golden_chestplate:minecraft:gold_ore",
+                    "minecraft:golden_leggings:minecraft:gold_ore",
+                    "minecraft:golden_boots:minecraft:gold_ore",
+                    "minecraft:golden_horse_armor:minecraft:gold_ore",
+                    "minecraft:diamond:minecraft:diamond_ore",
+                    "minecraft:diamond_ingot:minecraft:diamond_ore",
+                    "minecraft:diamond_pickaxe:minecraft:diamond_ore",
+                    "minecraft:diamond_hoe:minecraft:diamond_ore",
+                    "minecraft:diamond_shovel:minecraft:diamond_ore",
+                    "minecraft:diamond_sword:minecraft:diamond_ore",
+                    "minecraft:diamond_axe:minecraft:diamond_ore",
+                    "minecraft:diamond_helmet:minecraft:diamond_ore",
+                    "minecraft:diamond_chestplate:minecraft:diamond_ore",
+                    "minecraft:diamond_leggings:minecraft:diamond_ore",
+                    "minecraft:diamond_boots:minecraft:diamond_ore",
+                    "minecraft:diamond_horse_armor:minecraft:diamond_ore",
+                    "minecraft:redstone:minecraft:redstone_ore",
+                    "minecraft:lapis_lazuli:minecraft:lapis_ore",
+                    "minecraft:emerald:minecraft:emerald_ore",
+                    "minecraft:netherite_scrap:minecraft:ancient_debris",
+                    "minecraft:netherite_ingot:minecraft:ancient_debris",
+                    "minecraft:netherite_pickaxe:minecraft:ancient_debris",
+                    "minecraft:netherite_hoe:minecraft:ancient_debris",
+                    "minecraft:netherite_shovel:minecraft:ancient_debris",
+                    "minecraft:netherite_sword:minecraft:ancient_debris",
+                    "minecraft:netherite_axe:minecraft:ancient_debris",
+                    "minecraft:netherite_helmet:minecraft:ancient_debris",
+                    "minecraft:netherite_chestplate:minecraft:ancient_debris",
+                    "minecraft:netherite_leggings:minecraft:ancient_debris",
+                    "minecraft:netherite_boots:minecraft:ancient_debris",
+                    "minecraft:wheat:minecraft:wheat",
+                    "minecraft:beetroot:minecraft:beetroots",
+                    "roundabout:locacaca:roundabout:locacaca_plant",
+                    "roundabout:new_locacaca:roundabout:new_locacaca_plant"
             )
     );
 
     public Set<String> kingNothingBlockGroups = new HashSet<>(
             Arrays.asList(
-                    "minecraft:iron_ore:minecraft:deepslate_iron_ore"
+                    "minecraft:iron_ore:minecraft:deepslate_iron_ore",
+                    "minecraft:gold_ore:minecraft:deepslate_gold_ore:minecraft:nether_gold_ore",
+                    "minecraft:coal_ore:minecraft:deepslate_coal_ore",
+                    "minecraft:diamond_ore:minecraft:deepslate_diamond_ore",
+                    "minecraft:emerald_ore:minecraft:deepslate_emerald_ore",
+                    "minecraft:copper_ore:minecraft:deepslate_copper_ore",
+                    "minecraft:redstone_ore:minecraft:deepslate_redstone_ore",
+                    "minecraft:lapis_ore:minecraft:deepslate_lapis_ore",
+                    "roundabout:new_locacaca_plant:roundabout:locacaca_cactus"
+            )
+    );
+
+    public Set<String> kingNothingScentIconOverrides = new HashSet<>(
+            Arrays.asList(
+                    "minecraft:wheat:minecraft:wheat",
+                    "minecraft:beetroots:minecraft:beetroot",
+                    "roundabout:locacaca_plant:roundabout:locacaca"
             )
     );
 

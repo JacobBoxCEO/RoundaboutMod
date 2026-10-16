@@ -251,6 +251,7 @@ public class MainUtil {
     public static final Map<Item, Block> KING_NOTHING_FORM_PREDICT = new HashMap<>();
     public static final Map<Block, Set<Block>> KING_NOTHING_BLOCK_GROUPS = new HashMap<>();
     public static final Map<Block, Block> KING_NOTHING_BLOCK_KEYS = new HashMap<>();
+    public static final Map<Block, Item> KING_NOTHING_SCENT_ICON_OVERRIDES = new HashMap<>();
 
     public static final Map<Item, List<MobEffect>> foodCuresThat = new HashMap<>();
     public static final Map<Item, List<MobEffect>> foodAddsThat = new HashMap<>();
