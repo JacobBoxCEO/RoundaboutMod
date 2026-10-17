@@ -11,6 +11,7 @@ import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.stand.StandEntity;
+import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModGamerules;
 import net.hydra.jojomod.event.index.OffsetIndex;
 import net.hydra.jojomod.event.index.PacketDataIndex;
@@ -40,7 +41,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -176,6 +176,46 @@ public class PowersKingNothing extends NewDashPreset {
             }
         }
         return super.isAttackIneptVisually(activeP, slot);
+    }
+
+    @Override
+    public List<AbilityIconInstance> drawGUIIcons(GuiGraphics context, float delta, int mouseX, int mouseY, int leftPos,
+                                                  int topPos, byte level, boolean bypass) {
+        List<AbilityIconInstance> $$1 = Lists.newArrayList();
+        boolean canContinue = true;
+        for (int i = 0; canContinue; i++) {
+            int leftOffset = 20 + (19 * (i / 3));
+            int topOffset = 80 + (19 * (i % 3));
+            switch (i) {
+                case 0 -> {
+                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                            "ability.roundabout.kn_smell_track", "instruction.roundabout.press_skill",
+                            StandIcons.THE_WORLD_GRAB_BLOCK, 1, level, bypass));
+                }
+                case 1 -> {
+                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                            "ability.roundabout.kn_track_item", "instruction.roundabout.press_skill_crouch",
+                            StandIcons.THE_WORLD_GRAB_ITEM, 1, level, bypass));
+                }
+                case 2 -> {
+                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                            "ability.roundabout.kn_phase_hand", "instruction.roundabout.press_skill",
+                            StandIcons.DIVER_DOWN_PHASE_PUNCH, 2, level, bypass));
+                }
+                case 3 -> {
+                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                            "ability.roundabout.kn_phase_item", "instruction.roundabout.press_skill_crouch",
+                            StandIcons.STAR_PLATINUM_GRAB_ITEM, 2, level, bypass));
+                }
+                case 4 -> {
+                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                            "ability.roundabout.dodge", "instruction.roundabout.press_skill", StandIcons.DODGE, 3,
+                            level, bypass));
+                }
+                default -> canContinue = false;
+            }
+        }
+        return $$1;
     }
 
     public boolean powersAreUnusable() {
@@ -337,7 +377,7 @@ public class PowersKingNothing extends NewDashPreset {
                 //TODO implement this
             }
             case SKILL_2_NORMAL -> phaseGrabClient();
-            case SKILL_2_CROUCH -> phaseInteractClient();
+            case SKILL_2_CROUCH -> phaseItemClient();
             case SKILL_3_CROUCH -> this.tryFormPredict();
             case SKILL_4_NORMAL, SKILL_4_CROUCH -> this.tryMemorize();
         }
@@ -362,7 +402,7 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    public void phaseInteractClient() {
+    public void phaseItemClient() {
         if (this.getActivePower() != PowerIndex.POWER_2) {
             if (!this.onCooldown(PowerIndex.SKILL_2)) {
                 getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
@@ -399,7 +439,7 @@ public class PowersKingNothing extends NewDashPreset {
         return false;
     }
 
-    public boolean phaseInteract() {
+    public boolean phaseItem() {
         StandEntity stand = getStandEntity(this.self);
         if (Objects.nonNull(stand)) {
             if (this.inventoryGrab()) {
@@ -497,10 +537,9 @@ public class PowersKingNothing extends NewDashPreset {
                 LivingEntity self = getSelf();
                 if (!$$5.equals(stand) && !$$5.equals(self) &&
                         stand.getSensing().hasLineOfSight($$5)){
-                    if ($$5.isAttackable() && !($$5 instanceof Player PE &&
-                            (PE.isCreative() || PE.isSpectator()))){
+                    if ($$5.isAttackable() && !($$5 instanceof LivingEntity LE && LE.isDeadOrDying())
+                            && !($$5 instanceof Player PE && (PE.isCreative() || PE.isSpectator()))){
                         ItemStack held = stand.getHeldItem();
-
                         $$5.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, self, self),
                                 getDamage(held, $$5, stand));
                         playSoundIfPossible(self.level(),null, self.blockPosition(),
@@ -618,7 +657,7 @@ public class PowersKingNothing extends NewDashPreset {
                 return phaseGrab();
             }
             case PowerIndex.POWER_2_SNEAK -> {
-                return phaseInteract();
+                return phaseItem();
             }
             case PowerIndex.POWER_3_SNEAK -> {
                 return this.formPredict();
@@ -651,6 +690,9 @@ public class PowersKingNothing extends NewDashPreset {
     public Block getFormPrediction(Item item) {
         if (MainUtil.KING_NOTHING_FORM_PREDICT.get(item) != null) {
             return MainUtil.KING_NOTHING_FORM_PREDICT.get(item);
+        }
+        else if (item instanceof BlockItem BI && isMemorizableBlock(BI.getBlock())) {
+            return BI.getBlock();
         }
         return null;
     }

@@ -329,6 +329,16 @@ public class AdvancedConfig implements Cloneable {
                     "minecraft:copper_ore:minecraft:deepslate_copper_ore",
                     "minecraft:redstone_ore:minecraft:deepslate_redstone_ore",
                     "minecraft:lapis_ore:minecraft:deepslate_lapis_ore",
+                    "minecraft:oak_log:minecraft:oak_wood",
+                    "minecraft:birch_log:minecraft:birch_wood",
+                    "minecraft:spruce_log:minecraft:spruce_wood",
+                    "minecraft:jungle_log:minecraft:jungle_wood",
+                    "minecraft:acacia_log:minecraft:acacia_wood",
+                    "minecraft:dark_oak_log:minecraft:dark_oak_wood",
+                    "minecraft:mangrove_log:minecraft:mangrove_wood",
+                    "minecraft:cherry_log:minecraft:cherry_wood",
+                    "minecraft:crimson_log:minecraft:crimson_wood",
+                    "minecraft:warped_log:minecraft:warped_wood",
                     "roundabout:new_locacaca_plant:roundabout:locacaca_cactus"
             )
     );
