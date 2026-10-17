@@ -21,8 +21,8 @@ public class KingNothingEntity extends FollowingStandEntity {
     public static final byte MANGA = 1;
 
     @Override
-    public ItemStack getMainHandItem() {
-        return getHeldItem();
+    public void setupAnimationStates() {
+        super.setupAnimationStates();
     }
 
     @Override
@@ -32,6 +32,4 @@ public class KingNothingEntity extends FollowingStandEntity {
         }
         return super.getItemBySlot($$0);
     }
-
-
 }

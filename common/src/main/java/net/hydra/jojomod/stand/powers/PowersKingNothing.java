@@ -40,6 +40,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -244,7 +245,7 @@ public class PowersKingNothing extends NewDashPreset {
             /**Tick Phase Grab*/
             if (!this.getSelf().level().isClientSide()) {
                 if (this.attackTimeDuring == 108) {
-                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                 } else if (this.attackTimeDuring >= 0) {
                     StandEntity stand = getStandEntity(this.self);
                     if (Objects.nonNull(stand)) {
@@ -379,7 +380,6 @@ public class PowersKingNothing extends NewDashPreset {
         if (Objects.nonNull(stand)) {
             animateStand(StandEntity.PHASE_GRAB);
             this.attackTimeDuring = 0;
-            stand.setFadePercent(50);
             this.setActivePower(PowerIndex.POWER_2);
             this.poseStand(OffsetIndex.LOOSE);
 
@@ -405,7 +405,6 @@ public class PowersKingNothing extends NewDashPreset {
             if (this.inventoryGrab()) {
                 animateStand(StandEntity.PHASE_GRAB);
                 this.attackTimeDuring = 0;
-                stand.setFadePercent(50);
                 this.setActivePower(PowerIndex.POWER_2);
                 this.poseStand(OffsetIndex.LOOSE);
 
@@ -495,16 +494,21 @@ public class PowersKingNothing extends NewDashPreset {
         if (!$$3.isEmpty()) {
             for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
                 Entity $$5 = $$3.get($$4);
-                if (!$$5.equals(stand) && !$$5.equals(getSelf()) &&
+                LivingEntity self = getSelf();
+                if (!$$5.equals(stand) && !$$5.equals(self) &&
                         stand.getSensing().hasLineOfSight($$5)){
-                    if ($$5.isAttackable()){
+                    if ($$5.isAttackable() && !($$5 instanceof Player PE &&
+                            (PE.isCreative() || PE.isSpectator()))){
                         ItemStack held = stand.getHeldItem();
 
-                        $$5.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, this.getSelf(), this.getSelf()),
+                        $$5.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, self, self),
                                 getDamage(held, $$5, stand));
-                        playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 1.7F, 1.3F);
-                        if (held.isDamageableItem()) {
-                            held.setDamageValue(held.getDamageValue() + 1);
+                        playSoundIfPossible(self.level(),null, self.blockPosition(),
+                                SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.7F, 1.3F);
+                        if (held.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
+                            if (held.hurt(1, stand.level().getRandom(), null)) {
+                                stand.setHeldItem(ItemStack.EMPTY);
+                            }
                         }
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
                         this.setAttackTimeDuring(0);
@@ -627,18 +631,14 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public boolean exitPhaseGrab() {
+        StandEntity stand = getStandEntity(getSelf());
         if (!getSelf().level().isClientSide()) {
-            addItem(getStandEntity(getSelf()));
+            addItem(stand);
         }
-        else getStandEntity(getSelf()).setHeldItem(ItemStack.EMPTY);
+        else stand.setHeldItem(ItemStack.EMPTY);
         this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
         tryPowerPacket(PowerIndex.NONE);
         return true;
-    }
-
-    @Override
-    public boolean setPowerNone() {
-        return super.setPowerNone();
     }
 
     public boolean formPredict() {

@@ -140,11 +140,6 @@ public class KingNothingModel<T extends KingNothingEntity> extends StandModel<T>
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		stand.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
-
     StandPowers Power = new PowersKingNothing(null);
 
     @Override
