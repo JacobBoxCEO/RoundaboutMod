@@ -813,6 +813,7 @@ public class FabricItems {
                         entries.accept(MAX_STAND_DISC_SILVER_CHARIOT);
                         entries.accept(STAND_DISC_WHITESNAKE);
                         entries.accept(MAX_STAND_DISC_WHITESNAKE);
+                        entries.accept(STAND_DISC_KING_NOTHING);
                         if (ClientNetworking.getAppropriateConfig().whitesnakeSettings.sightDiscStealEnabled) {
                             entries.accept(SIGHT_DISC);
                         }

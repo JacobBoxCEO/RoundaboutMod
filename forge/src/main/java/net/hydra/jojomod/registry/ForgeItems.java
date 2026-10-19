@@ -524,6 +524,9 @@ public class ForgeItems {
     public static final RegistryObject<Item> MAX_STAND_DISC_D4C = addToWIPTab(ITEMS.register("max_d4c_disc",
             () -> new MaxStandDiscItem(new Item.Properties().stacksTo(1), new PowersD4C(null))));
 
+    public static final RegistryObject<Item> STAND_DISC_KING_NOTHING = addToWIPTab(ITEMS.register("king_nothing_disc",
+            () -> new StandDiscItem(new Item.Properties().stacksTo(1), new PowersKingNothing(null))));
+
 
 
     public static final RegistryObject<Item> SNUBNOSE_REVOLVER = addToTab(ITEMS.register("snubnose_revolver",

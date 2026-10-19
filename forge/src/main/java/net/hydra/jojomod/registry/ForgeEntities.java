@@ -601,6 +601,11 @@ public class ForgeEntities {
                             clientTrackingRange(14).
                             build(new ResourceLocation(Roundabout.MOD_ID, "dark_mirage").toString())
             );
+    public static final RegistryObject<EntityType<KingNothingEntity>> KING_NOTHING =
+            ENTITY_TYPES.register("king_nothing", () ->
+                    EntityType.Builder.of(KingNothingEntity::new, MobCategory.MISC).sized(0.75f, 2.05f)
+                            .clientTrackingRange(14).build(Roundabout.location("king_nothing").toString())
+            );
     public static final RegistryObject<EntityType<TuskEntity>> TUSK_A1 =
             ENTITY_TYPES.register("tusk_a1", () ->
                     EntityType.Builder.of(TuskEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).
