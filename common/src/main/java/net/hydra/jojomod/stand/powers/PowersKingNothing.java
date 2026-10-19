@@ -547,13 +547,15 @@ public class PowersKingNothing extends NewDashPreset {
     public void doPhaseAttack(ItemStack weapon, StandEntity stand, LivingEntity self, Entity target) {
         if (target.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, self, self),
                 getDamage(weapon, target, stand))) {
-            doBleed(weapon, target, stand);
+            doHitEffects(weapon, target, stand, self);
         }
-        playSoundIfPossible(self.level(), null, stand.blockPosition(),
+        playSoundIfPossible(self.level(), null, self.blockPosition(),
                 SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.7F, 1.3F);
         if (weapon.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
             if (weapon.hurt(1, stand.level().getRandom(), null)) {
                 stand.setHeldItem(ItemStack.EMPTY);
+                playSoundIfPossible(self.level(), null, self.blockPosition(),
+                        SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.7f, 1.3f);
             }
         }
     }
@@ -571,7 +573,7 @@ public class PowersKingNothing extends NewDashPreset {
         return damage;
     }
 
-    public void doBleed(ItemStack weapon, Entity target, StandEntity stand) {
+    public void doHitEffects(ItemStack weapon, Entity target, StandEntity stand, LivingEntity self) {
         int ticks = 0;
         int level = 0;
         if (weapon.is(ModItems.SCISSORS) || weapon.is(ModItems.SACRIFICIAL_DAGGER)) {
@@ -584,11 +586,11 @@ public class PowersKingNothing extends NewDashPreset {
             int ctd = ct.getInt("damaged");
             ctd++;
             if (ctd > 2) {
-                stand.level().playSound(null, stand.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS,
+                self.level().playSound(null, self.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS,
                         1F, 1);
                 weapon.shrink(1);
             } else {
-                stand.level().playSound(null, stand.blockPosition(), ModSounds.SIGN_HIT_EVENT, SoundSource.PLAYERS,
+                self.level().playSound(null, self.blockPosition(), ModSounds.SIGN_HIT_EVENT, SoundSource.PLAYERS,
                         1F, 1);
                 ct.putInt("damaged", ctd);
             }
