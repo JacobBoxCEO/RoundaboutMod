@@ -18,7 +18,9 @@ import net.hydra.jojomod.event.index.PacketDataIndex;
 import net.hydra.jojomod.event.index.PowerIndex;
 import net.hydra.jojomod.event.index.PowerTypes;
 import net.hydra.jojomod.event.powers.*;
+import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
+import net.hydra.jojomod.item.SignBlockItem;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
@@ -187,31 +189,21 @@ public class PowersKingNothing extends NewDashPreset {
             int leftOffset = 20 + (19 * (i / 3));
             int topOffset = 80 + (19 * (i % 3));
             switch (i) {
-                case 0 -> {
-                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                            "ability.roundabout.kn_smell_track", "instruction.roundabout.press_skill",
-                            StandIcons.THE_WORLD_GRAB_BLOCK, 1, level, bypass));
-                }
-                case 1 -> {
-                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                            "ability.roundabout.kn_track_item", "instruction.roundabout.press_skill_crouch",
-                            StandIcons.THE_WORLD_GRAB_ITEM, 1, level, bypass));
-                }
-                case 2 -> {
-                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                            "ability.roundabout.kn_phase_hand", "instruction.roundabout.press_skill",
-                            StandIcons.DIVER_DOWN_PHASE_PUNCH, 2, level, bypass));
-                }
-                case 3 -> {
-                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                            "ability.roundabout.kn_phase_item", "instruction.roundabout.press_skill_crouch",
-                            StandIcons.STAR_PLATINUM_GRAB_ITEM, 2, level, bypass));
-                }
-                case 4 -> {
-                    $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                            "ability.roundabout.dodge", "instruction.roundabout.press_skill", StandIcons.DODGE, 3,
-                            level, bypass));
-                }
+                case 0 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_smell_track", "instruction.roundabout.press_skill",
+                        StandIcons.THE_WORLD_GRAB_BLOCK, 1, level, bypass));
+                case 1 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_track_item", "instruction.roundabout.press_skill_crouch",
+                        StandIcons.THE_WORLD_GRAB_ITEM, 1, level, bypass));
+                case 2 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_phase_hand", "instruction.roundabout.press_skill",
+                        StandIcons.DIVER_DOWN_PHASE_PUNCH, 2, level, bypass));
+                case 3 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_phase_item", "instruction.roundabout.press_skill_crouch",
+                        StandIcons.STAR_PLATINUM_GRAB_ITEM, 2, level, bypass));
+                case 4 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.dodge", "instruction.roundabout.press_skill", StandIcons.DODGE, 3,
+                        level, bypass));
                 default -> canContinue = false;
             }
         }
@@ -432,7 +424,7 @@ public class PowersKingNothing extends NewDashPreset {
             stand.setYRot(twoVec.x);
             stand.setXRot(twoVec.y);
             moveVec = DamageHandler.getRotationVector(
-                    twoVecGrav.y, (float) (twoVecGrav.x)).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+                    twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
             stand.setPos(this.getSelf().position().add(moveVec));
             return true;
         }
@@ -457,7 +449,7 @@ public class PowersKingNothing extends NewDashPreset {
                 stand.setYRot(twoVec.x);
                 stand.setXRot(twoVec.y);
                 moveVec = DamageHandler.getRotationVector(
-                        twoVecGrav.y, (float) (twoVecGrav.x)).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+                        twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
                 stand.setPos(this.getSelf().position().add(moveVec));
                 return true;
             }
@@ -470,7 +462,7 @@ public class PowersKingNothing extends NewDashPreset {
             StandEntity standEntity = ((StandUser) this.getSelf()).roundabout$getStand();
             if (standEntity != null && standEntity.isAlive() && !standEntity.isRemoved() &&
                     this.getSelf() instanceof Player) {
-                ItemStack stack = ((Player)this.getSelf()).getMainHandItem();
+                ItemStack stack = this.getSelf().getMainHandItem();
                 if (isGrabbable(stack)) {
                     standEntity.canAcquireHeldItem = true;
                     standEntity.setHeldItem(stack.copyWithCount(1));
@@ -502,15 +494,15 @@ public class PowersKingNothing extends NewDashPreset {
         AABB $$2 = bb1.minmax(bb2);
         List<Entity> $$3 = stand.level().getEntities(stand, $$2);
         if (!$$3.isEmpty()) {
-            for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
-                Entity $$5 = $$3.get($$4);
-                if ($$5 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$5)){
+            for (Entity $$4 : $$3) {
+                if ($$4 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$4)) {
                     if (!(IE.getItem().getItem() instanceof BlockItem BI &&
                             (BI.getBlock() instanceof ShulkerBoxBlock ||
-                                    BI.getBlock() instanceof FancyLighterBlock))){
+                                    BI.getBlock() instanceof FancyLighterBlock))) {
                         stand.canAcquireHeldItem = true;
                         stand.setHeldItem(IE.getItem().copyWithCount(1));
-                        playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
+                        playSoundIfPossible(self.level(), null, this.getSelf().blockPosition(),
+                                ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
@@ -532,23 +524,14 @@ public class PowersKingNothing extends NewDashPreset {
         AABB $$2 = bb1.minmax(bb2);
         List<Entity> $$3 = stand.level().getEntities(stand, $$2);
         if (!$$3.isEmpty()) {
-            for (int $$4 = 0; $$4 < $$3.size(); $$4++) {
-                Entity $$5 = $$3.get($$4);
+            for (Entity $$4 : $$3) {
                 LivingEntity self = getSelf();
-                if (!$$5.equals(stand) && !$$5.equals(self) &&
-                        stand.getSensing().hasLineOfSight($$5)){
-                    if ($$5.isAttackable() && !($$5 instanceof LivingEntity LE && LE.isDeadOrDying())
-                            && !($$5 instanceof Player PE && (PE.isCreative() || PE.isSpectator()))){
+                if (!$$4.equals(stand) && !$$4.equals(self) &&
+                        stand.getSensing().hasLineOfSight($$4)) {
+                    if ($$4.isAttackable() && !($$4 instanceof LivingEntity LE && LE.isDeadOrDying())
+                            && !($$4 instanceof Player PE && (PE.isCreative() || PE.isSpectator()))) {
                         ItemStack held = stand.getHeldItem();
-                        $$5.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, self, self),
-                                getDamage(held, $$5, stand));
-                        playSoundIfPossible(self.level(),null, self.blockPosition(),
-                                SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.7F, 1.3F);
-                        if (held.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
-                            if (held.hurt(1, stand.level().getRandom(), null)) {
-                                stand.setHeldItem(ItemStack.EMPTY);
-                            }
-                        }
+                        doPhaseAttack(held, stand, self, $$4);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
@@ -561,7 +544,21 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    private float getDamage(ItemStack stack, Entity ent, StandEntity stand) {
+    public void doPhaseAttack(ItemStack weapon, StandEntity stand, LivingEntity self, Entity target) {
+        if (target.hurt(ModDamageTypes.of(stand.level(), DamageTypes.PLAYER_ATTACK, self, self),
+                getDamage(weapon, target, stand))) {
+            doBleed(weapon, target, stand);
+        }
+        playSoundIfPossible(self.level(), null, stand.blockPosition(),
+                SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.7F, 1.3F);
+        if (weapon.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
+            if (weapon.hurt(1, stand.level().getRandom(), null)) {
+                stand.setHeldItem(ItemStack.EMPTY);
+            }
+        }
+    }
+
+    public float getDamage(ItemStack stack, Entity ent, StandEntity stand) {
         float damage = 1;
         if (stand != null) damage = (float) stand.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1;
         if (damage != 1) {
@@ -572,6 +569,31 @@ public class PowersKingNothing extends NewDashPreset {
             }
         }
         return damage;
+    }
+
+    public void doBleed(ItemStack weapon, Entity target, StandEntity stand) {
+        int ticks = 0;
+        int level = 0;
+        if (weapon.is(ModItems.SCISSORS) || weapon.is(ModItems.SACRIFICIAL_DAGGER)) {
+            ticks = 400;
+        }
+        else if (weapon.getItem() instanceof SignBlockItem) {
+            ticks = 100;
+            level = 1;
+            CompoundTag ct = weapon.getOrCreateTagElement("BlockStateTag");
+            int ctd = ct.getInt("damaged");
+            ctd++;
+            if (ctd > 2) {
+                stand.level().playSound(null, stand.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS,
+                        1F, 1);
+                weapon.shrink(1);
+            } else {
+                stand.level().playSound(null, stand.blockPosition(), ModSounds.SIGN_HIT_EVENT, SoundSource.PLAYERS,
+                        1F, 1);
+                ct.putInt("damaged", ctd);
+            }
+        }
+        MainUtil.makeBleed(target, level, ticks, stand);
     }
 
     public void addItem(StandEntity standEntity){
@@ -616,7 +638,7 @@ public class PowersKingNothing extends NewDashPreset {
             for (int j = 0; j < serverWorld.players().size(); ++j) {
                 ServerPlayer serverPlayerEntity = ((ServerLevel) this.self.level()).players().get(j);
 
-                if (((ServerLevel) serverPlayerEntity.level()) != serverWorld) {
+                if (serverPlayerEntity.level() != serverWorld) {
                     continue;
                 }
 
