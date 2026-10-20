@@ -9,7 +9,6 @@ import net.hydra.jojomod.event.ModEffects;
 import net.hydra.jojomod.event.ModParticles;
 import net.hydra.jojomod.event.powers.ModDamageTypes;
 import net.hydra.jojomod.event.powers.StandUser;
-import net.hydra.jojomod.item.FleshBucketItem;
 import net.hydra.jojomod.item.GlaiveItem;
 import net.hydra.jojomod.item.KnifeItem;
 import net.hydra.jojomod.sound.ModSounds;
@@ -299,9 +298,7 @@ public class SeperatedArmEntity extends StandEntity {
 
                                 if (Can_activate) {
                                     if(!((Player)user).isCreative()) {
-                                        if(!(this.getMainHandItem().getItem() instanceof FleshBucketItem)) {
-                                            this.getMainHandItem().hurt(1, this.level().getRandom(), null);
-                                        }
+                                        this.getMainHandItem().hurt(1, this.level().getRandom(), null);
                                     }
                                 }
                                 Can_activate = false;
@@ -314,9 +311,7 @@ public class SeperatedArmEntity extends StandEntity {
 
                                 if (Can_activate) {
                                     if(!((Player)user).isCreative()) {
-                                        if(!(this.getMainHandItem().getItem() instanceof FleshBucketItem)) {
-                                            this.getMainHandItem().hurt(1, this.level().getRandom(), null);
-                                        }
+                                        this.getMainHandItem().hurt(1, this.level().getRandom(), null);
                                     }
                                 }
                                 Can_activate = false;
@@ -329,9 +324,7 @@ public class SeperatedArmEntity extends StandEntity {
                                 this.setDeltaMovement(0, 0, 0);
                                 if (Can_activate) {
                                     if(!((Player)user).isCreative()) {
-                                        if(!(this.getMainHandItem().getItem() instanceof FleshBucketItem)) {
-                                            this.getMainHandItem().hurt(1, this.level().getRandom(), null);
-                                        }
+                                        this.getMainHandItem().hurt(1, this.level().getRandom(), null);
                                     }
                                 }
                                 Can_activate = false;
@@ -568,9 +561,7 @@ public class SeperatedArmEntity extends StandEntity {
                 if(SpinTicks == 0) {
                     if (this.getMainHandItem().isDamageableItem()) {
                         if(!((Player)user).isCreative()) {
-                            if(!(this.getMainHandItem().getItem() instanceof FleshBucketItem)) {
-                                this.getMainHandItem().hurt(1, this.level().getRandom(), null);
-                            }
+                            this.getMainHandItem().hurt(1, this.level().getRandom(), null);
                         }
                     }
                 }
