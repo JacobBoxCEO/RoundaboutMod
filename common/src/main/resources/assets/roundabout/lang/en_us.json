@@ -2616,8 +2616,8 @@
   "text.roundabout.diver_down.release_mode": "Release Mode: Automatic",
   "text.roundabout.diver_down.release_mode_manual": "Release Mode: Manual",
 
-  "ability.roundabout.lyin_eyes_placeholder": "Would you still love me",
-  "ability.roundabout.lyin_eyes_placeholder.desc": "if I were a worm? \uD83E\uDD7A",
+  "ability.roundabout.lyin_eyes_map": "Nematode Map",
+  "ability.roundabout.lyin_eyes_map.desc": "The nematodes show you a layout of the blocks around you. The nematodes will also highlight enemies and containers, like chests, for you.",
   "ability.roundabout.lyin_eyes_tension_sensor": "Tension Sensor",
   "ability.roundabout.lyin_eyes_tension_sensor.desc": "The nematodes highlight enemies through walls. Hostile mobs are highlighted red, neutral mobs are yellow, and passive mobs are green. Enemies that are low are highlighted differently.",
   "ability.roundabout.lyin_eyes_inventory": "Inventory Reader",
@@ -2839,6 +2839,11 @@
 
   "idle.roundabout.sc_part_3": "Part 3 Pose",
   "idle.roundabout.sc_part_5": "Part 5 Pose",
+
+  "idle.roundabout.lyin_eyes_1": "Face",
+  "idle.roundabout.lyin_eyes_2": "Eyes Top",
+  "idle.roundabout.lyin_eyes_3": "Eyes Middle",
+  "idle.roundabout.lyin_eyes_4": "Eyes Bottom",
 
   "skins.roundabout.bad_company.anime": "Part 4",
   "skins.roundabout.bad_company.manga": "Manga",
@@ -3406,6 +3411,8 @@
   "skins.roundabout.whitesnake.eoh": "EOH",
   "skins.roundabout.whitesnake.fleshsnake": "Fleshsnake",
 
+  "skins.roundabout.lyin_eyes.base": "Part 9",
+
   "unlock_skin.roundabout.the_world.over_heaven": "The World: Over Heaven Skin Unlocked!",
   "unlock_skin.roundabout.star_platinum.atomic": "Star Platinum: Atomic Skin Unlocked!",
   "unlock_skin.roundabout.king_crimson.reaper": "Blossoming Time Reaper Skin Unlocked!",
@@ -3718,6 +3725,10 @@
 
   "config.roundabout.cloneLimit.name": "Clone Limit",
   "config.roundabout.cloneLimit.desc": "How many of your parallel selves can exist in a space before leaving home.",
+
+
+  "config.roundabout.chanceForFatClone.name": "Fat Chance",
+  "config.roundabout.chanceForFatClone.desc": "Chance that a clone has more or less weight.",
 
 
   "config.roundabout.chanceToEncounterNewAnimal.name": "Encounter New Animals",
@@ -4225,6 +4236,8 @@
   "config.roundabout.whitesnakeAttackMultOnPlayers.desc": "How much damage the stand deals to players, and potentially stand user mobs. The base of 100 means x1.0, so at 0.5 the damage is halved and at 300 the damage is tripled for instance.",
   "config.roundabout.whitesnakeAttackMultOnMobs.name": "Mob Damage Multiplier",
   "config.roundabout.whitesnakeAttackMultOnMobs.desc": "How much damage the stand deals to every other mob, same math as above.",
+  "config.roundabout.whitesnakeNameChangingText.name": "Whitesnake changing name in messages",
+  "config.roundabout.whitesnakeNameChangingText.desc": "When this config is on, sending messages when piloting will change the sender name to Whitesnake or to the disguise that he is currently using.",
 
 
   "config.roundabout.creamAttackMultOnPlayers.name": "Player Damage Multiplier",
