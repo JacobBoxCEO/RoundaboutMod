@@ -1549,7 +1549,7 @@ public class FabricEntities {
                 FabricDefaultAttributeRegistry.register(JUSTICE, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(JUSTICE_PIRATE, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(DARK_MIRAGE, StandEntity.createStandAttributes());
-                FabricDefaultAttributeRegistry.register(KING_NOTHING, StandEntity.createStandAttributes());
+                FabricDefaultAttributeRegistry.register(KING_NOTHING, KingNothingEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A1, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A2, StandEntity.createStandAttributes());
                 FabricDefaultAttributeRegistry.register(TUSK_A3, StandEntity.createStandAttributes());

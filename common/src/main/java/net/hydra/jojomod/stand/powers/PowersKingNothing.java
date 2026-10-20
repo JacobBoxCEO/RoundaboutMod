@@ -41,6 +41,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -50,7 +51,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -210,10 +213,6 @@ public class PowersKingNothing extends NewDashPreset {
         return $$1;
     }
 
-    public boolean powersAreUnusable() {
-        return getActivePower() == PowerIndex.POWER_2;
-    }
-
     public void renderScentIcon(GuiGraphics context, int x, int y){
         RenderSystem.enableBlend();
         context.setColor(1f, 1f, 1f, 1f);
@@ -273,7 +272,7 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void tickPowerEnd() {
         super.tickPowerEnd();
-        if (this.getActivePower() == PowerIndex.POWER_2){
+        if (getSelf().isAlive() && !getSelf().isRemoved() && isPhasing()){
             /**Tick Phase Grab*/
             if (!this.getSelf().level().isClientSide()) {
                 if (this.attackTimeDuring == 108) {
@@ -310,10 +309,8 @@ public class PowersKingNothing extends NewDashPreset {
                             stand.setPos(yes);
                         }
 
-                        boolean isHoldingItem = !stand.getHeldItem().equals(ItemStack.EMPTY);
-
                         if ((stand.isTechnicallyInImpassableWall()) ||
-                                stand.position().distanceTo(this.getSelf().position()) > 15){
+                                stand.position().distanceTo(this.getSelf().position()) > 15) {
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
                             this.setCooldown(PowerIndex.SKILL_2, 5);
                             ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
@@ -321,24 +318,46 @@ public class PowersKingNothing extends NewDashPreset {
                         }
 
 
-                        if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
-                                && !isHoldingItem)
-                        {
-                            Vec3 vec3d2ST = stand.getViewVector(0);
-                            Vec3 vec3dST = stand.getEyePosition(0);
-                            Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
-                            BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
-                                    ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, stand));
-                            BlockPos bpos = blockHit.getBlockPos();
-                            BlockState state = stand.level().getBlockState(bpos);
-                            if (!state.isAir()) {
+                        Vec3 vec3d2ST = stand.getViewVector(0);
+                        Vec3 vec3dST = stand.getEyePosition(0);
+                        Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
+                        BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
+                                ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
+                        BlockPos bpos = blockHit.getBlockPos();
+                        BlockState state = stand.level().getBlockState(bpos);
+                        ItemStack held = stand.getHeldItem();
+                        boolean isHoldingItem = !held.isEmpty();
+                        if (!state.isAir()) {
+                            if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
+                                    && !isHoldingItem) {
                                 Block blk = state.getBlock();
                                 if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
                                         || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
                                         || (blk instanceof FenceGateBlock))
                                         && this.getSelf() instanceof Player PE) {
-                                    blk.use(state, this.getSelf().level(), bpos, PE, PE.getUsedItemHand(), blockHit);
+                                    blk.use(state, this.getSelf().level(), bpos, PE, PE.getUsedItemHand(),
+                                            blockHit);
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
+                                    return;
+                                }
+                            }
+                            else if (held.getItem() instanceof BlockItem) {
+                                //todo block placement code
+                            }
+                            else if (isHoldingItem) {
+                                if (held.isCorrectToolForDrops(state)) {
+                                    this.getSelf().level().destroyBlock(bpos, true);
+                                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
+                                    int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
+                                    int cooldown = Mth.ceil(1 / ((held.getDestroySpeed(state) + (efficiencyLevel * efficiencyLevel) + 1)
+                                            / (30 * state.getBlock().defaultDestroyTime()))) + ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown;
+                                    if (getSelf() instanceof Player PE) {
+                                        PE.displayClientMessage(Component.literal(Integer.toString(cooldown)).withStyle(ChatFormatting.DARK_GREEN), true);
+                                    }
+                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                            cooldown);
+                                    this.setCooldown(PowerIndex.SKILL_2,
+                                            cooldown);
                                     return;
                                 }
                             }
@@ -357,6 +376,10 @@ public class PowersKingNothing extends NewDashPreset {
                 }
             }
         }
+    }
+
+    private boolean isPhasing() {
+        return this.getActivePower() == PowerIndex.POWER_2 || this.getActivePower() == PowerIndex.POWER_2_SNEAK;
     }
 
     @Override
@@ -382,7 +405,7 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void phaseGrabClient(){
-        if ((this.getActivePower() != PowerIndex.POWER_2)) {
+        if (!isPhasing()) {
             if (!this.onCooldown(PowerIndex.SKILL_2)) {
                 this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2, true);
                 tryPowerPacket(PowerIndex.POWER_2);
@@ -395,7 +418,7 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void phaseItemClient() {
-        if (this.getActivePower() != PowerIndex.POWER_2) {
+        if (!isPhasing()) {
             if (!this.onCooldown(PowerIndex.SKILL_2)) {
                 getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
                 tryPowerPacket(PowerIndex.POWER_2_SNEAK);
@@ -437,7 +460,7 @@ public class PowersKingNothing extends NewDashPreset {
             if (this.inventoryGrab()) {
                 animateStand(StandEntity.PHASE_GRAB);
                 this.attackTimeDuring = 0;
-                this.setActivePower(PowerIndex.POWER_2);
+                this.setActivePower(PowerIndex.POWER_2_SNEAK);
                 this.poseStand(OffsetIndex.LOOSE);
 
                 Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360),(this.getSelf().getXRot()));
@@ -461,8 +484,8 @@ public class PowersKingNothing extends NewDashPreset {
         if (!this.getSelf().level().isClientSide()) {
             StandEntity standEntity = ((StandUser) this.getSelf()).roundabout$getStand();
             if (standEntity != null && standEntity.isAlive() && !standEntity.isRemoved() &&
-                    this.getSelf() instanceof Player) {
-                ItemStack stack = this.getSelf().getMainHandItem();
+                    this.getSelf() instanceof Player PE) {
+                ItemStack stack = PE.getMainHandItem();
                 if (isGrabbable(stack)) {
                     standEntity.canAcquireHeldItem = true;
                     standEntity.setHeldItem(stack.copyWithCount(1));
@@ -504,6 +527,10 @@ public class PowersKingNothing extends NewDashPreset {
                         playSoundIfPossible(self.level(), null, this.getSelf().blockPosition(),
                                 ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                        this.setCooldown(PowerIndex.SKILL_2,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
                         animateStand(StandEntity.IDLE);
@@ -531,8 +558,15 @@ public class PowersKingNothing extends NewDashPreset {
                     if ($$4.isAttackable() && !($$4 instanceof LivingEntity LE && LE.isDeadOrDying())
                             && !($$4 instanceof Player PE && (PE.isCreative() || PE.isSpectator()))) {
                         ItemStack held = stand.getHeldItem();
+                        int cooldown = ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown
+                                + (int) (1F / stand.getAttributeValue(Attributes.ATTACK_SPEED) * 20);
                         doPhaseAttack(held, stand, self, $$4);
+                        stand.getAttribute(Attributes.ATTACK_SPEED);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                cooldown);
+                        this.setCooldown(PowerIndex.SKILL_2,
+                                cooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
                         animateStand(StandEntity.IDLE);
@@ -574,14 +608,14 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void doHitEffects(ItemStack weapon, Entity target, StandEntity stand, LivingEntity self) {
-        int ticks = 0;
-        int level = 0;
+        int bleedTicks = 0;
+        int bleedLevel = 0;
         if (weapon.is(ModItems.SCISSORS) || weapon.is(ModItems.SACRIFICIAL_DAGGER)) {
-            ticks = 400;
+            bleedTicks = 400;
         }
         else if (weapon.getItem() instanceof SignBlockItem) {
-            ticks = 100;
-            level = 1;
+            bleedTicks = 100;
+            bleedLevel = 1;
             CompoundTag ct = weapon.getOrCreateTagElement("BlockStateTag");
             int ctd = ct.getInt("damaged");
             ctd++;
@@ -595,18 +629,14 @@ public class PowersKingNothing extends NewDashPreset {
                 ct.putInt("damaged", ctd);
             }
         }
-        MainUtil.makeBleed(target, level, ticks, stand);
+        MainUtil.makeBleed(target, bleedLevel, bleedTicks, stand);
     }
 
     public void addItem(StandEntity standEntity){
         if (!this.getSelf().level().isClientSide()) {
             addItemLight(standEntity);
-            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-            this.setCooldown(PowerIndex.SKILL_2,
-                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
         }
-        this.getStandEntity(this.getSelf()).setHeldItem(ItemStack.EMPTY);
+        standEntity.setHeldItem(ItemStack.EMPTY);
     }
 
     public void addItemLight(StandEntity standEntity){
@@ -723,10 +753,15 @@ public class PowersKingNothing extends NewDashPreset {
 
     private void memorizeBlock(BlockPos blockPos) {
         Block block = this.getSelf().level().getBlockState(blockPos).getBlock();
-        if (isMemorizableBlock(block)) setMemorizedScent(block);
+        if (isMemorizableBlock(block)) {
+            if (getSelf() instanceof Player PE) {
+                PE.displayClientMessage(block.getName().withStyle(ChatFormatting.DARK_PURPLE), true);
+            }
+            setMemorizedScent(block);
+        }
     }
 
-    private static boolean isMemorizableBlock(Block block) {
+    private boolean isMemorizableBlock(Block block) {
         return !block.asItem().equals(Items.AIR) &&
                 !(block instanceof FogBlock) &&
                 block.defaultDestroyTime() >= 0;
