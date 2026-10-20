@@ -3365,6 +3365,7 @@
   "roundabout.troop_select.tank": "Tank",
   "roundabout.troop_select.helicopter": "Helicopter",
   "roundabout.troop_select.mine": "Mine",
+  "stand.bad_company.not_enought_space": "You don't have enought space for that troop!",
   "stand.bad_company.troop_limit": "You have reached army maximum size!",
 
   "skins.roundabout.green_day.part_five_green_day": "Part 5",
@@ -4237,7 +4238,7 @@
   "config.roundabout.whitesnakeAttackMultOnMobs.name": "Mob Damage Multiplier",
   "config.roundabout.whitesnakeAttackMultOnMobs.desc": "How much damage the stand deals to every other mob, same math as above.",
   "config.roundabout.whitesnakeNameChangingText.name": "Whitesnake changing name in messages",
-  "config.roundabout.whitesnakeNameChangingText.desc": "When this config is on, sending messages when piloting will change the sender name to Whitesnake or to the disguise that he is currently using.",
+  "config.roundabout.whitesnakeNameChangingText.desc": "When this config is on, when sending messages during pilot the users name will change to whitesnake or the disguise the user is using.",
 
 
   "config.roundabout.creamAttackMultOnPlayers.name": "Player Damage Multiplier",
