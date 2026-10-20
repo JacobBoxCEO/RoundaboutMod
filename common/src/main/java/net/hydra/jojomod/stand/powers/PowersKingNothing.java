@@ -159,7 +159,7 @@ public class PowersKingNothing extends NewDashPreset {
     public void renderIcons(GuiGraphics context, int x, int y) {
         if (isHoldingSneak()) {
             setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_1_SNEAK);
-            setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2);
+            setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2_SNEAK);
             setSkillIcon(context, x, y,3, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_3);
             renderScentIcon(context, x, y);
         }
@@ -345,18 +345,24 @@ public class PowersKingNothing extends NewDashPreset {
                                 //todo block placement code
                             }
                             else if (isHoldingItem) {
-                                if (held.isCorrectToolForDrops(state)) {
+                                if (held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
+                                        this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
+                                        && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
+                                        && !(SP).blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
+                                        && SP.level().mayInteract(SP, bpos)) {
                                     this.getSelf().level().destroyBlock(bpos, true);
+                                    damageHeld(held, stand, this.getSelf());
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                                     int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
-                                    int cooldown = Mth.ceil(1 / ((held.getDestroySpeed(state) + (efficiencyLevel * efficiencyLevel) + 1)
+                                    int cooldown = Mth.ceil(1 / ((held.getDestroySpeed(state) + (efficiencyLevel * efficiencyLevel) + efficiencyLevel)
                                             / (30 * state.getBlock().defaultDestroyTime()))) + ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown;
-                                    if (getSelf() instanceof Player PE) {
-                                        PE.displayClientMessage(Component.literal(Integer.toString(cooldown)).withStyle(ChatFormatting.DARK_GREEN), true);
-                                    }
                                     S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                                            cooldown);
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                                     this.setCooldown(PowerIndex.SKILL_2,
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                                            cooldown);
+                                    this.setCooldown(PowerIndex.SKILL_2_SNEAK,
                                             cooldown);
                                     return;
                                 }
@@ -419,7 +425,7 @@ public class PowersKingNothing extends NewDashPreset {
 
     public void phaseItemClient() {
         if (!isPhasing()) {
-            if (!this.onCooldown(PowerIndex.SKILL_2)) {
+            if (!this.onCooldown(PowerIndex.SKILL_2_SNEAK)) {
                 getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
                 tryPowerPacket(PowerIndex.POWER_2_SNEAK);
             }
@@ -564,8 +570,12 @@ public class PowersKingNothing extends NewDashPreset {
                         stand.getAttribute(Attributes.ATTACK_SPEED);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
                         S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                        this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
                                 cooldown);
-                        this.setCooldown(PowerIndex.SKILL_2,
+                        this.setCooldown(PowerIndex.SKILL_2_SNEAK,
                                 cooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
@@ -585,8 +595,12 @@ public class PowersKingNothing extends NewDashPreset {
         }
         playSoundIfPossible(self.level(), null, self.blockPosition(),
                 SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.7F, 1.3F);
-        if (weapon.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
-            if (weapon.hurt(1, stand.level().getRandom(), null)) {
+        damageHeld(weapon, stand, self);
+    }
+
+    private void damageHeld(ItemStack held, StandEntity stand, LivingEntity self) {
+        if (held.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
+            if (held.hurt(1, stand.level().getRandom(), null)) {
                 stand.setHeldItem(ItemStack.EMPTY);
                 playSoundIfPossible(self.level(), null, self.blockPosition(),
                         SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.7f, 1.3f);
