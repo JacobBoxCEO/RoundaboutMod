@@ -42,8 +42,10 @@ public class PowersLyinEyes extends NewDashPreset {
     // stand summoning variable
     private int summonOverlayTicks = 0;
     private int gatherOverlayTicks = 0;
+    private int idleOverlayTicks = 0;
     private boolean isSummon = false;
     private boolean isGather = false;
+    private boolean desummonFromMove = false;
     private boolean hadInventoryMenuOpen = false;
     //inventory reading target;
     private Entity inventoryTarget = null;
@@ -77,6 +79,7 @@ public class PowersLyinEyes extends NewDashPreset {
         }
         if (desummon && this.self.level().isClientSide()) {
             isSummon = false;
+            desummonFromMove = false;
         }
         super.onStandSummon(desummon);
     }
@@ -105,10 +108,20 @@ public class PowersLyinEyes extends NewDashPreset {
             }
         }
         super.tickPower();
+
         if (isSummon) {
             summonOverlayTicks = Math.min(summonOverlayTicks + 1, 12);
+            // once summoned, idle anim.
+            if (summonOverlayTicks >= 12) {
+                idleOverlayTicks++;
+            } else {
+                idleOverlayTicks = 0;
+            }
         } else {
-            summonOverlayTicks = Math.max(summonOverlayTicks - 1, 0);
+            // if desummoned through a move, update every tick instead of every other tick
+            int decrement = desummonFromMove ? 2 : 1;
+            summonOverlayTicks = Math.max(summonOverlayTicks - decrement, 0);
+            idleOverlayTicks = 0;
         }
         if (isGather) {
             gatherOverlayTicks = Math.min(gatherOverlayTicks + 1, 7);
@@ -219,6 +232,7 @@ public class PowersLyinEyes extends NewDashPreset {
             this.setAttackTimeDuring(0);
             this.setActivePower(READ_INVENTORY);
             isSummon = false;
+            desummonFromMove = true;
             isGather = true;
             gatherOverlayTicks = 1;
             // play sound here
@@ -267,6 +281,7 @@ public class PowersLyinEyes extends NewDashPreset {
             if (!visionModeClient) {
                 visionModeClient = true;
                 isSummon = false;
+                desummonFromMove = true;
                 PE.displayClientMessage(Component.translatable("text.roundabout.lyin_eyes.tension_highlight").withStyle(ChatFormatting.GOLD), true);
             }
             else{
@@ -299,6 +314,7 @@ public class PowersLyinEyes extends NewDashPreset {
             mapModeClient = true;
             isSummon = false;
             mapModeClient = true;
+            desummonFromMove = true;
             gatherOverlayTicks = 1;
             isGather = true;
         }
@@ -386,9 +402,12 @@ public class PowersLyinEyes extends NewDashPreset {
 
     //skins and poses
 
-    @Override public Component getSkinName(byte skinId) {
+    @Override
+    public Component getSkinName(byte skinId) {
         return Component.translatable("skins.roundabout.lyin_eyes.base");
     }
+
+    @Override
     public Component getPosName(byte posID){
         return switch (posID) {
             case (byte) 1 -> Component.translatable("idle.roundabout.lyin_eyes_2");
@@ -397,6 +416,8 @@ public class PowersLyinEyes extends NewDashPreset {
             default -> Component.translatable("idle.roundabout.lyin_eyes_1");
         };
     }
+    
+    @Override
     public List<Byte> getPosList(){
         List<Byte> $$1 = Lists.newArrayList();
         $$1.add((byte)0);
@@ -422,18 +443,11 @@ public class PowersLyinEyes extends NewDashPreset {
         }
     }
 
-    // basically the stand rejection thing is gonna have the nematodes
-    // cover your entire screen for the duration of the virus. cool
-    @Override
-    public void tickStandRejection(MobEffectInstance effect){
-        if (this.getSelf().level().isClientSide()) {
-            //oops! nematodes all over your screen.
-        }
-    }
     // basic setters and getters here
 
     public int getSummonOverlayTicks() {return summonOverlayTicks;}
     public int getGatherOverlayTicks() {return gatherOverlayTicks;}
+    public int getIdleOverlayTicks() { return idleOverlayTicks; }
     public boolean getVisionModeClient() {return visionModeClient;}
     public boolean isActive() {return hasStandActive(this.self);}
     public boolean getMapModeClient() {return mapModeClient;}

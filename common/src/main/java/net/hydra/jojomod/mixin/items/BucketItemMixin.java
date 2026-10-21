@@ -73,7 +73,7 @@ public class BucketItemMixin extends Item implements IBucketItem {
                                     }
                                 }
                                 SoundEvent $$6 = SoundEvents.BUCKET_FILL;
-                                level.playSound(player, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
+                                level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
                             }
                             cir.setReturnValue(InteractionResultHolder.pass(itemStack));
                         }
@@ -120,7 +120,10 @@ public class BucketItemMixin extends Item implements IBucketItem {
                             player.awardStat(Stats.ITEM_USED.get(this));
                             player.swing(hand);
                             itemStack.shrink(1);
+                            SoundEvent $$6 = SoundEvents.BUCKET_FILL;
+                            level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
                             if (itemStack.isEmpty()) {
+
                                 cir.setReturnValue(InteractionResultHolder.sidedSuccess(stack, level.isClientSide()));
                                 return;
                             } else {
@@ -128,8 +131,6 @@ public class BucketItemMixin extends Item implements IBucketItem {
                                     player.drop(stack, false);
                                 }
                             }
-                            SoundEvent $$6 = SoundEvents.BUCKET_FILL;
-                            level.playSound(player, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
                         }
                         cir.setReturnValue(InteractionResultHolder.pass(itemStack));
 
