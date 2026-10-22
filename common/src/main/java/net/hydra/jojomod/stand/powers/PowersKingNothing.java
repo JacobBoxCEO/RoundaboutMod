@@ -347,9 +347,9 @@ public class PowersKingNothing extends NewDashPreset {
                                 BlockPos placePos = bpos.relative(dir);
                                 BlockState placeState = stand.level().getBlockState(placePos);
                                 if ((placeState.canBeReplaced() || placeState.isAir())
-                                        && (getSelf() instanceof ServerPlayer SP &&
+                                        && getSelf() instanceof ServerPlayer SP &&
                                         SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
-                                        !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
+                                        !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer())
                                         && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
                                     if (BI.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                                             != InteractionResult.FAIL) {

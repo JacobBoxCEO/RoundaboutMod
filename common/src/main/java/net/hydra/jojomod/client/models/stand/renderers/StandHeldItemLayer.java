@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.hydra.jojomod.client.ClientUtil;
 import net.hydra.jojomod.client.models.stand.StandModel;
+import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.entity.stand.StarPlatinumEntity;
 import net.hydra.jojomod.entity.substand.SeperatedArmEntity;
@@ -79,7 +80,7 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
             boolean flag = humanoidArm == HumanoidArm.LEFT;
             poseStack.translate((float)(flag ? -1 : 1) / 16.0F, 0.125F, -0.625F);
 
-            if (!(livingEntity instanceof SeperatedArmEntity) && MainUtil.isThrownBlockItem(itemStack.getItem())){
+            if (!(livingEntity instanceof SeperatedArmEntity || livingEntity instanceof KingNothingEntity) && MainUtil.isThrownBlockItem(itemStack.getItem())){
                 poseStack.scale(3,3,3);
             }
             if (itemStack.getItem() instanceof AnubisItem) {
