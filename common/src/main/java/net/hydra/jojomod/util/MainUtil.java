@@ -26,6 +26,7 @@ import net.hydra.jojomod.entity.npcs.ZombieAesthetician;
 import net.hydra.jojomod.entity.paintings.RoundaboutPainting;
 import net.hydra.jojomod.entity.pathfinding.AnubisPossessorEntity;
 import net.hydra.jojomod.entity.pathfinding.GroundPathfindingStandAttackEntity;
+import net.hydra.jojomod.entity.pathfinding.TuskHoleEntity;
 import net.hydra.jojomod.entity.projectile.GasolineCanEntity;
 import net.hydra.jojomod.entity.projectile.SoftAndWetBubbleEntity;
 import net.hydra.jojomod.entity.projectile.SoftAndWetPlunderBubbleEntity;
@@ -1714,6 +1715,10 @@ public class MainUtil {
             Player player, int entityInt,
             double velocityX, double velocityY, double velocityZ) {
         Entity entity = player.level().getEntity(entityInt);
+        StandPowers powers = ((StandUser)player).roundabout$getStandPowers();
+        if (!powers.isPiloting() || entity == null || entity != powers.getPilotingStand()){
+            return;
+        }
         if (entity != null) {
             if (containsInvalidValues(getX, getY, getZ, getYRot, getXRot)
                     || !Double.isFinite(velocityX) || !Double.isFinite(velocityY) || !Double.isFinite(velocityZ)) {
@@ -4008,7 +4013,7 @@ public class MainUtil {
             StandEntity SE = ((StandUser) player).roundabout$getStand();
             Entity target = player.level().getEntity(data);
             if (target != null) {
-                if (!isCollidingWithAnyBlock(target)) {
+                if (!isCollidingWithAnyBlock(target) || (target instanceof TuskHoleEntity) ) {
                     ((StandUser) player).roundabout$getStandPowers().setPiloting(data);
                 }
             } else {
