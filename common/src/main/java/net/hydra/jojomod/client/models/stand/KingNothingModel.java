@@ -3,8 +3,7 @@ package net.hydra.jojomod.client.models.stand;// Made with Blockbench 5.2.2
 // Paste this class into your mod and generate all required imports
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.hydra.jojomod.client.models.stand.animations.KingNothingAnimations;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.hydra.jojomod.event.powers.StandPowers;
 import net.hydra.jojomod.stand.powers.PowersKingNothing;
@@ -179,6 +178,9 @@ public class KingNothingModel<T extends KingNothingEntity> extends StandModel<T>
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
         defaultModifiers(pEntity);
         defaultAnimations(pEntity, pAgeInTicks, 1/((float) Power.getBarrageWindup() / 20));
+        this.animate(pEntity.disintegrate, KingNothingAnimations.DISINTEGRATE, pAgeInTicks, 1.4f);
+        this.animate(pEntity.reach, KingNothingAnimations.REACH, pAgeInTicks, 2f);
+        this.animate(pEntity.returning, KingNothingAnimations.RETURN, pAgeInTicks, 1.4f);
     }
 
     @Override

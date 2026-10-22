@@ -1,5 +1,6 @@
 package net.hydra.jojomod.entity.stand;
 
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
@@ -27,7 +28,34 @@ public class KingNothingEntity extends FollowingStandEntity {
     @Override
     public void setupAnimationStates() {
         super.setupAnimationStates();
+        byte animation = this.getAnimation();
+        if (animation == REACH) {
+            this.reach.startIfStopped(this.tickCount);
+        } else {
+            this.reach.stop();
+        }
+
+        if (animation == DISINTEGRATE) {
+            this.disintegrate.startIfStopped(this.tickCount);
+        } else {
+            this.disintegrate.stop();
+        }
+
+        if (animation == RETURN) {
+            this.returning.startIfStopped(this.tickCount);
+        } else {
+            this.returning.stop();
+        }
     }
+
+    public static final byte
+            REACH = 51,
+            DISINTEGRATE = 52,
+            RETURN = 53;
+
+    public final AnimationState disintegrate = new AnimationState();
+    public final AnimationState returning = new AnimationState();
+    public final AnimationState reach = new AnimationState();
 
     @Override
     public ItemStack getItemBySlot(EquipmentSlot $$0) {

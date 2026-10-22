@@ -10,6 +10,7 @@ import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
+import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModGamerules;
@@ -506,7 +507,7 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean phaseGrab() {
         StandEntity stand = getStandEntity(this.self);
         if (Objects.nonNull(stand)) {
-            animateStand(StandEntity.PHASE_GRAB);
+            animateStand(KingNothingEntity.REACH);
             this.attackTimeDuring = 0;
             this.setActivePower(PowerIndex.POWER_2);
             this.poseStand(OffsetIndex.LOOSE);
@@ -531,7 +532,7 @@ public class PowersKingNothing extends NewDashPreset {
         StandEntity stand = getStandEntity(this.self);
         if (Objects.nonNull(stand)) {
             if (this.inventoryGrab()) {
-                animateStand(StandEntity.PHASE_GRAB);
+                animateStand(KingNothingEntity.REACH);
                 this.attackTimeDuring = 0;
                 this.setActivePower(PowerIndex.POWER_2_SNEAK);
                 this.poseStand(OffsetIndex.LOOSE);
@@ -610,7 +611,7 @@ public class PowersKingNothing extends NewDashPreset {
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
-                        animateStand(StandEntity.IDLE);
+                        animateStand(KingNothingEntity.RETURN);
 
                         IE.getItem().shrink(1);
                         itemNearby(IE.getId());
@@ -650,7 +651,7 @@ public class PowersKingNothing extends NewDashPreset {
                                 cooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
-                        animateStand(StandEntity.IDLE);
+                        animateStand(KingNothingEntity.RETURN);
 
                         return;
                     }
@@ -816,7 +817,15 @@ public class PowersKingNothing extends NewDashPreset {
         else stand.setHeldItem(ItemStack.EMPTY);
         this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
         tryPowerPacket(PowerIndex.NONE);
+        animateStand(KingNothingEntity.RETURN);
         return true;
+    }
+
+    @Override
+    public void onStandSummon(boolean desummon) {
+        super.onStandSummon(desummon);
+        if (desummon) animateStand(KingNothingEntity.DISINTEGRATE);
+        else animateStand(KingNothingEntity.RETURN);
     }
 
     public boolean formPredict() {
