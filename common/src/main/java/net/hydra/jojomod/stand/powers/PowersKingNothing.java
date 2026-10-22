@@ -6,6 +6,7 @@ import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.access.IGravityEntity;
 import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
+import net.hydra.jojomod.block.SafePlaceContext;
 import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
@@ -42,6 +43,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,6 +53,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -325,7 +328,9 @@ public class PowersKingNothing extends NewDashPreset {
 
 
                         Vec3 vec3d2ST = stand.getViewVector(0);
-                        Vec3 vec3dST = stand.getEyePosition(0);
+                        Vec3 vec3daST = stand.getPosition(0);
+                        Vec3 vec3DbST = stand.getEyePosition(0);
+                        Vec3 vec3dST = new Vec3((vec3daST.x + vec3DbST.x)/2, (vec3daST.y + vec3DbST.y)/2, (vec3daST.z + vec3DbST.z)/2);
                         Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
                         BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
                                 ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
@@ -348,7 +353,27 @@ public class PowersKingNothing extends NewDashPreset {
                                 }
                             }
                             else if (held.getItem() instanceof BlockItem) {
-                                //todo block placement code
+                                BlockPos placePos = bpos.relative(blockHit.getDirection());
+                                if (tryHitBlock(stand, held, blockHit, placePos, state) ||
+                                        tryHitBlock(stand, held, blockHit, placePos.relative(this.tempDirection), state) ||
+                                        tryHitBlock(stand, held, blockHit, placePos.above(), state)) {
+                                    getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA,true);
+                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    this.setCooldown(PowerIndex.SKILL_2,
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    return;
+                                }
+//                                Direction dir = stand.getDirection().getOpposite();
+//                                BlockPos placePos = bpos;
+//                                BlockState placeState = stand.level().getBlockState(placePos);
+//                                if (placeState.canBeReplaced() || placeState.isAir()) {
+//                                    BI.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir));
+//                                }
                             }
                             else if (isHoldingItem) {
                                 if (held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
@@ -388,6 +413,66 @@ public class PowersKingNothing extends NewDashPreset {
                 }
             }
         }
+    }
+
+    Direction tempDirection = Direction.UP;
+
+    public boolean tryHitBlock(StandEntity stand, ItemStack item, BlockHitResult $$0, BlockPos pos, BlockState state){
+
+        try {
+            if (item.getItem() instanceof BlockItem BE && BE.getBlock() instanceof SnowLayerBlock) {
+                return false;
+            }
+            if (((state.isAir() || state.canBeReplaced()) && (this.getSelf() != null && !((this.getSelf() instanceof Player &&
+                    (((Player) this.getSelf()).blockActionRestricted(this.getSelf().level(), pos, ((ServerPlayer)
+                            this.getSelf()).gameMode.getGameModeForPlayer()))) ||
+                    !this.getSelf().level().mayInteract(((Player) this.getSelf()), pos))))){
+
+                if (item.getItem() instanceof BlockItem) {
+                    Direction direction = stand.getDirection();
+                    if (direction.getAxis() == Direction.Axis.X){
+                        direction = direction.getOpposite();
+                    }
+                    if (((BlockItem) item.getItem()).getBlock() instanceof RotatedPillarBlock){
+                        direction = $$0.getDirection();
+                    }
+
+                    try {
+                        if (getSelf() instanceof Player PE){
+                            if(MainUtil.canPlaceOnClaim(PE,$$0)) {
+                                if (((BlockItem) item.getItem()).place(new SafePlaceContext(stand.level(), PE,
+                                        pos,
+                                        direction, item,
+                                        direction)) != InteractionResult.FAIL) {
+                                    this.tempDirection = direction;
+                                    return true;
+                                }
+                            }
+                        } else {
+                            if (((BlockItem)item.getItem()).place(new DirectionalPlaceContext(stand.level(),
+                                    pos,
+                                    direction, item,
+                                    direction)) != InteractionResult.FAIL){
+                                this.tempDirection = direction;
+                                return true;
+                            } else {
+                                if (ClientNetworking.getAppropriateConfig().miscellaneousSettings.banDirectionalBlockPlacingFailure){
+                                    return true;
+                                }
+                            }
+                        }
+                    } catch(Exception e) {
+                        //put shader debug stuff here
+                        Roundabout.LOGGER.info("Mod does not make a safe null check for players, report to devs who made blocks");
+                    }
+                }
+
+            }
+        } catch(Exception e) {
+            //put shader debug stuff here
+            Roundabout.LOGGER.info("Mod does not make a safe null check for players, report to devs who made blocks");
+        }
+        return false;
     }
 
     private boolean isPhasing() {
