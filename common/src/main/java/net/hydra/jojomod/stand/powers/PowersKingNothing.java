@@ -160,7 +160,7 @@ public class PowersKingNothing extends NewDashPreset {
         if (isHoldingSneak()) {
             setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_1_SNEAK);
             setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2_SNEAK);
-            setSkillIcon(context, x, y,3, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_3);
+            setSkillIcon(context, x, y,3, StandIcons.KING_CRIMSON_ITEM_GRAB, PowerIndex.SKILL_3);
             renderScentIcon(context, x, y);
         }
         else {
@@ -207,6 +207,12 @@ public class PowersKingNothing extends NewDashPreset {
                 case 4 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.dodge", "instruction.roundabout.press_skill", StandIcons.DODGE, 3,
                         level, bypass));
+                case 5 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_form_predict", "instruction.roundabout.press_skill_crouch",
+                        StandIcons.KING_CRIMSON_ITEM_GRAB, 3, level, bypass));
+                case 6 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_sniff", "instruction.roundabout.press_skill_crouch",
+                        StandIcons.STEAL_MEMORIES, 2, level, bypass));
                 default -> canContinue = false;
             }
         }
@@ -537,6 +543,10 @@ public class PowersKingNothing extends NewDashPreset {
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setCooldown(PowerIndex.SKILL_2,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                        this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setAttackTimeDuring(0);
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
                         animateStand(StandEntity.IDLE);
@@ -751,7 +761,12 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean formPredict() {
         Item held = this.getSelf().getMainHandItem().getItem();
         Block potentialBlock = getFormPrediction(held);
-        if (potentialBlock != null) this.setMemorizedScent(potentialBlock);
+        if (potentialBlock != null) {
+            this.setMemorizedScent(potentialBlock);
+            if (getSelf() instanceof Player PE) {
+                PE.displayClientMessage(potentialBlock.getName().withStyle(ChatFormatting.DARK_PURPLE), true);
+            }
+        }
         return true;
     }
 
