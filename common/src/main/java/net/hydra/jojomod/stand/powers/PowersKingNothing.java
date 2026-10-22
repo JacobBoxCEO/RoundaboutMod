@@ -6,7 +6,6 @@ import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.access.IGravityEntity;
 import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
-import net.hydra.jojomod.block.SafePlaceContext;
 import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
@@ -54,7 +53,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
@@ -344,35 +342,36 @@ public class PowersKingNothing extends NewDashPreset {
                                     return;
                                 }
                             }
-                            else if (held.getItem() instanceof BlockItem) {
-                                BlockPos placePos = bpos.relative(blockHit.getDirection());
-                                if (tryHitBlock(stand, held, blockHit, placePos, state) ||
-                                        tryHitBlock(stand, held, blockHit, placePos.relative(this.tempDirection), state) ||
-                                        tryHitBlock(stand, held, blockHit, placePos.above(), state)) {
-                                    getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA,true);
-                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    this.setCooldown(PowerIndex.SKILL_2,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    this.setCooldown(PowerIndex.SKILL_2_SNEAK,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    return;
+                            else if (held.getItem() instanceof BlockItem BI) {
+                                Direction dir = blockHit.getDirection();
+                                BlockPos placePos = bpos.relative(dir);
+                                BlockState placeState = stand.level().getBlockState(placePos);
+                                if ((placeState.canBeReplaced() || placeState.isAir())
+                                        && (getSelf() instanceof ServerPlayer SP &&
+                                        SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
+                                        !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
+                                        && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
+                                    if (BI.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
+                                            != InteractionResult.FAIL) {
+                                        getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA,true);
+                                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                        this.setCooldown(PowerIndex.SKILL_2,
+                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                        this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                        return;
+                                    }
                                 }
-//                                Direction dir = stand.getDirection().getOpposite();
-//                                BlockPos placePos = bpos;
-//                                BlockState placeState = stand.level().getBlockState(placePos);
-//                                if (placeState.canBeReplaced() || placeState.isAir()) {
-//                                    BI.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir));
-//                                }
                             }
                             else if (isHoldingItem) {
                                 if (held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
                                         this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
                                         && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
-                                        && !(SP).blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
-                                        && SP.level().mayInteract(SP, bpos)) {
+                                        && !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
+                                        && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
                                     this.getSelf().level().destroyBlock(bpos, true);
                                     damageHeld(held, stand, this.getSelf());
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
@@ -406,73 +405,14 @@ public class PowersKingNothing extends NewDashPreset {
                                 stand.position().distanceTo(this.getSelf().position()) > 15) {
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
                             this.setCooldown(PowerIndex.SKILL_2, 5);
+                            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK, 7);
+                            this.setCooldown(PowerIndex.SKILL_2_SNEAK, 5);
                             ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
-                            return;
                         }
                     }
                 }
             }
         }
-    }
-
-    Direction tempDirection = Direction.UP;
-
-    public boolean tryHitBlock(StandEntity stand, ItemStack item, BlockHitResult $$0, BlockPos pos, BlockState state){
-
-        try {
-            if (item.getItem() instanceof BlockItem BE && BE.getBlock() instanceof SnowLayerBlock) {
-                return false;
-            }
-            if (((state.isAir() || state.canBeReplaced()) && (this.getSelf() != null && !((this.getSelf() instanceof Player &&
-                    (((Player) this.getSelf()).blockActionRestricted(this.getSelf().level(), pos, ((ServerPlayer)
-                            this.getSelf()).gameMode.getGameModeForPlayer()))) ||
-                    !this.getSelf().level().mayInteract(((Player) this.getSelf()), pos))))){
-
-                if (item.getItem() instanceof BlockItem) {
-                    Direction direction = stand.getDirection();
-                    if (direction.getAxis() == Direction.Axis.X){
-                        direction = direction.getOpposite();
-                    }
-                    if (((BlockItem) item.getItem()).getBlock() instanceof RotatedPillarBlock){
-                        direction = $$0.getDirection();
-                    }
-
-                    try {
-                        if (getSelf() instanceof Player PE){
-                            if(MainUtil.canPlaceOnClaim(PE,$$0)) {
-                                if (((BlockItem) item.getItem()).place(new SafePlaceContext(stand.level(), PE,
-                                        pos,
-                                        direction, item,
-                                        direction)) != InteractionResult.FAIL) {
-                                    this.tempDirection = direction;
-                                    return true;
-                                }
-                            }
-                        } else {
-                            if (((BlockItem)item.getItem()).place(new DirectionalPlaceContext(stand.level(),
-                                    pos,
-                                    direction, item,
-                                    direction)) != InteractionResult.FAIL){
-                                this.tempDirection = direction;
-                                return true;
-                            } else {
-                                if (ClientNetworking.getAppropriateConfig().miscellaneousSettings.banDirectionalBlockPlacingFailure){
-                                    return true;
-                                }
-                            }
-                        }
-                    } catch(Exception e) {
-                        //put shader debug stuff here
-                        Roundabout.LOGGER.info("Mod does not make a safe null check for players, report to devs who made blocks");
-                    }
-                }
-
-            }
-        } catch(Exception e) {
-            //put shader debug stuff here
-            Roundabout.LOGGER.info("Mod does not make a safe null check for players, report to devs who made blocks");
-        }
-        return false;
     }
 
     private boolean isPhasing() {
