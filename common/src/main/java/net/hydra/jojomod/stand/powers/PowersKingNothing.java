@@ -318,14 +318,6 @@ public class PowersKingNothing extends NewDashPreset {
                             stand.setPos(yes);
                         }
 
-                        if ((stand.isTechnicallyInImpassableWall()) ||
-                                stand.position().distanceTo(this.getSelf().position()) > 15) {
-                            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
-                            this.setCooldown(PowerIndex.SKILL_2, 5);
-                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
-                            return;
-                        }
-
 
                         Vec3 vec3d2ST = stand.getViewVector(0);
                         Vec3 vec3daST = stand.getPosition(0);
@@ -408,6 +400,14 @@ public class PowersKingNothing extends NewDashPreset {
                             else {
                                 tryPhaseAttack(stand, BB1, BB2);
                             }
+                        }
+
+                        if ((stand.isTechnicallyInImpassableWall()) ||
+                                stand.position().distanceTo(this.getSelf().position()) > 15) {
+                            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
+                            this.setCooldown(PowerIndex.SKILL_2, 5);
+                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
+                            return;
                         }
                     }
                 }
