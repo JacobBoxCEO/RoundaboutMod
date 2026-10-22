@@ -3,7 +3,6 @@ package net.hydra.jojomod.client.models.stand.renderers;
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.client.models.layers.ModEntityRendererClient;
 import net.hydra.jojomod.client.models.stand.KingNothingModel;
-import net.hydra.jojomod.client.models.stand.StandModel;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -11,10 +10,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
 
-    private static final ResourceLocation MANGA_SKIN = Roundabout.location("textures/stand/king_nothing/manga.png");
+    private static final ResourceLocation MANGA = Roundabout.location("textures/stand/king_nothing/manga.png");
+    private static final ResourceLocation SPINE = Roundabout.location("textures/stand/king_nothing/spine.png");
+
 
     public static ResourceLocation getSkin(byte bt) {
-        return MANGA_SKIN;
+        return switch (bt) {
+            case 1 -> MANGA;
+            case 2 -> SPINE;
+            default -> MANGA;
+        };
     }
 
     /**

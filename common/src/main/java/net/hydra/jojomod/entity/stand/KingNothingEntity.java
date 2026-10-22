@@ -20,7 +20,9 @@ public class KingNothingEntity extends FollowingStandEntity {
         super(entityType, world);
     }
 
-    public static final byte MANGA = 1;
+    public static final byte
+            MANGA = 1,
+            SPINE = 2;
 
     @Override
     public void setupAnimationStates() {

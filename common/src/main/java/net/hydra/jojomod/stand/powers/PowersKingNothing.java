@@ -57,6 +57,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 
@@ -65,6 +66,11 @@ import java.util.Objects;
 
 public class PowersKingNothing extends NewDashPreset {
 
+    public static final byte
+            MANGA = 1,
+            SPINE = 2;
+
+
     public PowersKingNothing(LivingEntity self) {
         super(self);
     }
@@ -72,6 +78,11 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public StandPowers generateStandPowers(LivingEntity entity) {
         return new PowersKingNothing(entity);
+    }
+
+    @Override
+    public boolean isStandEnabled() {
+        return ClientNetworking.getAppropriateConfig().kingNothingSettings.enableKingNothing;
     }
 
     @Override
@@ -149,6 +160,7 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     private Block memorizedBlock = null;
+    private Item trackedItem = null;
 
     public ItemStack getMemorizedScentIcon() {
         return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
@@ -177,6 +189,7 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean isAttackIneptVisually(byte activeP, int slot) {
         if (slot != 4) {
             if (isHoldingSneak()) {
+                if (slot == 1) return getSelf().getMainHandItem().isEmpty();
                 if (slot == 2) return !isGrabbable(getSelf().getMainHandItem());
                 if (slot == 3) return getFormPrediction(getSelf().getMainHandItem().getItem()) == null;
             }
@@ -372,7 +385,9 @@ public class PowersKingNothing extends NewDashPreset {
                                         && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
                                         && !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
                                         && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
-                                    this.getSelf().level().destroyBlock(bpos, true);
+                                    this.getSelf().level().destroyBlock(bpos, false);
+                                    BlockEntity $$6 = state.hasBlockEntity() ? getSelf().level().getBlockEntity(bpos) : null;
+                                    Block.dropResources(state, getSelf().level(), bpos, $$6, null, held);
                                     damageHeld(held, stand, this.getSelf());
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                                     int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
@@ -413,6 +428,27 @@ public class PowersKingNothing extends NewDashPreset {
                 }
             }
         }
+    }
+
+    @Override
+    public List<Byte> getSkinList() {
+        List<Byte> $$1 = Lists.newArrayList();
+        $$1.add(MANGA);
+        $$1.add(SPINE);
+        return $$1;
+    }
+
+    @Override
+    public Component getSkinName(byte skinId) {
+        return Component.translatable("skins.roundabout.king_nothing." + getSkinString(skinId));
+    }
+
+    public static String getSkinString(byte id) {
+        return switch (id) {
+            case MANGA -> "manga";
+            case SPINE -> "spine";
+            default -> "manga";
+        };
     }
 
     private boolean isPhasing() {
