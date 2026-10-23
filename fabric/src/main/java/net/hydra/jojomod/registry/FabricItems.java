@@ -247,7 +247,7 @@ public class FabricItems {
     public static Item SNIPER_AMMO = registerItem("sniper_ammo", new SniperAmmoItem(new Item.Properties().stacksTo(64)));
 
     public static Item BERETTA_PISTOL = registerItem("beretta_pistol", new BerettaPistolItem(new Item.Properties().stacksTo(1)));
-    public static Item PISTOL_AMMO = registerItem("pistol_ammo", new PistolAmmoItem(new Item.Properties().stacksTo(16)));
+    public static Item PISTOL_AMMO = registerItem("pistol_ammo", new PistolAmmoItem(new Item.Properties().stacksTo(64)));
 
     public static Item IRON_BALL_CROSSBOW = registerItem("iron_ball_crossbow", new IronBallCrossbowItem(new Item.Properties().stacksTo(1).durability(565)));
 
@@ -519,10 +519,12 @@ public class FabricItems {
                         entries.accept(GASOLINE_BUCKET);
                         entries.accept(OCCULT_CHARGE);
                         entries.accept(SNUBNOSE_REVOLVER);
-                        entries.accept(TOMMY_GUN);
                         entries.accept(COLT_REVOLVER);
+                        entries.accept(BERETTA_PISTOL);
+                        entries.accept(TOMMY_GUN);
                         entries.accept(JACKAL_RIFLE);
                         entries.accept(SNUBNOSE_AMMO);
+                        entries.accept(PISTOL_AMMO);
                         entries.accept(TOMMY_AMMO);
                         entries.accept(SNIPER_AMMO);
                         entries.accept(ROAD_ROLLER);
@@ -598,6 +600,7 @@ public class FabricItems {
                         entries.accept(DAIYA_MASK);
                         entries.accept(DAIYA_2_MASK);
                         entries.accept(HATO_MASK);
+                        entries.accept(LAEM_MASK);
                         entries.accept(SHIZUKA_MASK);
                         entries.accept(RAT_MASK);
 
@@ -757,6 +760,8 @@ public class FabricItems {
                         entries.accept(MAX_STAND_DISC_MAGICIANS_RED);
                         entries.accept(STAND_DISC_JUSTICE);
                         entries.accept(MAX_STAND_DISC_JUSTICE);
+                        entries.accept(STAND_DISC_GREEN_DAY);
+                        entries.accept(MAX_STAND_DISC_GREEN_DAY);
                         entries.accept(STAND_DISC_ANUBIS);
                         entries.accept(MAX_STAND_DISC_ANUBIS);
                         entries.accept(STAND_DISC_RATT);
@@ -780,6 +785,7 @@ public class FabricItems {
                         entries.accept(STAND_DISC_HEY_YA);
                         entries.accept(STAND_DISC_MANDOM);
                         entries.accept(STAND_DISC_CALIFORNIA_KING_BED);
+                        entries.accept(STAND_DISC_LYIN_EYES);
 
                     }).build());
 
@@ -792,11 +798,7 @@ public class FabricItems {
                         //entries.accept(ModBlocks.HAND_BLOCK);
                         entries.accept(STAND_DISC_D4C);
                         entries.accept(MAX_STAND_DISC_D4C);
-                        entries.accept(STAND_DISC_GREEN_DAY);
-                        entries.accept(MAX_STAND_DISC_GREEN_DAY);
                         entries.accept(STAND_DISC_20_CENTURY_BOY);
-                        entries.accept(STAND_DISC_LYIN_EYES);
-                        entries.accept(LAEM_MASK);
                         entries.accept(STAND_DISC_TUSK);
                         entries.accept(MAX_STAND_DISC_TUSK);
                         entries.accept(STAND_DISC_METALLICA);
@@ -838,8 +840,6 @@ public class FabricItems {
                         entries.accept(HALLUCINATORY_ACID_HEIGHT_4);
                         entries.accept(HALLUCINATORY_ACID_WALL);
                         entries.accept(ModBlocks.GAMBLING_TABLE);
-                        entries.accept(BERETTA_PISTOL);
-                        entries.accept(PISTOL_AMMO);
                     }).build());
     public static final CreativeModeTab FOG_BLOCK_ITEMS = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
             new ResourceLocation(Roundabout.MOD_ID, "justice_fog_items"),
