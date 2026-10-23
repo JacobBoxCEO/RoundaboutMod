@@ -1,9 +1,11 @@
 package net.hydra.jojomod.particles;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.event.ModParticles;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -106,7 +108,7 @@ public class FabricParticles {
     public static final SimpleParticleType PW_BLUE_BLASTWAVE_EXPLOSION = FabricParticleTypes.simple();
     public static final SimpleParticleType PW_BLUE_MUSHROOM_EXPLOSION = FabricParticleTypes.simple();
 
-    public static final net.minecraft.core.particles.ParticleType<HazeColorParticleOptions> PURPLE_HAZE_SMOKE =
+    public static final ParticleType<HazeColorParticleOptions> PURPLE_HAZE_SMOKE =
             new net.minecraft.core.particles.ParticleType<>(false, HazeColorParticleOptions.DESERIALIZER) {
                 @Override
                 public com.mojang.serialization.Codec<HazeColorParticleOptions> codec() {
@@ -114,11 +116,19 @@ public class FabricParticles {
                 }
             };
     public static final SimpleParticleType DISTORTION_SMOKE = FabricParticleTypes.simple();
-    public static final net.minecraft.core.particles.ParticleType<HazeColorParticleOptions> PURPLE_HAZE_BLASTWAVE =
+    public static final ParticleType<HazeColorParticleOptions> PURPLE_HAZE_BLASTWAVE =
             new net.minecraft.core.particles.ParticleType<>(false, HazeColorParticleOptions.DESERIALIZER) {
                 @Override
                 public com.mojang.serialization.Codec<HazeColorParticleOptions> codec() {
                     return HazeColorParticleOptions.codec(this);
+                }
+            };
+
+    public static final ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE =
+            new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
+                @Override
+                public Codec<PuzzleColorParticleOptions> codec() {
+                    return PuzzleColorParticleOptions.codec(this);
                 }
             };
 
@@ -232,6 +242,7 @@ public class FabricParticles {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("purple_haze_smoke"), PURPLE_HAZE_SMOKE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("distortion_smoke"), DISTORTION_SMOKE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("purple_haze_blastwave"), PURPLE_HAZE_BLASTWAVE);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("kn_piece"), PUZZLE_PARTICLE);
 
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("road_roller_explosion"), ROAD_ROLLER_EXPLOSION);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("road_roller_smoke"), ROAD_ROLLER_SMOKE);
@@ -345,6 +356,8 @@ public class FabricParticles {
         ModParticles.PURPLE_HAZE_SMOKE = PURPLE_HAZE_SMOKE;
         ModParticles.DISTORTION_SMOKE = DISTORTION_SMOKE;
         ModParticles.PURPLE_HAZE_BLASTWAVE = PURPLE_HAZE_BLASTWAVE;
+
+        ModParticles.PUZZLE_PARTICLE = PUZZLE_PARTICLE;
 
         ModParticles.ROAD_ROLLER_EXPLOSION = ROAD_ROLLER_EXPLOSION;
         ModParticles.ROAD_ROLLER_SMOKE = ROAD_ROLLER_SMOKE;

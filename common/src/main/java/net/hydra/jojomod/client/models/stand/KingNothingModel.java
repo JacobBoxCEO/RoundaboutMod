@@ -178,9 +178,9 @@ public class KingNothingModel<T extends KingNothingEntity> extends StandModel<T>
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
         defaultModifiers(pEntity);
         defaultAnimations(pEntity, pAgeInTicks, 1/((float) Power.getBarrageWindup() / 20));
-        this.animate(pEntity.disintegrate, KingNothingAnimations.DISINTEGRATE, pAgeInTicks, 1.4f);
+        this.animate(pEntity.disintegrate, KingNothingAnimations.DISINTEGRATE, pAgeInTicks, 1f);
         this.animate(pEntity.reach, KingNothingAnimations.REACH, pAgeInTicks, 2f);
-        this.animate(pEntity.returning, KingNothingAnimations.RETURN, pAgeInTicks, 1.4f);
+        this.animate(pEntity.returning, KingNothingAnimations.RETURN, pAgeInTicks, 1f);
     }
 
     @Override

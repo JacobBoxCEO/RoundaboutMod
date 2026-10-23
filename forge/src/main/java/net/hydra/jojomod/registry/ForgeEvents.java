@@ -1,6 +1,5 @@
 package net.hydra.jojomod.registry;
 
-import com.mojang.authlib.GameProfile;
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.Utils.ForgeBrewingRecipes;
 import net.hydra.jojomod.access.IFireBlock;
@@ -28,16 +27,12 @@ import net.hydra.jojomod.entity.visages.mobs.*;
 import net.hydra.jojomod.entity.zombie_minion.*;
 import net.hydra.jojomod.event.ModEffects;
 import net.hydra.jojomod.event.ModParticles;
-import net.hydra.jojomod.event.powers.StandUser;
 import net.hydra.jojomod.item.MaxStandDiscItem;
 import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.StandDiscItem;
 import net.hydra.jojomod.util.config.ConfigManager;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.block.Blocks;
@@ -46,13 +41,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mod.EventBusSubscriber(modid = Roundabout.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ForgeEvents {
@@ -787,6 +778,7 @@ public class ForgeEvents {
         ModParticles.PURPLE_HAZE_SMOKE = ForgeParticles.PURPLE_HAZE_SMOKE.get();
         ModParticles.PURPLE_HAZE_BLASTWAVE = ForgeParticles.PURPLE_HAZE_BLASTWAVE.get();
         ModParticles.DISTORTION_SMOKE = ForgeParticles.DISTORTION_SMOKE.get();
+        ModParticles.PUZZLE_PARTICLE = ForgeParticles.PUZZLE_PARTICLES.get();
 
         FireBlock fire = (FireBlock) Blocks.FIRE;
         ((IFireBlock) fire).roundabout$bootstrap();

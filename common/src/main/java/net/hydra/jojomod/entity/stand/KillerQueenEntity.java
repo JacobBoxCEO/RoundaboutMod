@@ -152,7 +152,7 @@ public class KillerQueenEntity extends FollowingStandEntity {
                     hideSwordInHand.stop();
                 }
 
-            }else {
+            } else {
                 hideExtra.startIfStopped(tickCount);
             }
 

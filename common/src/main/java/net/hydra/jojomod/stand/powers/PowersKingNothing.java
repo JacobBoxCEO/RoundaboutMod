@@ -11,9 +11,11 @@ import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
+import net.hydra.jojomod.entity.stand.PurpleHazeEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModGamerules;
+import net.hydra.jojomod.event.ModParticles;
 import net.hydra.jojomod.event.index.OffsetIndex;
 import net.hydra.jojomod.event.index.PacketDataIndex;
 import net.hydra.jojomod.event.index.PowerIndex;
@@ -22,6 +24,7 @@ import net.hydra.jojomod.event.powers.*;
 import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.item.SignBlockItem;
+import net.hydra.jojomod.particles.PuzzleColorParticleOptions;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
@@ -62,7 +65,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class PowersKingNothing extends NewDashPreset {
@@ -71,6 +76,11 @@ public class PowersKingNothing extends NewDashPreset {
             MANGA = 1,
             SPINE = 2;
 
+    public static final Map<Byte, Integer> COLOR_MAP_1 = new HashMap<>();
+    static {
+        COLOR_MAP_1.put(KingNothingEntity.MANGA, 0xb982df);//
+        COLOR_MAP_1.put(KingNothingEntity.SPINE, 0xff7abc);
+    }
 
     public PowersKingNothing(LivingEntity self) {
         super(self);
@@ -290,6 +300,28 @@ public class PowersKingNothing extends NewDashPreset {
 
     public Vec3 moveVec = Vec3.ZERO;
 
+    // 1000% bad method but IT WORKS OK
+    int returnAnimTicks = 0;
+
+    @Override
+    public void tickPower() {
+        super.tickPower();
+        if (getSelf().isAlive() && !getSelf().isRemoved() && getStandEntity(getSelf()) != null) {
+            if (getStandEntity(getSelf()).getAnimation() == KingNothingEntity.RETURN) {
+                if (returnAnimTicks < 27) {
+                    returnAnimTicks++;
+                }
+                else {
+                    animateStand(StandEntity.IDLE);
+                    returnAnimTicks = 0;
+                }
+            }
+            else {
+                returnAnimTicks = 0;
+            }
+        }
+    }
+
     @Override
     public void tickPowerEnd() {
         super.tickPowerEnd();
@@ -301,8 +333,18 @@ public class PowersKingNothing extends NewDashPreset {
                 } else if (this.attackTimeDuring >= 0) {
                     StandEntity stand = getStandEntity(this.self);
                     if (Objects.nonNull(stand)) {
+                        int color = COLOR_MAP_1.getOrDefault(this.standSkin,
+                                COLOR_MAP_1.get(KingNothingEntity.MANGA));
+                        double x = stand.getX();
+                        double y = stand.getY();
+                        double z = stand.getZ();
+                        ((ServerLevel) getSelf().level()).sendParticles(
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
+                                    x, y+.8, z, 1, 0.5, 0.5, 0.5, 0.01);
                         AABB BB1 = stand.getBoundingBox();
-                        Vec3 vec3d = this.getSelf().getEyePosition(0);
+                        Vec3 vec3da = this.getSelf().getEyePosition(0);
+                        Vec3 vec3db = stand.getPosition(0);
+                        Vec3 vec3d = new Vec3((vec3da.x + vec3db.x)/2, (vec3da.y + vec3db.y)/2, (vec3da.z + vec3db.z)/2);
                         Vec3 vec3d2 = this.getSelf().getViewVector(0);
                         Vec3 vec3d3 = vec3d.add(vec3d2.x * 20, vec3d2.y * 20, vec3d2.z * 20);
                         double mag = 0.18F;
