@@ -74,12 +74,16 @@ public class PowersKingNothing extends NewDashPreset {
 
     public static final byte
             MANGA = 1,
-            SPINE = 2;
+            SPINE = 2,
+            NOTE = 3,
+            BETA = 4;
 
     public static final Map<Byte, Integer> COLOR_MAP_1 = new HashMap<>();
     static {
         COLOR_MAP_1.put(KingNothingEntity.MANGA, 0xb982df);//
         COLOR_MAP_1.put(KingNothingEntity.SPINE, 0xff7abc);
+        COLOR_MAP_1.put(KingNothingEntity.NOTE, 0x301d11);
+        COLOR_MAP_1.put(KingNothingEntity.BETA, 0xae41ff);
     }
 
     public PowersKingNothing(LivingEntity self) {
@@ -340,11 +344,9 @@ public class PowersKingNothing extends NewDashPreset {
                         double z = stand.getZ();
                         ((ServerLevel) getSelf().level()).sendParticles(
                                 PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
-                                    x, y+.8, z, 1, 0.5, 0.5, 0.5, 0.01);
+                                    x, y + 1.1, z, 1, 0.1, 0.1, 0.1, 0.01);
                         AABB BB1 = stand.getBoundingBox();
-                        Vec3 vec3da = this.getSelf().getEyePosition(0);
-                        Vec3 vec3db = stand.getPosition(0);
-                        Vec3 vec3d = new Vec3((vec3da.x + vec3db.x)/2, (vec3da.y + vec3db.y)/2, (vec3da.z + vec3db.z)/2);
+                        Vec3 vec3d = this.getSelf().getEyePosition(0);
                         Vec3 vec3d2 = this.getSelf().getViewVector(0);
                         Vec3 vec3d3 = vec3d.add(vec3d2.x * 20, vec3d2.y * 20, vec3d2.z * 20);
                         double mag = 0.18F;
@@ -354,7 +356,7 @@ public class PowersKingNothing extends NewDashPreset {
                         );
                         Vec3 yes = this.getSelf().position().add(moveVec);
                         double post = stand.position().distanceTo(vec3d3);
-                        if (post< 1.5){
+                        if (post < 1.5){
                             stand.setYRot(this.getSelf().getYHeadRot() % 360);
                             stand.setXRot(this.getSelf().getXRot());
                         } else {
@@ -434,8 +436,10 @@ public class PowersKingNothing extends NewDashPreset {
                                     damageHeld(held, stand, this.getSelf());
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                                     int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
-                                    int cooldown = Math.max(Mth.ceil(1 / ((held.getDestroySpeed(state) + (efficiencyLevel * efficiencyLevel) + efficiencyLevel)
-                                            / (30 * state.getBlock().defaultDestroyTime()))), ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                                    int cooldown = Math.max(Mth.ceil(1 / ((held.getDestroySpeed(
+                                                    state) + efficiencyLevel * efficiencyLevel +
+                                                    (efficiencyLevel > 0 ? 1 : 0)) / state.getBlock().defaultDestroyTime() / 30)),
+                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                                     S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                                             ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                                     this.setCooldown(PowerIndex.SKILL_2,
@@ -458,7 +462,6 @@ public class PowersKingNothing extends NewDashPreset {
                                 tryPhaseAttack(stand, BB1, BB2);
                             }
                         }
-
                         if ((stand.isTechnicallyInImpassableWall()) ||
                                 stand.position().distanceTo(this.getSelf().position()) > 15) {
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2, 7);
@@ -478,6 +481,8 @@ public class PowersKingNothing extends NewDashPreset {
         List<Byte> $$1 = Lists.newArrayList();
         $$1.add(MANGA);
         $$1.add(SPINE);
+        $$1.add(NOTE);
+        $$1.add(BETA);
         return $$1;
     }
 
@@ -490,6 +495,8 @@ public class PowersKingNothing extends NewDashPreset {
         return switch (id) {
             case MANGA -> "manga";
             case SPINE -> "spine";
+            case NOTE -> "note_block";
+            case BETA -> "beta";
             default -> "manga";
         };
     }
@@ -560,11 +567,11 @@ public class PowersKingNothing extends NewDashPreset {
             Vec3 threeVec = new Vec3(0,0.25,0);
             threeVec = RotationUtil.vecPlayerToWorld(threeVec,gdir);
 
-            stand.setYRot(twoVec.x);
             stand.setXRot(twoVec.y);
+            stand.setYRot(twoVec.x);
             moveVec = DamageHandler.getRotationVector(
                     twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
-            stand.setPos(this.getSelf().position().add(moveVec));
+            stand.setPos(this.getSelf().getPosition(1).add(moveVec));
             return true;
         }
         return false;
@@ -589,7 +596,7 @@ public class PowersKingNothing extends NewDashPreset {
                 stand.setXRot(twoVec.y);
                 moveVec = DamageHandler.getRotationVector(
                         twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
-                stand.setPos(this.getSelf().position().add(moveVec));
+                stand.setPos(this.getSelf().getPosition(1).add(moveVec));
                 return true;
             }
         }
@@ -725,12 +732,10 @@ public class PowersKingNothing extends NewDashPreset {
     public float getDamage(ItemStack stack, Entity ent, StandEntity stand) {
         float damage = 1;
         if (stand != null) damage = (float) stand.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1;
-        if (damage != 1) {
-            if (ent instanceof LivingEntity){
-                damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity)ent).getMobType());
-            } else {
-                damage += EnchantmentHelper.getDamageBonus(stack, MobType.UNDEFINED);
-            }
+        if (ent instanceof LivingEntity){
+            damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity)ent).getMobType());
+        } else {
+            damage += EnchantmentHelper.getDamageBonus(stack, MobType.UNDEFINED);
         }
         return damage;
     }
@@ -757,7 +762,10 @@ public class PowersKingNothing extends NewDashPreset {
                 ct.putInt("damaged", ctd);
             }
         }
-        MainUtil.makeBleed(target, bleedLevel, bleedTicks, stand);
+        if (bleedTicks > 0) MainUtil.makeBleed(target, bleedLevel, bleedTicks, stand);
+        int ench = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, weapon);
+        if (ench >= 1) target.setSecondsOnFire(ench * 4);
+
     }
 
     public void addItem(StandEntity standEntity){

@@ -199,7 +199,7 @@ public class TuskNailEntity extends AbstractArrow {
 
     private TuskHoleEntity createHole(BlockHitResult bhr) {return createHole(bhr, this.getPosition(0));}
     private TuskHoleEntity createHole(BlockHitResult bhr, Vec3 pos) {
-        if (this.getOwner() instanceof LivingEntity LE) {
+        if (this.getOwner() instanceof LivingEntity LE && bhr != null) {
             TuskHoleEntity tuskHoleEntity = new TuskHoleEntity(this.level(), LE);
             if (this.getExtra() == GOLDEN) {tuskHoleEntity.setLifeSpan(150);}
             Direction dir = bhr.getDirection();

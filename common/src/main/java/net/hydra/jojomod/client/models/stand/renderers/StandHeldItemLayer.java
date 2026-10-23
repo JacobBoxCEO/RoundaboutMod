@@ -45,7 +45,14 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
             if (itemstack.getItem() instanceof BlockItem){
                 //p_117204_.scale(3,3,3);
             }
-            this.renderArmWithItem(entity, itemstack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, stack, bufferSource, p_117206_);
+            if (entity instanceof KingNothingEntity) {
+                this.renderArmWithItem(entity, itemstack,
+                        ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                        HumanoidArm.RIGHT, stack, bufferSource, p_117206_);
+            }
+            else this.renderArmWithItem(entity, itemstack,
+                    ItemDisplayContext.THIRD_PERSON_LEFT_HAND,
+                    HumanoidArm.LEFT, stack, bufferSource, p_117206_);
             stack.popPose();
         }
     }
@@ -66,15 +73,23 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
                 }
             } else if (livingEntity instanceof StarPlatinumEntity SP){
                 shiftZ = -1F;
+            } else if (livingEntity instanceof KingNothingEntity) {
+                shiftX = 2f;
+                shiftZ = 1.5f;
+                shiftY = 0f;
             }
             this.getParentModel().translateToHand(humanoidArm, poseStack, shiftZ, shiftY, shiftX);
-            if (!(livingEntity instanceof SeperatedArmEntity) && MainUtil.isThrownBlockItem((itemStack.getItem()))) {
+            if (!(livingEntity instanceof SeperatedArmEntity || livingEntity instanceof KingNothingEntity) &&
+                    MainUtil.isThrownBlockItem((itemStack.getItem()))) {
                 poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             } else {
                 poseStack.mulPose(Axis.XP.rotationDegrees(-65.0F));
             }
-            if(livingEntity instanceof SeperatedArmEntity){
+            if (livingEntity instanceof SeperatedArmEntity){
                 poseStack.rotateAround(new Quaternionf().fromAxisAngleDeg(1,0,0,-90),0,0.7F,0.5F);
+            }
+            if (livingEntity instanceof KingNothingEntity) {
+                poseStack.rotateAround(new Quaternionf().fromAxisAngleDeg(1,0,0,-45),0,0.7F,0.5F);
             }
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
             boolean flag = humanoidArm == HumanoidArm.LEFT;

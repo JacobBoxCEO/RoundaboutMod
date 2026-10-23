@@ -1,15 +1,13 @@
 package net.hydra.jojomod.entity.stand;
 
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class KingNothingEntity extends FollowingStandEntity {
+
     /**
      * Initialize Stands
      *
@@ -23,7 +21,9 @@ public class KingNothingEntity extends FollowingStandEntity {
 
     public static final byte
             MANGA = 1,
-            SPINE = 2;
+            SPINE = 2,
+            NOTE = 3,
+            BETA = 4;
 
     @Override
     public void setupAnimationStates() {
@@ -105,6 +105,11 @@ public class KingNothingEntity extends FollowingStandEntity {
             return getHeldItem();
         }
         return super.getItemBySlot($$0);
+    }
+
+    @Override
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.RIGHT;
     }
 
     public static AttributeSupplier.Builder createStandAttributes() {
