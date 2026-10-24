@@ -1889,6 +1889,8 @@
   "instruction.roundabout.whitesnake_auto_mode_attack": "While in Auto Mode, Press Skill %1$s",
   "instruction.roundabout.distortion_spit": "While having Haze immunity, Press Skill %1$s",
   "instruction.roundabout.press_skill_submerged": "Press Skill %1$s While Submerged",
+  "instruction.roundabout.press_skill_phase_item": "Press Skill %1$s While using Phase Item",
+  "instruction.roundabout.press_skill_tracking": "Press Skill %1$s While Tracking",
 
 
   "ability.roundabout.ice_guard": "Guard",

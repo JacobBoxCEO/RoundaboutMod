@@ -11,7 +11,6 @@ import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
-import net.hydra.jojomod.entity.stand.PurpleHazeEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModGamerules;
@@ -185,23 +184,40 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public void renderIcons(GuiGraphics context, int x, int y) {
+        boolean normalZIcon = true;
+        boolean normalXIcon = true;
+        if (getActivePower() == PowerIndex.POWER_2_SNEAK) {
+            setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_DROP_ITEM, PowerIndex.NO_CD);
+            setSkillIcon(context, x, y, 2, StandIcons.KING_NOTHING_PHASE_ITEM, PowerIndex.SKILL_2_SNEAK);
+            normalZIcon = false;
+            normalXIcon = false;
+        }
+        else if (getActivePower() == PowerIndex.POWER_2) {
+            setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
+            normalXIcon = false;
+        }
         if (isHoldingSneak()) {
-            setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_ITEM, PowerIndex.SKILL_1_SNEAK);
-            setSkillIcon(context, x, y,2, StandIcons.STAR_PLATINUM_PHASE_GRAB, PowerIndex.SKILL_2_SNEAK);
-            setSkillIcon(context, x, y,3, StandIcons.KING_CRIMSON_ITEM_GRAB, PowerIndex.SKILL_3);
-            renderScentIcon(context, x, y);
+            if (normalZIcon) setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_SNIFF_ITEM, PowerIndex.SKILL_1_SNEAK);
+            if (normalXIcon) setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_ITEM, PowerIndex.SKILL_2_SNEAK);
+            setSkillIcon(context, x, y,3, StandIcons.KING_NOTHING_FORM_PREDICT, PowerIndex.SKILL_3);
         }
         else {
-            setSkillIcon(context, x, y,1, StandIcons.THE_WORLD_GRAB_BLOCK, PowerIndex.SKILL_1);
-            setSkillIcon(context, x, y,2, StandIcons.DIVER_DOWN_PHASE_PUNCH, PowerIndex.SKILL_2);
+            if (normalZIcon) setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_TRACKING, PowerIndex.SKILL_1);
+            if (normalXIcon) setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
             setSkillIcon(context, x, y,3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
-            setSkillIcon(context, x, y, 4, StandIcons.STEAL_MEMORIES, PowerIndex.SKILL_4);
         }
+        renderScentIcon(context, x, y);
         super.renderIcons(context, x, y);
     }
 
     @Override
     public boolean isAttackIneptVisually(byte activeP, int slot) {
+        if (getActivePower() == PowerIndex.POWER_2_SNEAK) {
+            return slot > 2;
+        }
+        else if (getActivePower() == PowerIndex.POWER_2) {
+            return slot != 2;
+        }
         if (slot != 4) {
             if (isHoldingSneak()) {
                 if (slot == 1) return getSelf().getMainHandItem().isEmpty();
@@ -223,25 +239,28 @@ public class PowersKingNothing extends NewDashPreset {
             switch (i) {
                 case 0 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.kn_smell_track", "instruction.roundabout.press_skill",
-                        StandIcons.THE_WORLD_GRAB_BLOCK, 1, level, bypass));
+                        StandIcons.KING_NOTHING_TRACKING, 1, level, bypass));
                 case 1 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.kn_track_item", "instruction.roundabout.press_skill_crouch",
-                        StandIcons.THE_WORLD_GRAB_ITEM, 1, level, bypass));
+                        StandIcons.KING_NOTHING_SNIFF_ITEM, 1, level, bypass));
                 case 2 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.kn_phase_hand", "instruction.roundabout.press_skill",
-                        StandIcons.DIVER_DOWN_PHASE_PUNCH, 2, level, bypass));
+                        StandIcons.KING_NOTHING_PHASE_GRAB, 2, level, bypass));
                 case 3 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.kn_phase_item", "instruction.roundabout.press_skill_crouch",
-                        StandIcons.STAR_PLATINUM_GRAB_ITEM, 2, level, bypass));
+                        StandIcons.KING_NOTHING_PHASE_ITEM, 2, level, bypass));
                 case 4 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_drop_item", "instruction.roundabout.press_skill_phase_item",
+                        StandIcons.KING_NOTHING_DROP_ITEM, 1, level, bypass));
+                case 5 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.dodge", "instruction.roundabout.press_skill", StandIcons.DODGE, 3,
                         level, bypass));
-                case 5 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                        "ability.roundabout.kn_form_predict", "instruction.roundabout.press_skill_crouch",
-                        StandIcons.KING_CRIMSON_ITEM_GRAB, 3, level, bypass));
                 case 6 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                        "ability.roundabout.kn_sniff", "instruction.roundabout.press_skill_crouch",
-                        StandIcons.STEAL_MEMORIES, 2, level, bypass));
+                        "ability.roundabout.kn_form_predict", "instruction.roundabout.press_skill_crouch",
+                        StandIcons.KING_NOTHING_FORM_PREDICT, 3, level, bypass));
+                case 7 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
+                        "ability.roundabout.kn_sniff", "instruction.roundabout.press_skill",
+                        StandIcons.STEAL_MEMORIES, 4, level, bypass));
                 default -> canContinue = false;
             }
         }
@@ -267,7 +286,7 @@ public class PowersKingNothing extends NewDashPreset {
         Component special4Key = KeyInputRegistry.abilityFourKey.getTranslatedKeyMessage();
         special4Key = fixKey(special4Key);
         //true? false? it doesn't matter, for this text will render below the item no matter what i try :(
-        context.drawString(renderer, special4Key,x-1,y+11,0xffffff,false);
+        context.drawString(renderer, special4Key,x-1,y+11,0xffffff, true);
         RenderSystem.enableBlend();
         if ((cd != null && (cd.time >= 0)) || isAttackIneptVisually(PowerIndex.SKILL_4,4)){
             context.setColor(0.62f, 0.62f, 0.62f, 0.8f);
@@ -312,9 +331,7 @@ public class PowersKingNothing extends NewDashPreset {
         super.tickPower();
         if (getSelf().isAlive() && !getSelf().isRemoved() && getStandEntity(getSelf()) != null) {
             if (getStandEntity(getSelf()).getAnimation() == KingNothingEntity.RETURN) {
-                if (returnAnimTicks < 27) {
-                    returnAnimTicks++;
-                }
+                if (returnAnimTicks < 27) returnAnimTicks++;
                 else {
                     animateStand(StandEntity.IDLE);
                     returnAnimTicks = 0;
@@ -337,14 +354,6 @@ public class PowersKingNothing extends NewDashPreset {
                 } else if (this.attackTimeDuring >= 0) {
                     StandEntity stand = getStandEntity(this.self);
                     if (Objects.nonNull(stand)) {
-                        int color = COLOR_MAP_1.getOrDefault(this.standSkin,
-                                COLOR_MAP_1.get(KingNothingEntity.MANGA));
-                        double x = stand.getX();
-                        double y = stand.getY();
-                        double z = stand.getZ();
-                        ((ServerLevel) getSelf().level()).sendParticles(
-                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
-                                    x, y + 1.1, z, 1, 0.1, 0.1, 0.1, 0.01);
                         AABB BB1 = stand.getBoundingBox();
                         Vec3 vec3d = this.getSelf().getEyePosition(0);
                         Vec3 vec3d2 = this.getSelf().getViewVector(0);
@@ -373,7 +382,14 @@ public class PowersKingNothing extends NewDashPreset {
                         } else {
                             stand.setPos(yes);
                         }
-
+                        int color = COLOR_MAP_1.getOrDefault(this.standSkin,
+                                COLOR_MAP_1.get(KingNothingEntity.MANGA));
+                        double x = stand.getX();
+                        double y = stand.getY();
+                        double z = stand.getZ();
+                        ((ServerLevel) getSelf().level()).sendParticles(
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
+                                x, y + 1.1, z, 1, 0.1, 0.1, 0.1, 0.01);
 
                         Vec3 vec3d2ST = stand.getViewVector(0);
                         Vec3 vec3daST = stand.getPosition(0);
@@ -394,62 +410,19 @@ public class PowersKingNothing extends NewDashPreset {
                                         || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
                                         || (blk instanceof FenceGateBlock))
                                         && this.getSelf() instanceof Player PE) {
-                                    blk.use(state, this.getSelf().level(), bpos, PE, PE.getUsedItemHand(),
+                                    blk.use(state, PE.level(), bpos, PE, PE.getUsedItemHand(),
                                             blockHit);
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
                                     return;
                                 }
                             }
                             else if (held.getItem() instanceof BlockItem BI) {
-                                Direction dir = blockHit.getDirection();
-                                BlockPos placePos = bpos.relative(dir);
-                                BlockState placeState = stand.level().getBlockState(placePos);
-                                if ((placeState.canBeReplaced() || placeState.isAir())
-                                        && getSelf() instanceof ServerPlayer SP &&
-                                        SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
-                                        !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer())
-                                        && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
-                                    if (BI.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
-                                            != InteractionResult.FAIL) {
-                                        getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA,true);
-                                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                        this.setCooldown(PowerIndex.SKILL_2,
-                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
-                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                        this.setCooldown(PowerIndex.SKILL_2_SNEAK,
-                                                ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                        return;
-                                    }
-                                }
+                                tryPlaceBlock(BI, blockHit, bpos, stand, held);
+                                return;
                             }
                             else if (isHoldingItem) {
-                                if (held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
-                                        this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
-                                        && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
-                                        && !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
-                                        && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
-                                    this.getSelf().level().destroyBlock(bpos, false);
-                                    BlockEntity $$6 = state.hasBlockEntity() ? getSelf().level().getBlockEntity(bpos) : null;
-                                    Block.dropResources(state, getSelf().level(), bpos, $$6, null, held);
-                                    damageHeld(held, stand, this.getSelf());
-                                    ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
-                                    int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
-                                    int cooldown = Math.max(Mth.ceil(1 / ((held.getDestroySpeed(
-                                                    state) + efficiencyLevel * efficiencyLevel +
-                                                    (efficiencyLevel > 0 ? 1 : 0)) / state.getBlock().defaultDestroyTime() / 30)),
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    this.setCooldown(PowerIndex.SKILL_2,
-                                            ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                                    S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
-                                            cooldown);
-                                    this.setCooldown(PowerIndex.SKILL_2_SNEAK,
-                                            cooldown);
-                                    return;
-                                }
+                                tryMineBlock(held, state, bpos, stand);
+                                return;
                             }
                         }
 
@@ -473,6 +446,57 @@ public class PowersKingNothing extends NewDashPreset {
                     }
                 }
             }
+        }
+    }
+
+    public void tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand, ItemStack held) {
+        Direction dir = blockHit.getDirection();
+        BlockPos placePos = bpos.relative(dir);
+        BlockState placeState = stand.level().getBlockState(placePos);
+        if ((placeState.canBeReplaced() || placeState.isAir())
+                && getSelf() instanceof ServerPlayer SP &&
+                SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
+                !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer())
+                && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
+            if (blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
+                    != InteractionResult.FAIL) {
+                getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA,true);
+                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                this.setCooldown(PowerIndex.SKILL_2,
+                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+                this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            }
+        }
+    }
+
+    public void tryMineBlock(ItemStack held, BlockState state, BlockPos bpos, StandEntity stand) {
+        if (held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
+                this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
+                && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
+                && !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
+                && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos)) {
+            this.getSelf().level().destroyBlock(bpos, false);
+            BlockEntity $$6 = state.hasBlockEntity() ? getSelf().level().getBlockEntity(bpos) : null;
+            Block.dropResources(state, getSelf().level(), bpos, $$6, null, held);
+            damageHeld(held, stand, this.getSelf());
+            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.EXTRA, true);
+            int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
+            int cooldown = Math.max(Mth.ceil(1 / ((held.getDestroySpeed(
+                            state) + efficiencyLevel * efficiencyLevel +
+                            (efficiencyLevel > 0 ? 1 : 0)) / state.getBlock().defaultDestroyTime() / 30)),
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                    cooldown);
+            this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                    cooldown);
         }
     }
 
@@ -507,6 +531,11 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public void powerActivate(PowerContext context) {
+        if ((context == PowerContext.SKILL_1_NORMAL || context == PowerContext.SKILL_1_CROUCH) &&
+                getStandEntity(getSelf()) != null && !getStandEntity(getSelf()).getHeldItem().isEmpty() &&
+                getActivePower() == PowerIndex.POWER_2_SNEAK) {
+            tryDropPhaseItem();
+        }
         switch (context) {
             case SKILL_1_NORMAL -> {
                 //TODO implement this
@@ -527,24 +556,16 @@ public class PowersKingNothing extends NewDashPreset {
         tryPowerPacket(PowerIndex.POWER_3_SNEAK);
     }
 
+    public void tryDropPhaseItem() {
+        getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA_2, true);
+        tryPowerPacket(PowerIndex.EXTRA_2);
+    }
+
     public void phaseGrabClient(){
         if (!isPhasing()) {
             if (!this.onCooldown(PowerIndex.SKILL_2)) {
                 this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2, true);
                 tryPowerPacket(PowerIndex.POWER_2);
-            }
-        }
-        else {
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
-            tryPowerPacket(PowerIndex.EXTRA);
-        }
-    }
-
-    public void phaseItemClient() {
-        if (!isPhasing()) {
-            if (!this.onCooldown(PowerIndex.SKILL_2_SNEAK)) {
-                getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
-                tryPowerPacket(PowerIndex.POWER_2_SNEAK);
             }
         }
         else {
@@ -575,6 +596,19 @@ public class PowersKingNothing extends NewDashPreset {
             return true;
         }
         return false;
+    }
+
+    public void phaseItemClient() {
+        if (!isPhasing()) {
+            if (!this.onCooldown(PowerIndex.SKILL_2_SNEAK)) {
+                getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
+                tryPowerPacket(PowerIndex.POWER_2_SNEAK);
+            }
+        }
+        else {
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+            tryPowerPacket(PowerIndex.EXTRA);
+        }
     }
 
     public boolean phaseItem() {
@@ -641,7 +675,7 @@ public class PowersKingNothing extends NewDashPreset {
         List<Entity> $$3 = stand.level().getEntities(stand, $$2);
         if (!$$3.isEmpty()) {
             for (Entity $$4 : $$3) {
-                if ($$4 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$4)) {
+                if ($$4 instanceof ItemEntity IE && !IE.hasPickUpDelay() && stand.getSensing().hasLineOfSight($$4)) {
                     if (!(IE.getItem().getItem() instanceof BlockItem BI &&
                             (BI.getBlock() instanceof ShulkerBoxBlock ||
                                     BI.getBlock() instanceof FancyLighterBlock))) {
@@ -855,6 +889,9 @@ public class PowersKingNothing extends NewDashPreset {
             case PowerIndex.EXTRA -> {
                 return this.exitPhaseGrab();
             }
+            case PowerIndex.EXTRA_2 -> {
+                return this.dropPhaseItem();
+            }
         }
         return super.setPowerOther(move, lastMove);
     }
@@ -871,11 +908,32 @@ public class PowersKingNothing extends NewDashPreset {
         return true;
     }
 
+    public boolean dropPhaseItem() {
+        StandEntity stand = getStandEntity(getSelf());
+        if (!getSelf().level().isClientSide()) {
+            ItemEntity $$4 = new ItemEntity(this.getSelf().level(), stand.getX(),
+                    stand.getY() + stand.getEyeHeight(), stand.getZ(),
+                    stand.getHeldItem());
+            $$4.setPickUpDelay(40);
+            $$4.setThrower(this.getSelf().getUUID());
+            PowerTypes.copyPlaneOfExisting(self, $$4);
+            this.getSelf().level().addFreshEntity($$4);
+            stand.setHeldItem(ItemStack.EMPTY);
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA, true);
+            tryPowerPacket(PowerIndex.EXTRA);
+        }
+
+        return true;
+    }
+
     @Override
     public void onStandSummon(boolean desummon) {
         super.onStandSummon(desummon);
         if (desummon) animateStand(KingNothingEntity.DISINTEGRATE);
-        else animateStand(KingNothingEntity.RETURN);
+        else {
+            returnAnimTicks = 0;
+            animateStand(KingNothingEntity.RETURN);
+        }
     }
 
     public boolean formPredict() {
