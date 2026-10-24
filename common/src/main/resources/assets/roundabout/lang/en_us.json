@@ -970,7 +970,7 @@
   "sounds.roundabout.bc_bundle_summon": "Bad Company group summoning",
   "sounds.roundabout.bc_tank_summon": "Bad Company tank summoning",
   "sounds.roundabout.bc_helicopter_summon": "Bad Company helicopter summoning",
-  "sounds.roundabout.bc_ui_select": "Troop select",
+  "sounds.roundabout.bc_ui_select": "Bad Company select",
 
   "sounds.roundabout.j_anubis_hit_1": "Sword hit",
   "sounds.roundabout.j_anubis_hit_2": "Sword hit",
@@ -3404,7 +3404,7 @@
   "roundabout.troop_tactics.tank": "Select tank.",
   "roundabout.troop_tactics.helicopter": "Select helicopter.",
   "roundabout.troop_tactics.missile": "Shoot missile!",
-  "roundabout.troop_tactics.troop": "Select troop.",
+  "roundabout.troop_tactics.soldier": "Select soldier.",
 
   "skins.roundabout.green_day.part_five_green_day": "Part 5",
   "skins.roundabout.green_day.red_day": "Red Day",
@@ -4337,6 +4337,8 @@
   "config.roundabout.maxDetectionRange.desc": "How many blocks away can the nematodes detect someone in tension sensor? Default is 25.",
   "config.roundabout.nematodeOpacity.name": "Nematode Overlay Opacity",
   "config.roundabout.nematodeOpacity.desc": "What is the opacity of the nematode overlay in first person? 1.0 is the default. (Change this as a decimal point, i.e. 0.5 for 50%)",
+  "config.roundabout.mapOpacity.name": "Map Overlay Opacity",
+  "config.roundabout.mapOpacity.desc": "What is the opacity of the map overlay in first person? 1.0 is the default. (Change this as a decimal point, i.e. 0.5 for 50%)",
   "config.roundabout.spinMapInsteadOfArrow.name": "Spin Map Instead Of Arrow",
   "config.roundabout.spinMapInsteadOfArrow.desc": "Spins the minimap of the second ability instead of the player arrow.",
 
