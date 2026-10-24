@@ -242,6 +242,16 @@ public abstract class ConfigManager {
             }
         }
 
+        if (getAdvancedConfig().kingNothingBlockSniffBlacklist != null) {
+            MainUtil.kingNothingBlockSniffBlacklist.clear();
+            MainUtil.kingNothingBlockSniffBlacklist.addAll(getAdvancedConfig().kingNothingBlockSniffBlacklist);
+        }
+
+        if (getAdvancedConfig().kingNothingMobSniffBlacklist != null) {
+            MainUtil.kingNothingMobSniffBlacklist.clear();
+            MainUtil.kingNothingMobSniffBlacklist.addAll(getAdvancedConfig().kingNothingMobSniffBlacklist);
+        }
+
         if (getAdvancedConfig().silverChariotBlocksToSlabs != null)
         {
             MainUtil.SILVER_CHARIOT_BLOCK_TO_SLAB.clear();

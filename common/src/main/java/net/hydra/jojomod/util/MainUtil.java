@@ -235,6 +235,9 @@ public class MainUtil {
     public static ArrayList<String> blackOrWhiteListParallelMobs = Lists.newArrayList();
     public static ArrayList<String> fleshBudMobBlacklist = Lists.newArrayList();
     public static ArrayList<String> lootPoolForD4CChests = Lists.newArrayList();
+    public static ArrayList<String> kingNothingBlockSniffBlacklist = Lists.newArrayList();
+    public static ArrayList<String> kingNothingMobSniffBlacklist = Lists.newArrayList();
+
 
     public static final Map<Block, Block> FREEZABLE_BLOCKS = new HashMap<>();
     public static final Map<Block, Block> FREEZABLE_BLOCK_ITEMS = new HashMap<>();
@@ -618,6 +621,18 @@ public class MainUtil {
             return false;
         }
         return true;
+    }
+
+    public static boolean isBlockSniffBlacklisted(Block blk) {
+        ResourceLocation rl = BuiltInRegistries.BLOCK.getKey(blk);
+        return kingNothingBlockSniffBlacklist != null && !kingNothingBlockSniffBlacklist.isEmpty()
+                && kingNothingBlockSniffBlacklist.contains(rl.toString());
+    }
+
+    public static boolean isMobSniffBlacklisted(Entity ent) {
+        ResourceLocation rl = BuiltInRegistries.ENTITY_TYPE.getKey(ent.getType());
+        return kingNothingMobSniffBlacklist != null && !kingNothingMobSniffBlacklist.isEmpty()
+                && kingNothingMobSniffBlacklist.contains(rl.toString());
     }
 
     public static boolean isStandingInBlock(LivingEntity LE) {

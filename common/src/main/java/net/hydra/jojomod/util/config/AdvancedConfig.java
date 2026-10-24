@@ -355,6 +355,19 @@ public class AdvancedConfig implements Cloneable {
             )
     );
 
+    public Set<String> kingNothingBlockSniffBlacklist = new HashSet<>(
+            Arrays.asList(
+                    "minecraft:barrier",
+                    "minecraft:bedrock"
+            )
+    );
+
+    public Set<String> kingNothingMobSniffBlacklist = new HashSet<>(
+            Arrays.asList(
+                    "roundabout:fog_clone"
+            )
+    );
+
     public Set<String> silverChariotBlocksToSlabs = new HashSet<>(
             Arrays.asList(
                     "minecraft:stone:minecraft:stone_slab",
