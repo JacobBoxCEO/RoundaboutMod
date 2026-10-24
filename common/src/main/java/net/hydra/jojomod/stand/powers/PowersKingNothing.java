@@ -2,7 +2,6 @@ package net.hydra.jojomod.stand.powers;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.access.IGravityEntity;
 import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
@@ -48,6 +47,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -59,18 +59,16 @@ import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class PowersKingNothing extends NewDashPreset {
-
+    private static final float SMELL_RANGE = 5f;
     public static final byte
             MANGA = 1,
             SPINE = 2,
@@ -78,6 +76,10 @@ public class PowersKingNothing extends NewDashPreset {
             BETA = 4;
 
     public static final Map<Byte, Integer> COLOR_MAP_1 = new HashMap<>();
+    public static final String MEMORIZED_BLOCK_TAG = "memorizedBlock",
+            MEMORIZED_ENTITY_TYPE_TAG = "memorizedEntityType",
+            MEMORIZED_UUID_TAG = "memorizedUUID";
+
     static {
         COLOR_MAP_1.put(KingNothingEntity.MANGA, 0xb982df);//
         COLOR_MAP_1.put(KingNothingEntity.SPINE, 0xff7abc);
@@ -112,18 +114,43 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void addAdditionalSaveData(CompoundTag $$0) {
         super.addAdditionalSaveData($$0);
-        $$0.putString("memorizedBlock", BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString());
-        if (!$$0.getString("memorizedBlock").equals(BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString())) {
-            Roundabout.LOGGER.debug("SOMETHING WENT WRONG SAVING DATA FUCK");
+        if (memorizedBlock != null) {
+            $$0.putString(MEMORIZED_BLOCK_TAG, BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString());
+        } else {
+            $$0.remove(MEMORIZED_BLOCK_TAG);
+        }
+        if (memorizedEntityType != null) {
+            $$0.putString(MEMORIZED_ENTITY_TYPE_TAG, BuiltInRegistries.ENTITY_TYPE.getKey(memorizedEntityType).toString());
+        } else {
+            $$0.remove(MEMORIZED_ENTITY_TYPE_TAG);
+        }
+        if (memorizedPlayer != null) {
+            $$0.putUUID(MEMORIZED_UUID_TAG, memorizedPlayer);
+        } else {
+            $$0.remove(MEMORIZED_UUID_TAG);
         }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag $$0) {
         super.readAdditionalSaveData($$0);
-        if ($$0.contains("memorizedBlock")) {
+        if ($$0.contains(MEMORIZED_BLOCK_TAG)) {
             memorizedBlock = BuiltInRegistries.BLOCK.get(
-                    new ResourceLocation($$0.getString("memorizedBlock")));
+                    new ResourceLocation($$0.getString(MEMORIZED_BLOCK_TAG)));
+            memorizedEntityType = null;
+            memorizedPlayer = null;
+        }
+        else if ($$0.contains(MEMORIZED_ENTITY_TYPE_TAG)) {
+            memorizedEntityType = BuiltInRegistries.ENTITY_TYPE.get(
+                    new ResourceLocation($$0.getString(MEMORIZED_ENTITY_TYPE_TAG))
+            );
+            memorizedBlock = null;
+            memorizedPlayer = null;
+        }
+        else if ($$0.contains(MEMORIZED_UUID_TAG)) {
+            memorizedPlayer = $$0.getUUID(MEMORIZED_UUID_TAG);
+            memorizedEntityType = null;
+            memorizedBlock = null;
         }
         else resetMemorizedScentData();
     }
@@ -174,12 +201,23 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     private Block memorizedBlock = null;
+    private EntityType<?> memorizedEntityType = null;
+    private UUID memorizedPlayer = null;
     private Item trackedItem = null;
 
     public ItemStack getMemorizedScentIcon() {
-        return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
-                new ItemStack(memorizedBlock.asItem()) :
-                new ItemStack(MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock));
+        if (memorizedBlock != null) {
+            return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
+                    new ItemStack(memorizedBlock.asItem()) :
+                    new ItemStack(MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock));
+        }
+        else if (memorizedEntityType != null) {
+            return new ItemStack(Items.EGG);
+        }
+        else if (memorizedPlayer != null) {
+            return new ItemStack(Items.PLAYER_HEAD);
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -290,7 +328,7 @@ public class PowersKingNothing extends NewDashPreset {
         RenderSystem.enableBlend();
         if ((cd != null && (cd.time >= 0)) || isAttackIneptVisually(PowerIndex.SKILL_4,4)){
             context.setColor(0.62f, 0.62f, 0.62f, 0.8f);
-            context.renderFakeItem(block, x+1, y+1);
+            context.renderItem(block, x+1, y+1);
             if ((cd != null && (cd.time >= 0))) {
                 float blit = (20*(1-((float) (1+cd.time) /(1+cd.maxTime))));
                 int b = Math.round(blit);
@@ -354,6 +392,14 @@ public class PowersKingNothing extends NewDashPreset {
                 } else if (this.attackTimeDuring >= 0) {
                     StandEntity stand = getStandEntity(this.self);
                     if (Objects.nonNull(stand)) {
+                        int color = COLOR_MAP_1.getOrDefault(this.standSkin,
+                                COLOR_MAP_1.get(KingNothingEntity.MANGA));
+                        double x = stand.getX();
+                        double y = stand.getY();
+                        double z = stand.getZ();
+                        ((ServerLevel) getSelf().level()).sendParticles(
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
+                                x, y + 1.1, z, 2, 0.1, 0.1, 0.1, 0.01);
                         AABB BB1 = stand.getBoundingBox();
                         Vec3 vec3d = this.getSelf().getEyePosition(0);
                         Vec3 vec3d2 = this.getSelf().getViewVector(0);
@@ -382,19 +428,11 @@ public class PowersKingNothing extends NewDashPreset {
                         } else {
                             stand.setPos(yes);
                         }
-                        int color = COLOR_MAP_1.getOrDefault(this.standSkin,
-                                COLOR_MAP_1.get(KingNothingEntity.MANGA));
-                        double x = stand.getX();
-                        double y = stand.getY();
-                        double z = stand.getZ();
-                        ((ServerLevel) getSelf().level()).sendParticles(
-                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
-                                x, y + 1.1, z, 1, 0.1, 0.1, 0.1, 0.01);
 
                         Vec3 vec3d2ST = stand.getViewVector(0);
                         Vec3 vec3daST = stand.getPosition(0);
                         Vec3 vec3DbST = stand.getEyePosition(0);
-                        Vec3 vec3dST = new Vec3((vec3daST.x + vec3DbST.x)/2, (vec3daST.y + vec3DbST.y)/2, (vec3daST.z + vec3DbST.z)/2);
+                        Vec3 vec3dST = new Vec3((vec3daST.x + vec3DbST.x)/2, (vec3daST.y + vec3DbST.y + 0.6)/2, (vec3daST.z + vec3DbST.z)/2);
                         Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
                         BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
                                 ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
@@ -405,6 +443,7 @@ public class PowersKingNothing extends NewDashPreset {
                         if (!state.isAir()) {
                             if (this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
                                     && !isHoldingItem) {
+                                Level level = getSelf().level();
                                 Block blk = state.getBlock();
                                 if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
                                         || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
@@ -826,7 +865,8 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean canAddItem(ItemStack itemStack, Inventory inventory) {
         boolean bl = false;
         for (ItemStack itemStack2 : inventory.items) {
-            if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack) || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
+            if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack)
+                    || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
             bl = true;
             break;
         }
@@ -853,10 +893,16 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void tryMemorize() {
-        float range = 5f;
+        Entity targEnt = MainUtil.getTargetEntity(this.getSelf(), SMELL_RANGE);
+        if (targEnt instanceof LivingEntity LE) {
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_4_BONUS, true);
+            tryPowerPacket(PowerIndex.POWER_4_BONUS);
+            setMemorizedScent(LE);
+            return;
+        }
         Vec3 vec3d = this.getSelf().getEyePosition(0);
         Vec3 vec3d2 = this.getSelf().getViewVector(0);
-        Vec3 vec3d3 = vec3d.add(vec3d2.x * range, vec3d2.y * range, vec3d2.z * range);
+        Vec3 vec3d3 = vec3d.add(vec3d2.x * SMELL_RANGE, vec3d2.y * SMELL_RANGE, vec3d2.z * SMELL_RANGE);
         BlockHitResult blockHit = this.getSelf().level().clip(new ClipContext(vec3d, vec3d3,
                 ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, this.getSelf()));
         if (blockHit.getType() == HitResult.Type.BLOCK) {
@@ -891,6 +937,9 @@ public class PowersKingNothing extends NewDashPreset {
             }
             case PowerIndex.EXTRA_2 -> {
                 return this.dropPhaseItem();
+            }
+            case PowerIndex.POWER_4_BONUS -> {
+                return this.memorizeEntity();
             }
         }
         return super.setPowerOther(move, lastMove);
@@ -968,6 +1017,16 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
+    public boolean memorizeEntity() {
+        Entity ent = MainUtil.getTargetEntity(this.getSelf(), SMELL_RANGE);
+        if (ent instanceof LivingEntity LE) {
+            setMemorizedScent(LE);
+            if (this.getSelf() instanceof Player PE)
+                PE.displayClientMessage(LE.getDisplayName().copy().withStyle(ChatFormatting.DARK_PURPLE), true);
+        }
+        return true;
+    }
+
     private boolean isMemorizableBlock(Block block) {
         return !block.asItem().equals(Items.AIR) &&
                 !(block instanceof FogBlock) &&
@@ -976,6 +1035,21 @@ public class PowersKingNothing extends NewDashPreset {
 
     private void setMemorizedScent(Block memorizedBlock) {
         this.memorizedBlock = memorizedBlock;
+        this.memorizedEntityType = null;
+        this.memorizedPlayer = null;
+        saveDiscAndSync();
+    }
+
+    private void setMemorizedScent(LivingEntity entity) {
+        if (entity instanceof Player PE) {
+            this.memorizedPlayer = PE.getUUID();
+            this.memorizedEntityType = null;
+        }
+        else {
+            this.memorizedEntityType = entity.getType();
+            this.memorizedPlayer = null;
+        }
+        this.memorizedBlock = null;
         saveDiscAndSync();
     }
 
