@@ -3004,6 +3004,7 @@
   "skins.roundabout.soft_and_wet.kira": "Kira",
   "skins.roundabout.soft_and_wet.colors": "Colors",
   "skins.roundabout.soft_and_wet.green": "Green",
+  "skins.roundabout.soft_and_wet.green_2": "Volume 5",
   "skins.roundabout.soft_and_wet.knight": "Knight",
   "skins.roundabout.soft_and_wet.morioh": "Morioh",
   "skins.roundabout.soft_and_wet.melon": "Melon",
@@ -3047,6 +3048,7 @@
   "skins.roundabout.walking_heart.scarecrow": "Scarecrow",
   "skins.roundabout.walking_heart.abyssal": "Abyssal",
   "skins.roundabout.walking_heart.melon": "Melon",
+  "skins.roundabout.walking_heart.creaking": "Creaking",
 
   "skins.roundabout.green_day.base": "Part 5",
 
@@ -3140,6 +3142,7 @@
   "skins.roundabout.mandom.command": "Commander",
   "skins.roundabout.mandom.sculk": "Sculk",
   "skins.roundabout.mandom.tv": "TV",
+  "skins.roundabout.mandom.caps": "Caps",
 
   "skins.roundabout.survivor.base": "Part 6",
   "skins.roundabout.survivor.green": "Green",
@@ -3154,6 +3157,8 @@
   "skins.roundabout.survivor.sponge": "Sponge",
   "skins.roundabout.survivor.sculk": "Sculk",
   "skins.roundabout.survivor.redstone": "Redstone",
+  "skins.roundabout.survivor.centurian": "Centurion",
+  "skins.roundabout.survivor.blob": "Blob",
 
   "skins.roundabout.oasis.base": "Part 5",
   "skins.roundabout.oasis.open": "Open",
@@ -3178,6 +3183,8 @@
   "skins.roundabout.white_album.manga": "Manga",
   "skins.roundabout.white_album.yuki": "Yuki-onna",
   "skins.roundabout.white_album.ice": "Ice",
+  "skins.roundabout.white_album.shulker": "Shulker",
+  "skins.roundabout.white_album.boxer": "Boxer",
 
   "skins.roundabout.killer_queen.anime": "Part 4",
   "skins.roundabout.killer_queen.manga": "Manga",
@@ -3400,7 +3407,9 @@
   "stand.bad_company.not_enought_space": "You don't have enough space for that troop!",
   "stand.bad_company.not_enought_space.soldier": "You don't have enough soldiers left for that troop!",
   "stand.bad_company.total_troops.soldier": "%1$s/%2$s active Soldiers.",
-  "stand.bad_company.soldier_limit": "You already have released all your soldiers!",
+  "stand.bad_company.total_troops.tank": "%1$s/%2$s active Tanks.",
+  "stand.bad_company.soldier_limit": "You already have released all your Soldiers!",
+  "stand.bad_company.tank_limit": "You already have released all your Tanks!",
   "stand.bad_company.troop_limit": "You have reached army maximum size!",
 
   "roundabout.bad_company.troop_tactics": "Troop Tactics",
@@ -4227,6 +4236,10 @@
   "config.roundabout.silverChariotCooldownStatueCutting.desc": "The cooldown of Statue Cutting.",
   "config.roundabout.silverChariotCooldownSelfGrab.name": "Self Grab Cooldown",
   "config.roundabout.silverChariotCooldownSelfGrab.desc": "The cooldown of Self Grab.",
+  "config.roundabout.silverChariotCooldownSelfThrow.name": "Self Throw Cooldown",
+  "config.roundabout.silverChariotCooldownSelfThrow.desc": "The cooldown of Self Throw.",
+  "config.roundabout.silverChariotCooldownSelfThrowRebound.name": "Self Throw Rebound Cooldown",
+  "config.roundabout.silverChariotCooldownSelfThrowRebound.desc": "The cooldown of Self Throw Rebound.",
   "config.roundabout.silverChariotCooldownArmorShed.name": "Armor Shed Cooldown",
   "config.roundabout.silverChariotCooldownArmorShed.desc": "The cooldown of Armor Shed.",
   "config.roundabout.silverChariotForceThirdPersonInControlMode.name": "Force Third Person in Control Mode",
@@ -4352,6 +4365,12 @@
   "config.roundabout.customDiverDownWorkbench.desc": "Enables the custom wokrbench textures.",
   "config.roundabout.forceThirdPersonInGroundDive.name": "Force Third Person in Ground Dive",
   "config.roundabout.forceThirdPersonInGroundDive.desc": "Automatically switches to third person while in ground dive.",
+  "config.roundabout.diverZipCooldown.name": "Diver Zip CD",
+  "config.roundabout.diverZipCooldown.desc": "This cooldown in ticks.",
+  "config.roundabout.kickTrapCooldown.name": "Kick Trap CD",
+  "config.roundabout.kickTrapCooldown.desc": "This cooldown in ticks.",
+  "config.roundabout.diveCooldown.name": "Submerge/Self-Submerge CD",
+  "config.roundabout.diveCooldown.desc": "This cooldown in ticks.",
 
   "config.roundabout.maxDetectionRange.name": "Max Detection Range",
   "config.roundabout.maxDetectionRange.desc": "How many blocks away can the nematodes detect someone in tension sensor? Default is 25.",

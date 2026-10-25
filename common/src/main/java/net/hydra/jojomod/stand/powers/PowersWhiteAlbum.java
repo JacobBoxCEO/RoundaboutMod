@@ -1594,7 +1594,9 @@ public class PowersWhiteAlbum extends NewDashPreset {
             FRIGID =9,
             MANGA =10,
             YUKI =11,
-            ICE =12;
+            ICE =12,
+            SHULKER =13,
+            BOXER =14;
 
 
     public static final int coldFromBlockLaunch = -8;
@@ -1617,7 +1619,9 @@ public class PowersWhiteAlbum extends NewDashPreset {
             } if (Level > 3 || bypass){
                 $$1.add(ICEOLOGER);
                 $$1.add(STRAY);
+                $$1.add(SHULKER);
             } if (Level > 4 || bypass){
+                $$1.add(BOXER);
                 $$1.add(FRIGID);
                 $$1.add(BETA);
             } if (((IPlayerEntity)PE).roundabout$getUnlockedBonusSkin() || bypass){
@@ -1648,6 +1652,8 @@ public class PowersWhiteAlbum extends NewDashPreset {
             case MANGA -> "manga";
             case YUKI -> "yuki";
             case ICE -> "ice";
+            case SHULKER -> "shulker";
+            case BOXER -> "boxer";
             default -> "base";
         };
     }
