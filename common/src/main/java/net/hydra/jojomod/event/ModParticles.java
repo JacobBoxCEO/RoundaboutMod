@@ -132,5 +132,7 @@ public class ModParticles {
     public static ParticleType<HazeColorParticleOptions> PURPLE_HAZE_SMOKE;
     public static SimpleParticleType DISTORTION_SMOKE;
     public static ParticleType<HazeColorParticleOptions> PURPLE_HAZE_BLASTWAVE;
-    public static ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE;
+
+    public static ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE_A;
+    public static ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE_B;
 }

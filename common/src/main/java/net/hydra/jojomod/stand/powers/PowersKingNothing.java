@@ -43,6 +43,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -65,21 +66,27 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
+import net.hydra.jojomod.event.index.SoundIndex;
 
 import java.util.*;
 
 public class PowersKingNothing extends NewDashPreset {
-    private static final float SMELL_RANGE = 5f;
     public static final byte
             MANGA = 1,
             SPINE = 2,
             NOTE = 3,
             BETA = 4;
 
+    public static final byte
+            DISINTEGRATE = 32,
+            PHASE = 33;
+
     public static final Map<Byte, Integer> COLOR_MAP_1 = new HashMap<>();
     public static final String MEMORIZED_BLOCK_TAG = "memorizedBlock",
             MEMORIZED_ENTITY_TYPE_TAG = "memorizedEntityType",
             MEMORIZED_UUID_TAG = "memorizedUUID";
+
+    private static final float SMELL_RANGE = 5f;
 
     static {
         COLOR_MAP_1.put(KingNothingEntity.MANGA, 0xb982df);//
@@ -88,8 +95,43 @@ public class PowersKingNothing extends NewDashPreset {
         COLOR_MAP_1.put(KingNothingEntity.BETA, 0xae41ff);
     }
 
+    public Vec3 moveVec = Vec3.ZERO;
+    // im sure theres a better way to resume idles after the return animation but this works
+    // ... probably...
+    int returnAnimTicks = 0;
+    int disintegrateAnimTicks = 0;
+    boolean canSummonParticles = false;
+
+    private Block memorizedBlock = null;
+    private EntityType<?> memorizedEntityType = null;
+    private UUID memorizedPlayer = null;
+    private Item trackedItem = null;
+    private boolean isTrackingItem = false;
+
     public PowersKingNothing(LivingEntity self) {
         super(self);
+    }
+
+    public static String getSkinString(byte id) {
+        return switch (id) {
+            case MANGA -> "manga";
+            case SPINE -> "spine";
+            case NOTE -> "note_block";
+            case BETA -> "beta";
+            default -> "manga";
+        };
+    }
+
+    private static boolean isGrabbable(ItemStack stack) {
+        return !stack.isEmpty() &&
+                !(MainUtil.isItemGrabBlacklisted(stack)) &&
+                !(stack.getItem() instanceof BlockItem
+                        && (MainUtil.isBlockBlacklisted(((BlockItem) stack.getItem()).getBlock().defaultBlockState()) ||
+                        ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock ||
+                        ((BlockItem) stack.getItem()).getBlock() instanceof FancyLighterBlock)) &&
+                !(stack.getItem() instanceof BoatItem) &&
+                !(stack.getItem() instanceof MinecartItem) &&
+                !(stack.getItem() instanceof RoadRollerItem);
     }
 
     @Override
@@ -113,8 +155,24 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     @Override
-    public boolean canSummonStandAsEntity() {
-        return !isTracking();
+    protected Byte getSummonSound() {
+        return SoundIndex.SUMMON_SOUND;
+    }
+
+    @Override
+    public SoundEvent getSoundFromByte(byte soundChoice) {
+        switch (soundChoice) {
+            case SoundIndex.SUMMON_SOUND -> {
+                return ModSounds.KING_NOTHING_SUMMON_EVENT;
+            }
+            case DISINTEGRATE -> {
+                return ModSounds.KING_NOTHING_DESUMMON_EVENT;
+            }
+            case PHASE -> {
+                return ModSounds.KING_NOTHING_PHASE_EVENT;
+            }
+        }
+        return super.getSoundFromByte(soundChoice);
     }
 
     @Override
@@ -122,17 +180,21 @@ public class PowersKingNothing extends NewDashPreset {
         super.addAdditionalSaveData($$0);
         if (memorizedBlock != null) {
             $$0.putString(MEMORIZED_BLOCK_TAG, BuiltInRegistries.BLOCK.getKey(memorizedBlock).toString());
-        } else {
+        }
+        else {
             $$0.remove(MEMORIZED_BLOCK_TAG);
         }
         if (memorizedEntityType != null) {
-            $$0.putString(MEMORIZED_ENTITY_TYPE_TAG, BuiltInRegistries.ENTITY_TYPE.getKey(memorizedEntityType).toString());
-        } else {
+            $$0.putString(MEMORIZED_ENTITY_TYPE_TAG,
+                    BuiltInRegistries.ENTITY_TYPE.getKey(memorizedEntityType).toString());
+        }
+        else {
             $$0.remove(MEMORIZED_ENTITY_TYPE_TAG);
         }
         if (memorizedPlayer != null) {
             $$0.putUUID(MEMORIZED_UUID_TAG, memorizedPlayer);
-        } else {
+        }
+        else {
             $$0.remove(MEMORIZED_UUID_TAG);
         }
     }
@@ -158,7 +220,9 @@ public class PowersKingNothing extends NewDashPreset {
             memorizedEntityType = null;
             memorizedBlock = null;
         }
-        else resetMemorizedScentData();
+        else {
+            resetMemorizedScentData();
+        }
     }
 
     private void resetMemorizedScentData() {
@@ -206,11 +270,6 @@ public class PowersKingNothing extends NewDashPreset {
         return $$1;
     }
 
-    private Block memorizedBlock = null;
-    private EntityType<?> memorizedEntityType = null;
-    private UUID memorizedPlayer = null;
-    private Item trackedItem = null;
-
     public ItemStack getMemorizedScentIcon() {
         if (memorizedBlock != null) {
             return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
@@ -231,24 +290,36 @@ public class PowersKingNothing extends NewDashPreset {
         boolean normalZIcon = true;
         boolean normalXIcon = true;
         if (getActivePower() == PowerIndex.POWER_2_SNEAK) {
-            setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_DROP_ITEM, PowerIndex.NO_CD);
+            setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_DROP_ITEM, PowerIndex.NO_CD);
             setSkillIcon(context, x, y, 2, StandIcons.KING_NOTHING_PHASE_ITEM, PowerIndex.SKILL_2_SNEAK);
             normalZIcon = false;
             normalXIcon = false;
         }
         else if (getActivePower() == PowerIndex.POWER_2) {
-            setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
+            setSkillIcon(context, x, y, 2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
             normalXIcon = false;
         }
+        else if (isTrackingItem) {
+            setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_REFORM, PowerIndex.SKILL_1_SNEAK );
+            normalZIcon = false;
+        }
         if (isHoldingSneak()) {
-            if (normalZIcon) setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_SNIFF_ITEM, PowerIndex.SKILL_1_SNEAK);
-            if (normalXIcon) setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_ITEM, PowerIndex.SKILL_2_SNEAK);
-            setSkillIcon(context, x, y,3, StandIcons.KING_NOTHING_FORM_PREDICT, PowerIndex.SKILL_3);
+            if (normalZIcon) {
+                setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_SNIFF_ITEM, PowerIndex.SKILL_1_SNEAK);
+            }
+            if (normalXIcon) {
+                setSkillIcon(context, x, y, 2, StandIcons.KING_NOTHING_PHASE_ITEM, PowerIndex.SKILL_2_SNEAK);
+            }
+            setSkillIcon(context, x, y, 3, StandIcons.KING_NOTHING_FORM_PREDICT, PowerIndex.SKILL_3);
         }
         else {
-            if (normalZIcon) setSkillIcon(context, x, y,1, StandIcons.KING_NOTHING_TRACKING, PowerIndex.SKILL_1);
-            if (normalXIcon) setSkillIcon(context, x, y,2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
-            setSkillIcon(context, x, y,3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
+            if (normalZIcon) {
+                setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_TRACKING, PowerIndex.SKILL_1);
+            }
+            if (normalXIcon) {
+                setSkillIcon(context, x, y, 2, StandIcons.KING_NOTHING_PHASE_GRAB, PowerIndex.SKILL_2);
+            }
+            setSkillIcon(context, x, y, 3, StandIcons.DODGE, PowerIndex.GLOBAL_DASH);
         }
         renderScentIcon(context, x, y);
         super.renderIcons(context, x, y);
@@ -256,17 +327,33 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public boolean isAttackIneptVisually(byte activeP, int slot) {
-        if (getActivePower() == PowerIndex.POWER_2_SNEAK) {
-            return slot > 2;
-        }
-        else if (getActivePower() == PowerIndex.POWER_2) {
-            return slot != 2;
-        }
-        if (slot != 4) {
-            if (isHoldingSneak()) {
-                if (slot == 1) return getSelf().getMainHandItem().isEmpty();
-                if (slot == 2) return !isGrabbable(getSelf().getMainHandItem());
-                if (slot == 3) return getFormPrediction(getSelf().getMainHandItem().getItem()) == null;
+        LivingEntity self = getSelf();
+        switch (slot) {
+            case 1 -> {
+                if (getActivePower() == PowerIndex.POWER_2 || (isHoldingSneak()
+                        && self.getMainHandItem().isEmpty() && getActivePower() == PowerIndex.NONE)) {
+                    return true;
+                }
+            }
+            case 2 -> {
+                if (isTrackingItem || isHoldingSneak()
+                        && getActivePower() == PowerIndex.NONE && self.getMainHandItem().isEmpty()) {
+                    return true;
+                }
+            }
+            case 3 -> {
+                // is inept when:
+                // isn't holding item while power is none or while phasing or while tracking item or block
+                if (isHoldingSneak() && ((getActivePower() == PowerIndex.NONE && getStandEntity(self) != null &&
+                        getFormPrediction(getStandEntity(self).getHeldItem().getItem()) == null)
+                        || isTrackingItem || isPhasing())) {
+                    return true;
+                }
+            }
+            case 4 -> {
+                if (isPhasing() || isTrackingItem) {
+                    return true;
+                }
             }
         }
         return super.isAttackIneptVisually(activeP, slot);
@@ -311,18 +398,18 @@ public class PowersKingNothing extends NewDashPreset {
         return $$1;
     }
 
-    public void renderScentIcon(GuiGraphics context, int x, int y){
+    public void renderScentIcon(GuiGraphics context, int x, int y) {
         RenderSystem.enableBlend();
         context.setColor(1f, 1f, 1f, 1f);
         CooldownInstance cd = null;
-        if (!getPowerCooldowns().isEmpty() && getPowerCooldowns().size() >= PowerIndex.SKILL_4){
+        if (!getPowerCooldowns().isEmpty() && getPowerCooldowns().size() >= PowerIndex.SKILL_4) {
             cd = getPowerCooldowns().get(PowerIndex.SKILL_4);
         }
         x += 100;
-        y-=1;
+        y -= 1;
 
         RenderSystem.enableBlend();
-        context.blit(getIconYes(4),x-3,y-3,0, 0, squareWidth, squareHeight, squareWidth, squareHeight);
+        context.blit(getIconYes(4), x - 3, y - 3, 0, 0, squareWidth, squareHeight, squareWidth, squareHeight);
 
         ItemStack block = getMemorizedScentIcon();
         RenderSystem.enableBlend();
@@ -330,55 +417,58 @@ public class PowersKingNothing extends NewDashPreset {
         Component special4Key = KeyInputRegistry.abilityFourKey.getTranslatedKeyMessage();
         special4Key = fixKey(special4Key);
         //true? false? it doesn't matter, for this text will render below the item no matter what i try :(
-        context.drawString(renderer, special4Key,x-1,y+11,0xffffff, true);
+        context.drawString(renderer, special4Key, x - 1, y + 11, 0xffffff, true);
         RenderSystem.enableBlend();
-        if ((cd != null && (cd.time >= 0)) || isAttackIneptVisually(PowerIndex.SKILL_4,4)){
+        if ((cd != null && (cd.time >= 0)) || isAttackIneptVisually(PowerIndex.SKILL_4, 4)) {
             context.setColor(0.62f, 0.62f, 0.62f, 0.8f);
-            context.renderItem(block, x+1, y+1);
+            context.renderItem(block, x + 1, y + 1);
             if ((cd != null && (cd.time >= 0))) {
-                float blit = (20*(1-((float) (1+cd.time) /(1+cd.maxTime))));
+                float blit = (20 * (1 - ((float) (1 + cd.time) / (1 + cd.maxTime))));
                 int b = Math.round(blit);
                 RenderSystem.enableBlend();
                 context.setColor(1f, 1f, 1f, 1f);
 
                 ResourceLocation COOLDOWN_TEX = StandIcons.COOLDOWN_ICON;
 
-                if (cd.isFrozen())
+                if (cd.isFrozen()) {
                     COOLDOWN_TEX = StandIcons.FROZEN_COOLDOWN_ICON;
+                }
 
-                context.blit(COOLDOWN_TEX, x - 1, y - 1 + b, 0, b, 20, 20-b, 20, 20);
-                int num = ((int)(Math.floor((double) cd.time /20)+1));
-                int offset = x+3;
-                if (num <=9){
-                    offset = x+7;
+                context.blit(COOLDOWN_TEX, x - 1, y - 1 + b, 0, b, 20, 20 - b, 20, 20);
+                int num = ((int) (Math.floor((double) cd.time / 20) + 1));
+                int offset = x + 3;
+                if (num <= 9) {
+                    offset = x + 7;
                 }
                 //If 100 or more seconds long shift to the left
-                if (num >= 100){
-                    offset = offset-3;
+                if (num >= 100) {
+                    offset = offset - 3;
                 }
 
-                if (!cd.isFrozen())
-                    context.drawString(Minecraft.getInstance().font, ""+num,offset,y,0xffffff,true);
+                if (!cd.isFrozen()) {
+                    context.drawString(Minecraft.getInstance().font, "" + num, offset, y, 0xffffff, true);
+                }
 
             }
             context.setColor(1f, 1f, 1f, 0.9f);
-        } else context.renderItem(block, x + 1, y + 1);
+        }
+        else {
+            context.renderItem(block, x + 1, y + 1);
+        }
     }
-
-    public Vec3 moveVec = Vec3.ZERO;
-
-    // im sure theres a better way to resume idles after the return animation but this works
-    // ... probably...
-    // yes i am gyro how did you know?
-    int returnAnimTicks = 0;
 
     @Override
     public void tickPower() {
         super.tickPower();
+        // handle idle stuffs
         if (getSelf().isAlive() && !getSelf().isRemoved() && getStandEntity(getSelf()) != null) {
-            if (getStandEntity(getSelf()).getAnimation() == KingNothingEntity.RETURN) {
-                if (returnAnimTicks < 27) returnAnimTicks++;
+            StandEntity stand = getStandEntity(getSelf());
+            if (stand.getAnimation() == KingNothingEntity.RETURN) {
+                if (returnAnimTicks < 27) {
+                    returnAnimTicks++;
+                }
                 else {
+                    canSummonParticles = false;
                     animateStand(StandEntity.IDLE);
                     returnAnimTicks = 0;
                 }
@@ -386,13 +476,52 @@ public class PowersKingNothing extends NewDashPreset {
             else {
                 returnAnimTicks = 0;
             }
-            if (getSelf().level().isClientSide()) {
-                Roundabout.LOGGER.debug("IM JOHN CLIENT AND I THINK I AM {}",
-                        getStandEntity(getSelf()).getHeldItem().isEmpty() ? "HOLDING ITEM" : "NOT HOLDING ITEM");
+            if (stand.getAnimation() == KingNothingEntity.DISINTEGRATE) {
+                if (disintegrateAnimTicks < 27) {
+                    disintegrateAnimTicks++;
+                }
+                else {
+                    disintegrateAnimTicks = 0;
+                }
+                if (disintegrateAnimTicks > 14) {
+                    canSummonParticles = true;
+                }
             }
             else {
-                Roundabout.LOGGER.debug("IM JOHN SERVER AND I THINK I AM {}",
-                        getStandEntity(getSelf()).getHeldItem().isEmpty() ? "HOLDING ITEM" : "NOT HOLDING ITEM");
+                disintegrateAnimTicks = 0;
+            }
+        }
+        if (getSelf().isAlive() && !getSelf().isRemoved() && isTrackingItem &&
+                !getSelf().level().isClientSide() && canSummonParticles) {
+            float checkRange = 64.0f;
+            List<Entity> targets = MainUtil.getEntitiesInRange(getSelf().level(), getSelf().blockPosition(),
+                    checkRange, getSelf());
+            for (Entity ent : targets) {
+                boolean foundItem = ent instanceof ItemEntity IE && IE.getItem().getItem().equals(trackedItem);
+                if (ent instanceof LivingEntity LE && LE.getMainHandItem().getItem().equals(trackedItem)) {
+                    foundItem = true;
+                }
+                if (ent instanceof Player PE) {
+                    Inventory inv = PE.getInventory();
+                    for (int i = 0; i < inv.getContainerSize(); i++) {
+                        if (inv.getItem(i).getItem().equals(trackedItem)) {
+                            foundItem = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundItem) {
+                    int color = COLOR_MAP_1.getOrDefault(this.standSkin,
+                            COLOR_MAP_1.get(KingNothingEntity.MANGA));
+                    MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                            PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE_A, color),
+                            ent.getX(), ent.getY() + ent.getEyeHeight() + 0.5, ent.getZ(),
+                            1, 0.1, 0, 0.1, 0.01);
+                    MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                            PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE_B, color),
+                            ent.getX(), ent.getY() + ent.getEyeHeight() + 0.5, ent.getZ(),
+                            1, 0.1, 0, 0.1, 0.01);
+                }
             }
         }
     }
@@ -400,7 +529,7 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void tickPowerEnd() {
         super.tickPowerEnd();
-        if (getSelf().isAlive() && !getSelf().isRemoved()){
+        if (getSelf().isAlive() && !getSelf().isRemoved()) {
             if (isPhasing()) {
                 /**Tick Phase Grab*/
                 if (!this.getSelf().level().isClientSide()) {
@@ -412,13 +541,16 @@ public class PowersKingNothing extends NewDashPreset {
                         if (Objects.nonNull(stand)) {
                             int color = COLOR_MAP_1.getOrDefault(this.standSkin,
                                     COLOR_MAP_1.get(KingNothingEntity.MANGA));
-                            double x = stand.getX();
-                            double y = stand.getY();
-                            double z = stand.getZ();
-                            ((ServerLevel) getSelf().level()).sendParticles(
-                                    PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
-                                    x, y + 1.1, z, 2, 0.1, 0.1, 0.1, 0.01);
                             AABB BB1 = stand.getBoundingBox();
+                            double x = BB1.getCenter().x();
+                            double y = BB1.getCenter().y() + 0.1;
+                            double z = BB1.getCenter().z();
+                            MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                                    PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE_A, color),
+                                    x, y, z, 1, 0.1, 0.1, 0.1, 0.05);
+                            MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                                    PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE_B, color),
+                                    x, y, z, 1, 0.1, 0.1, 0.1, 0.05);
                             Vec3 vec3d = this.getSelf().getEyePosition(0);
                             Vec3 vec3d2 = this.getSelf().getViewVector(0);
                             Vec3 vec3d3 = vec3d.add(vec3d2.x * 20, vec3d2.y * 20, vec3d2.z * 20);
@@ -477,10 +609,14 @@ public class PowersKingNothing extends NewDashPreset {
                                     }
                                 }
                                 else if (held.getItem() instanceof BlockItem BI) {
-                                    if (tryPlaceBlock(BI, blockHit, bpos, stand, held)) return;
+                                    if (tryPlaceBlock(BI, blockHit, bpos, stand, held)) {
+                                        return;
+                                    }
                                 }
                                 else if (isHoldingItem) {
-                                    if (tryMineBlock(held, state, bpos, stand)) return;
+                                    if (tryMineBlock(held, state, bpos, stand)) {
+                                        return;
+                                    }
                                 }
                             }
 
@@ -512,7 +648,8 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand, ItemStack held) {
+    public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand,
+                                 ItemStack held) {
         Direction dir = blockHit.getDirection();
         BlockPos placePos = bpos.relative(dir);
         BlockState placeState = stand.level().getBlockState(placePos);
@@ -524,7 +661,7 @@ public class PowersKingNothing extends NewDashPreset {
         if (placesfrfr) {
             if (blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                     != InteractionResult.FAIL) {
-                getStandUserSelf().roundabout$tryPower(PowerIndex.NONE,true);
+                getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
                 S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                         ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                 this.setCooldown(PowerIndex.SKILL_2,
@@ -582,16 +719,6 @@ public class PowersKingNothing extends NewDashPreset {
         return Component.translatable("skins.roundabout.king_nothing." + getSkinString(skinId));
     }
 
-    public static String getSkinString(byte id) {
-        return switch (id) {
-            case MANGA -> "manga";
-            case SPINE -> "spine";
-            case NOTE -> "note_block";
-            case BETA -> "beta";
-            default -> "manga";
-        };
-    }
-
     private boolean isPhasing() {
         return getActivePower() == PowerIndex.POWER_2 || getActivePower() == PowerIndex.POWER_2_SNEAK;
     }
@@ -602,13 +729,14 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public void powerActivate(PowerContext context) {
-        if ((context == PowerContext.SKILL_1_NORMAL || context == PowerContext.SKILL_1_CROUCH) &&
-                getStandEntity(getSelf()) != null) {
-            if (getActivePower() == PowerIndex.POWER_2_SNEAK) {
+        if ((context == PowerContext.SKILL_1_NORMAL || context == PowerContext.SKILL_1_CROUCH)) {
+            if (getActivePower() == PowerIndex.POWER_2_SNEAK && getStandEntity(getSelf()) != null) {
                 tryDropPhaseItem();
+                return;
             }
-            else if (getActivePower() == PowerIndex.POWER_1_SNEAK) {
-                //todo return skill
+            else if (isTrackingItem) {
+                tryEndItemTrack();
+                return;
             }
         }
         switch (context) {
@@ -624,15 +752,108 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
+    @Override
+    public boolean tryBlockPosPower(int move, boolean forced, BlockPos blockPos) {
+        if (move == PowerIndex.POWER_4) {
+            memorizeBlock(blockPos);
+        }
+        return super.tryBlockPosPower(move, forced, blockPos);
+    }
+
+    @Override
+    public boolean tryPower(int move, boolean forced) {
+        if (isPhasing()) {
+            stopSoundsIfNearby(PHASE, 27, false);
+        }
+        return super.tryPower(move, forced);
+    }
+
+    @Override
+    public boolean setPowerOther(int move, int lastMove) {
+        switch (move) {
+            case PowerIndex.POWER_1_SNEAK -> {
+                return startItemTracking();
+            }
+            case PowerIndex.POWER_2 -> {
+                return phaseGrab();
+            }
+            case PowerIndex.POWER_2_SNEAK -> {
+                return phaseItem();
+            }
+            case PowerIndex.POWER_3_SNEAK -> {
+                return this.formPredict();
+            }
+            case PowerIndex.EXTRA -> {
+                return this.dropPhaseItem();
+            }
+            case PowerIndex.EXTRA_2 -> {
+                return this.endItemTrack();
+            }
+            case PowerIndex.POWER_4_BONUS -> {
+                return this.memorizeEntity();
+            }
+        }
+        return super.setPowerOther(move, lastMove);
+    }
+
+    @Override
+    public boolean setPowerNone() {
+        boolean wasGone = getAnimation() != StandEntity.IDLE && getStandUserSelf().roundabout$hasStandOut();
+        this.attackTimeDuring = -1;
+        this.setActivePower(PowerIndex.NONE);
+        poseStand(OffsetIndex.FOLLOW);
+        if (!wasGone) {
+            animateStand(StandEntity.IDLE);
+        }
+        StandEntity stand = getStandEntity(getSelf());
+        if (stand != null) {
+            if (!getSelf().level().isClientSide()) {
+                addItem(stand);
+            }
+            stand.setHeldItem(ItemStack.EMPTY);
+        }
+        if (wasGone && disintegrateAnimTicks == 0) {
+            playSoundsIfNearby(DISINTEGRATE, 27, false);
+            animateStand(KingNothingEntity.RETURN);
+        }
+        return true;
+    }
+
     private void tryItemTrack() {
-        if (!isPhasing() && !isTracking()) {
+        if (!isPhasing() && !isTrackingItem && !onCooldown(PowerIndex.SKILL_1_SNEAK)) {
             this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_1_SNEAK, true);
             tryPowerPacket(PowerIndex.POWER_1_SNEAK);
         }
     }
 
+    public void tryEndItemTrack() {
+        if (!onCooldown(PowerIndex.SKILL_1_SNEAK)) {
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.EXTRA_2, true);
+            tryPowerPacket(PowerIndex.EXTRA_2);
+        }
+    }
+
+    public boolean endItemTrack() {
+        if (isTrackingItem && !onCooldown(PowerIndex.SKILL_1_SNEAK)) {
+            this.isTrackingItem = false;
+            this.trackedItem = null;
+            disintegrateAnimTicks = 0;
+            if (getSelf() instanceof ServerPlayer) {
+                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_1_SNEAK,
+                        20);
+                this.setCooldown(PowerIndex.SKILL_1_SNEAK,
+                        20);
+            }
+            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+            tryPowerPacket(PowerIndex.NONE);
+        }
+        return true;
+    }
+
     public void tryDashClient() {
-        if (!isPhasing()) dash();
+        if (!isPhasing()) {
+            dash();
+        }
     }
 
     public void tryFormPredict() {
@@ -645,16 +866,18 @@ public class PowersKingNothing extends NewDashPreset {
         tryPowerPacket(PowerIndex.EXTRA);
     }
 
-    public void phaseGrabClient(){
-        if (!isPhasing()) {
-            if (!this.onCooldown(PowerIndex.SKILL_2)) {
-                this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2, true);
-                tryPowerPacket(PowerIndex.POWER_2);
+    public void phaseGrabClient() {
+        if (!isTrackingItem) {
+            if (!isPhasing()) {
+                if (!this.onCooldown(PowerIndex.SKILL_2)) {
+                    this.getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2, true);
+                    tryPowerPacket(PowerIndex.POWER_2);
+                }
             }
-        }
-        else {
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-            tryPowerPacket(PowerIndex.NONE);
+            else {
+                this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+                tryPowerPacket(PowerIndex.NONE);
+            }
         }
     }
 
@@ -663,19 +886,20 @@ public class PowersKingNothing extends NewDashPreset {
         if (Objects.nonNull(stand)) {
             animateStand(KingNothingEntity.REACH);
             this.attackTimeDuring = 0;
+            playSoundsIfNearby(PHASE, 27, false);
             this.setActivePower(PowerIndex.POWER_2);
             this.poseStand(OffsetIndex.LOOSE);
 
-            Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360),(this.getSelf().getXRot()));
-            Direction gdir = ((IGravityEntity)this.self).roundabout$getGravityDirection();
-            Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec,gdir);
-            Vec3 threeVec = new Vec3(0,0.25,0);
-            threeVec = RotationUtil.vecPlayerToWorld(threeVec,gdir);
+            Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360), (this.getSelf().getXRot()));
+            Direction gdir = ((IGravityEntity) this.self).roundabout$getGravityDirection();
+            Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec, gdir);
+            Vec3 threeVec = new Vec3(0, 0.25, 0);
+            threeVec = RotationUtil.vecPlayerToWorld(threeVec, gdir);
 
             stand.setXRot(twoVec.y);
             stand.setYRot(twoVec.x);
             moveVec = DamageHandler.getRotationVector(
-                    twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+                    twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x, threeVec.y, threeVec.z);
             stand.setPos(this.getSelf().getPosition(1).add(moveVec));
             return true;
         }
@@ -683,15 +907,17 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void phaseItemClient() {
-        if (!isPhasing()) {
-            if (!this.onCooldown(PowerIndex.SKILL_2_SNEAK)) {
-                getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
-                tryPowerPacket(PowerIndex.POWER_2_SNEAK);
+        if (!isTrackingItem) {
+            if (!isPhasing()) {
+                if (!this.onCooldown(PowerIndex.SKILL_2_SNEAK)) {
+                    getStandUserSelf().roundabout$tryPower(PowerIndex.POWER_2_SNEAK, true);
+                    tryPowerPacket(PowerIndex.POWER_2_SNEAK);
+                }
             }
-        }
-        else {
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-            tryPowerPacket(PowerIndex.NONE);
+            else {
+                this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+                tryPowerPacket(PowerIndex.NONE);
+            }
         }
     }
 
@@ -700,20 +926,21 @@ public class PowersKingNothing extends NewDashPreset {
         if (Objects.nonNull(stand)) {
             if (this.inventoryGrab()) {
                 animateStand(KingNothingEntity.REACH);
+                playSoundsIfNearby(PHASE, 27, false);
                 this.attackTimeDuring = 0;
                 this.setActivePower(PowerIndex.POWER_2_SNEAK);
                 this.poseStand(OffsetIndex.LOOSE);
 
-                Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360),(this.getSelf().getXRot()));
-                Direction gdir = ((IGravityEntity)this.self).roundabout$getGravityDirection();
-                Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec,gdir);
-                Vec3 threeVec = new Vec3(0,0.25,0);
-                threeVec = RotationUtil.vecPlayerToWorld(threeVec,gdir);
+                Vec2 twoVec = new Vec2((this.getSelf().getYHeadRot() % 360), (this.getSelf().getXRot()));
+                Direction gdir = ((IGravityEntity) this.self).roundabout$getGravityDirection();
+                Vec2 twoVecGrav = RotationUtil.rotPlayerToWorld(twoVec, gdir);
+                Vec3 threeVec = new Vec3(0, 0.25, 0);
+                threeVec = RotationUtil.vecPlayerToWorld(threeVec, gdir);
 
                 stand.setYRot(twoVec.x);
                 stand.setXRot(twoVec.y);
                 moveVec = DamageHandler.getRotationVector(
-                        twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x,threeVec.y,threeVec.z);
+                        twoVecGrav.y, twoVecGrav.x).scale(1.8).add(threeVec.x, threeVec.y, threeVec.z);
                 stand.setPos(this.getSelf().getPosition(1).add(moveVec));
                 return true;
             }
@@ -730,7 +957,8 @@ public class PowersKingNothing extends NewDashPreset {
                 if (isGrabbable(stack)) {
                     standEntity.canAcquireHeldItem = true;
                     standEntity.setHeldItem(stack.copyWithCount(1));
-                    playSoundIfPossible(self.level(),null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
+                    playSoundIfPossible(self.level(), null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT,
+                            SoundSource.PLAYERS, 1.7F, 1.3F);
                     stack.shrink(1);
                     return true;
                 }
@@ -739,19 +967,7 @@ public class PowersKingNothing extends NewDashPreset {
         return false;
     }
 
-    private static boolean isGrabbable(ItemStack stack) {
-        return !stack.isEmpty() &&
-                !(MainUtil.isItemGrabBlacklisted(stack)) &&
-                !(stack.getItem() instanceof BlockItem
-                        && (MainUtil.isBlockBlacklisted(((BlockItem) stack.getItem()).getBlock().defaultBlockState()) ||
-                        ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock ||
-                        ((BlockItem) stack.getItem()).getBlock() instanceof FancyLighterBlock)) &&
-                !(stack.getItem() instanceof BoatItem) &&
-                !(stack.getItem() instanceof MinecartItem) &&
-                !(stack.getItem() instanceof RoadRollerItem);
-    }
-
-    public void tryPhaseItemGrab(StandEntity stand, AABB bb1, AABB bb2){
+    public void tryPhaseItemGrab(StandEntity stand, AABB bb1, AABB bb2) {
         bb1 = bb1.inflate(1.6F);
         bb2 = bb2.inflate(1.6F);
 
@@ -849,10 +1065,13 @@ public class PowersKingNothing extends NewDashPreset {
 
     public float getDamage(ItemStack stack, Entity ent, StandEntity stand) {
         float damage = 1;
-        if (stand != null) damage = (float) stand.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1;
-        if (ent instanceof LivingEntity){
-            damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity)ent).getMobType());
-        } else {
+        if (stand != null) {
+            damage = (float) stand.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1;
+        }
+        if (ent instanceof LivingEntity) {
+            damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity) ent).getMobType());
+        }
+        else {
             damage += EnchantmentHelper.getDamageBonus(stack, MobType.UNDEFINED);
         }
         return damage;
@@ -874,35 +1093,41 @@ public class PowersKingNothing extends NewDashPreset {
                 self.level().playSound(null, self.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS,
                         1F, 1);
                 weapon.shrink(1);
-            } else {
+            }
+            else {
                 self.level().playSound(null, self.blockPosition(), ModSounds.SIGN_HIT_EVENT, SoundSource.PLAYERS,
                         1F, 1);
                 ct.putInt("damaged", ctd);
             }
         }
-        if (bleedTicks > 0) MainUtil.makeBleed(target, bleedLevel, bleedTicks, stand);
+        if (bleedTicks > 0) {
+            MainUtil.makeBleed(target, bleedLevel, bleedTicks, stand);
+        }
         int ench = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, weapon);
-        if (ench >= 1) target.setSecondsOnFire(ench * 4);
+        if (ench >= 1) {
+            target.setSecondsOnFire(ench * 4);
+        }
 
     }
 
-    public void addItem(StandEntity standEntity){
+    public void addItem(StandEntity standEntity) {
         if (!this.getSelf().level().isClientSide()) {
             addItemLight(standEntity);
         }
         standEntity.setHeldItem(ItemStack.EMPTY);
     }
 
-    public void addItemLight(StandEntity standEntity){
+    public void addItemLight(StandEntity standEntity) {
         if (canAddItem(standEntity.getHeldItem(), ((Player) this.getSelf()).getInventory())) {
             ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
-        } else {
+        }
+        else {
             ItemEntity $$4 = new ItemEntity(this.getSelf().level(), this.getSelf().getX(),
                     this.getSelf().getY() + this.getSelf().getEyeHeight(), this.getSelf().getZ(),
                     standEntity.getHeldItem());
             $$4.setPickUpDelay(40);
             $$4.setThrower(this.getSelf().getUUID());
-            PowerTypes.copyPlaneOfExisting(self,$$4);
+            PowerTypes.copyPlaneOfExisting(self, $$4);
             this.getSelf().level().addFreshEntity($$4);
         }
     }
@@ -911,7 +1136,9 @@ public class PowersKingNothing extends NewDashPreset {
         boolean bl = false;
         for (ItemStack itemStack2 : inventory.items) {
             if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack)
-                    || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
+                    || itemStack2.getCount() >= itemStack2.getMaxStackSize())) {
+                continue;
+            }
             bl = true;
             break;
         }
@@ -921,7 +1148,7 @@ public class PowersKingNothing extends NewDashPreset {
     public final void itemNearby(int id) {
         if (!this.self.level().isClientSide) {
             ServerLevel serverWorld = ((ServerLevel) this.self.level());
-            Vec3 userLocation = new Vec3(this.self.getX(),  this.self.getY(), this.self.getZ());
+            Vec3 userLocation = new Vec3(this.self.getX(), this.self.getY(), this.self.getZ());
             for (int j = 0; j < serverWorld.players().size(); ++j) {
                 ServerPlayer serverPlayerEntity = ((ServerLevel) this.self.level()).players().get(j);
 
@@ -931,7 +1158,8 @@ public class PowersKingNothing extends NewDashPreset {
 
                 BlockPos blockPos = serverPlayerEntity.blockPosition();
                 if (blockPos.closerToCenterThan(userLocation, 100)) {
-                    S2CPacketUtil.sendGenericIntToClientPacket(serverPlayerEntity, PacketDataIndex.S2C_INT_GRAB_ITEM,id);
+                    S2CPacketUtil.sendGenericIntToClientPacket(serverPlayerEntity, PacketDataIndex.S2C_INT_GRAB_ITEM,
+                            id);
                 }
             }
         }
@@ -956,51 +1184,6 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    @Override
-    public boolean tryBlockPosPower(int move, boolean forced, BlockPos blockPos) {
-        if (move == PowerIndex.POWER_4) {
-            memorizeBlock(blockPos);
-        }
-        return super.tryBlockPosPower(move, forced, blockPos);
-    }
-
-    @Override
-    public boolean setPowerOther(int move, int lastMove) {
-        switch (move) {
-            case PowerIndex.POWER_2 -> {
-                return phaseGrab();
-            }
-            case PowerIndex.POWER_2_SNEAK -> {
-                return phaseItem();
-            }
-            case PowerIndex.POWER_3_SNEAK -> {
-                return this.formPredict();
-            }
-            case PowerIndex.EXTRA -> {
-                return this.dropPhaseItem();
-            }
-            case PowerIndex.POWER_4_BONUS -> {
-                return this.memorizeEntity();
-            }
-        }
-        return super.setPowerOther(move, lastMove);
-    }
-
-    @Override
-    public boolean setPowerNone() {
-        boolean wasGone = isPhasing();
-        boolean result = super.setPowerNone();
-        StandEntity stand = getStandEntity(getSelf());
-        if (stand != null) {
-            if (!getSelf().level().isClientSide()) {
-                addItem(stand);
-            }
-            stand.setHeldItem(ItemStack.EMPTY);
-        }
-        if (wasGone) animateStand(KingNothingEntity.RETURN);
-        return result;
-    }
-
     public boolean dropPhaseItem() {
         StandEntity stand = getStandEntity(getSelf());
         if (!getSelf().level().isClientSide()) {
@@ -1022,7 +1205,10 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void onStandSummon(boolean desummon) {
         super.onStandSummon(desummon);
-        if (desummon) animateStand(KingNothingEntity.DISINTEGRATE);
+        if (desummon) {
+            this.isTrackingItem = false;
+            this.trackedItem = null;
+        }
         else {
             returnAnimTicks = 0;
             animateStand(KingNothingEntity.RETURN);
@@ -1061,12 +1247,29 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
+    private boolean startItemTracking() {
+        if (!getSelf().getMainHandItem().isEmpty() && !onCooldown(PowerIndex.SKILL_1_SNEAK)) {
+            this.isTrackingItem = true;
+            this.trackedItem = getSelf().getMainHandItem().getItem();
+            if (getSelf() instanceof  ServerPlayer) {
+                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_1_SNEAK,
+                        20);
+                this.setCooldown(PowerIndex.SKILL_1_SNEAK,
+                        20);
+            }
+            animateStand(KingNothingEntity.DISINTEGRATE);
+            disintegrateAnimTicks = 0;
+        }
+        return true;
+    }
+
     public boolean memorizeEntity() {
         Entity ent = MainUtil.getTargetEntity(this.getSelf(), SMELL_RANGE, 0);
         if (ent instanceof LivingEntity LE && !MainUtil.isMobSniffBlacklisted(ent)) {
             setMemorizedScent(LE);
-            if (this.getSelf() instanceof Player PE)
+            if (this.getSelf() instanceof Player PE) {
                 PE.displayClientMessage(LE.getDisplayName().copy().withStyle(ChatFormatting.DARK_PURPLE), true);
+            }
         }
         return true;
     }
@@ -1089,7 +1292,8 @@ public class PowersKingNothing extends NewDashPreset {
         if (entity instanceof Player PE) {
             this.memorizedPlayer = PE.getUUID();
             this.memorizedEntityType = null;
-        } else if (entity instanceof CloneEntity CE && CE.getPlayerUUID().isPresent()) {
+        }
+        else if (entity instanceof CloneEntity CE && CE.getPlayerUUID().isPresent()) {
             this.memorizedPlayer = CE.getPlayerUUID().get();
             this.memorizedEntityType = null;
         }
@@ -1113,6 +1317,6 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public Component ifWipListDevStatus() {
-        return Component.translatable(  "roundabout.dev_status.active").withStyle(ChatFormatting.DARK_PURPLE);
+        return Component.translatable("roundabout.dev_status.active").withStyle(ChatFormatting.DARK_PURPLE);
     }
 }

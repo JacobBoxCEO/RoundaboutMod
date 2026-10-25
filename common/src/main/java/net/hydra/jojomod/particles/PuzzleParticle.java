@@ -1,7 +1,11 @@
 package net.hydra.jojomod.particles;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.hydra.jojomod.client.ClientUtil;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import org.jetbrains.annotations.NotNull;
 
 public class PuzzleParticle extends TextureSheetParticle {
 
@@ -17,8 +21,15 @@ public class PuzzleParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+    public void render(VertexConsumer $$0, Camera $$1, float $$2) {
+        if (ClientUtil.canSeeStands(ClientUtil.getPlayer())) {
+            super.render($$0, $$1, $$2);
+        }
+    }
+
+    @Override
+    public @NotNull ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
     public static class Provider implements ParticleProvider<PuzzleColorParticleOptions> {
