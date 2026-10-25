@@ -375,6 +375,46 @@ public abstract class HudRendering implements IHudAccess {
         StandHudRender.renderStandHud($$1, minecraft, this.getCameraPlayer(), screenWidth, screenHeight, tickCount, this.getVehicleMaxHearts(this.getPlayerVehicleWithHealth()), roundabout$flashAlpha, roundabout$otherFlashAlpha);
 
         RenderSystem.enableBlend();
+
+        // for counting gun ammo
+
+        if (this.minecraft.player != null) {
+            ItemStack heldItem = this.minecraft.player.getMainHandItem();
+
+            // check if the main hand item is a firearm, don't render with jackal rifle cuz like... it's 1 ammo...
+            if (heldItem.getItem() instanceof net.hydra.jojomod.item.FirearmItem gun && !(gun instanceof JackalRifleItem)) {
+                String ammoText;
+                int color = 0xFFFFFF; // white
+
+                // if gun is reloading, print dots to indicate  an action
+                if (gun.isReloading(heldItem)) {
+                    ammoText = "...";
+                    color = 0xFFFF55; // yellow
+                } else {
+                    // self explanatory, just print the current and max ammo
+                    int currentAmmo = gun.getAmmo(heldItem);
+                    int maxAmmo = gun.getMaxAmmo();
+                    ammoText = currentAmmo + " / " + maxAmmo;
+
+                    // if low, make it red
+                    if (currentAmmo < maxAmmo * 0.25) {
+                        color = 0xFF5555; // red
+                    }
+                }
+
+                // put the thing slightly below the crosshair
+                int textWidth = this.getFont().width(ammoText);
+                int x = (this.screenWidth - textWidth) / 2;
+                int y = this.screenHeight - 56;
+                // prints :0
+                $$1.drawString(this.getFont(), ammoText, x, y, color, true);
+            }
+        }
+    }
+
+    @Inject(method = "renderHotbar", at = @At(value = "TAIL"))
+    private void roundabout$renderHotbarTailMixin(float partialTick, GuiGraphics graphics, CallbackInfo info) {
+
     }
 
     private void rdbt$renderTex(TextureAtlasSprite $$0, PoseStack $$1) {
@@ -1039,41 +1079,6 @@ public abstract class HudRendering implements IHudAccess {
         if (rdbt$tempEnt !=null){
             this.minecraft.crosshairPickEntity = rdbt$tempEnt;
             rdbt$tempEnt = null;
-        }
-
-        // ammo counter for guns
-
-        if (this.minecraft.player != null) {
-            ItemStack heldItem = this.minecraft.player.getMainHandItem();
-
-            // check if the main hand item is a firearm, don't render with jackal rifle cuz like... it's 1 ammo...
-            if (heldItem.getItem() instanceof net.hydra.jojomod.item.FirearmItem gun && !(gun instanceof JackalRifleItem)) {
-                String ammoText;
-                int color = 0xFFFFFF; // white
-
-                // if gun is reloading, print dots to indicate  an action
-                if (gun.isReloading(heldItem)) {
-                    ammoText = "...";
-                    color = 0xFFFF55; // yellow
-                } else {
-                    // self explanatory, just print the current and max ammo
-                    int currentAmmo = gun.getAmmo(heldItem);
-                    int maxAmmo = gun.getMaxAmmo();
-                    ammoText = currentAmmo + " / " + maxAmmo;
-
-                    // if low, make it red
-                    if (currentAmmo < maxAmmo * 0.25) {
-                        color = 0xFF5555; // red
-                    }
-                }
-
-                // put the thing slightly below the crosshair
-                int textWidth = this.getFont().width(ammoText);
-                int x = (this.screenWidth - textWidth) / 2;
-                int y = (this.screenHeight / 2) + 15;
-                // prints :O
-                $$0.drawString(this.getFont(), ammoText, x, y, color, true);
-            }
         }
     }
 

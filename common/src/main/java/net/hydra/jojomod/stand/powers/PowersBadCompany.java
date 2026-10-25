@@ -20,11 +20,15 @@ import net.hydra.jojomod.stand.powers.presets.NewDashPreset;
 import net.hydra.jojomod.util.S2CPacketUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
 import java.util.List;
@@ -208,7 +212,20 @@ public class PowersBadCompany extends NewDashPreset {
     }
 
     public void selectedTactics(int id) {
-        tryIntPowerPacket(PowerIndex.POWER_2, id);
+        if (id == TACTIC_FIRE) {
+            fireTactic();
+        }else {
+            tryIntPowerPacket(PowerIndex.POWER_2, id);
+        }
+    }
+
+    public void fireTactic() {
+        float range = BCTroop.getMaximumRangeBullets()+1;
+        Vec3 vec3d = self.getEyePosition(0);
+        Vec3 vec3d2 = self.getViewVector(0);
+        Vec3 vec3d3 = vec3d.add(vec3d2.x * range, vec3d2.y * range, vec3d2.z * range);
+        HitResult blockHit = self.level().clip(new ClipContext(vec3d, vec3d3, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, self));
+        tryPosPowerPacket(PowerIndex.POWER_2, blockHit.getLocation());
     }
 
     private int getTroopLimit() { return 12; }
@@ -279,11 +296,21 @@ public class PowersBadCompany extends NewDashPreset {
             if (chargeTime == TACTIC_STOP) {
                 sendTroopsSignal(BadCompanyTactics.STOP);
             }else if (chargeTime == TACTIC_WARD) {
-
+                sendTroopsSignal(BadCompanyTactics.WARD);
             }
         }
 
         return super.tryIntPower(move, forced, chargeTime);
+    }
+
+    @Override
+    public boolean tryPosPower(int move, boolean forced, Vec3 pos) {
+        if (move == PowerIndex.POWER_2) {
+            sendTroopsShootSignal(pos);
+            return true;
+        }
+
+        return super.tryPosPower(move, forced, pos);
     }
 
     @Override
@@ -302,6 +329,13 @@ public class PowersBadCompany extends NewDashPreset {
                 totalTroopsOut = data;
             }
         }
+    }
+
+    public boolean holdDownClick = false;
+
+    @Override
+    public void buttonInputAttack(boolean keyIsDown, Options options) {
+        holdDownClick = keyIsDown;
     }
 
 
@@ -372,6 +406,15 @@ public class PowersBadCompany extends NewDashPreset {
             T.setCurrentTactic(tactic.id);
         }
     }
+    private void sendTroopsShootSignal(Vec3 pos){
+        initActiveTroops();
+        for (BCTroop T : activeTroops) {
+            if (T instanceof BCSoldier Soldier) {
+                Soldier.shootAtPosition(pos);
+            }
+            //T.setCurrentTactic(tactic.id);
+        }
+    }
 
     @Override
     public boolean returnFakeStandForHud(){
@@ -428,5 +471,11 @@ public class PowersBadCompany extends NewDashPreset {
     }
 
     @Override
-    public boolean isMiningStand() { return true; }
+    public boolean isMiningStand() { return false; }
+    @Override
+    public boolean interceptAttack(){ return true; }
+
+    public void tickPower() {
+        if (holdDownClick) fireTactic();
+    }
 }
