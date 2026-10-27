@@ -254,6 +254,10 @@ public class MainUtil {
     public static final Map<Block, Block> KING_NOTHING_BLOCK_KEYS = new HashMap<>();
     public static final Map<Block, Item> KING_NOTHING_SCENT_ICON_OVERRIDES = new HashMap<>();
 
+    public static final Map<Item, EntityType> GOLD_EXPERIENCE_DNA_DROPS = new HashMap<>();
+    public static final Map<Item, Float> GOLD_EXPERIENCE_TRANSFORM_RATE = new HashMap<>();
+    public static final Map<Item, Boolean> GOLD_EXPERIENCE_IS_BABY = new HashMap<>();
+
     public static final Map<Item, List<MobEffect>> foodCuresThat = new HashMap<>();
     public static final Map<Item, List<MobEffect>> foodAddsThat = new HashMap<>();
     public static final Map<Item, List<String>> specialFoodRemoves = new HashMap<>();
