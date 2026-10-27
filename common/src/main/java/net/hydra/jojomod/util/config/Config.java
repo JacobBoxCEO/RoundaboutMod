@@ -1409,7 +1409,7 @@ public class Config implements Cloneable {
         public Integer hallucinationAllowsDiscSteal;
         @BooleanOption(group = "inherit", value = true)
         public Boolean stealDiscWhenLowHealth;
-        @BooleanOption(group = "inherit", value = true)
+        @BooleanOption(group = "inherit", value = false)
         public Boolean stealPlayerDiscs;
         @IntOption(group = "inherit", value = 1, min = 1, max = 2)
         public Integer ejectType;
