@@ -124,14 +124,7 @@ public class FabricParticles {
                 }
             };
 
-    public static final ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE_A =
-            new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
-                @Override
-                public Codec<PuzzleColorParticleOptions> codec() {
-                    return PuzzleColorParticleOptions.codec(this);
-                }
-            };
-    public static final ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE_B =
+    public static final ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE =
             new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
                 @Override
                 public Codec<PuzzleColorParticleOptions> codec() {
@@ -249,8 +242,7 @@ public class FabricParticles {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("purple_haze_smoke"), PURPLE_HAZE_SMOKE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("distortion_smoke"), DISTORTION_SMOKE);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("purple_haze_blastwave"), PURPLE_HAZE_BLASTWAVE);
-        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("kn_piece_a"), PUZZLE_PARTICLE_A);
-        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("kn_piece_b"), PUZZLE_PARTICLE_B);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("kn_piece"), PUZZLE_PARTICLE);
 
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("road_roller_explosion"), ROAD_ROLLER_EXPLOSION);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("road_roller_smoke"), ROAD_ROLLER_SMOKE);
@@ -365,8 +357,7 @@ public class FabricParticles {
         ModParticles.DISTORTION_SMOKE = DISTORTION_SMOKE;
         ModParticles.PURPLE_HAZE_BLASTWAVE = PURPLE_HAZE_BLASTWAVE;
 
-        ModParticles.PUZZLE_PARTICLE_A = PUZZLE_PARTICLE_A;
-        ModParticles.PUZZLE_PARTICLE_B = PUZZLE_PARTICLE_B;
+        ModParticles.PUZZLE_PARTICLE = PUZZLE_PARTICLE;
 
         ModParticles.ROAD_ROLLER_EXPLOSION = ROAD_ROLLER_EXPLOSION;
         ModParticles.ROAD_ROLLER_SMOKE = ROAD_ROLLER_SMOKE;

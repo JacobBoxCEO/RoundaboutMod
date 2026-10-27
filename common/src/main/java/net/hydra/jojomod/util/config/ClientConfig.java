@@ -114,6 +114,8 @@ public class ClientConfig implements Cloneable {
     public ClientConfig.SilverChariotSettings silverChariotSettings;
     @NestedOption(group = "modded")
     public ClientConfig.LyinEyesSettings lyinEyesSettings;
+    @NestedOption(group = "modded")
+    public ClientConfig.KingNothingSettings kingNothingSettings;
   /*  @NestedOption(group = "modded")
     public ClientConfig.StandTweakSettings standTweakSettings; */
 
@@ -243,6 +245,10 @@ public class ClientConfig implements Cloneable {
         public Boolean bombConfigFastToggle;
         @BooleanOption(group = "inherit", value = true)
         public Boolean itemToolsProtection;
+    }
+    public static class KingNothingSettings {
+        @BooleanOption(group = "inherit", value = true)
+        public Boolean highlightEntitiesWhileTrackingItem;
     }
     public static class WhitesnakeSettings {
         @BooleanOption(group = "inherit", value = false)

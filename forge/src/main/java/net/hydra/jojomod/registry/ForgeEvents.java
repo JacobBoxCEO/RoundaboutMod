@@ -786,8 +786,7 @@ public class ForgeEvents {
         ModParticles.PURPLE_HAZE_SMOKE = ForgeParticles.PURPLE_HAZE_SMOKE.get();
         ModParticles.PURPLE_HAZE_BLASTWAVE = ForgeParticles.PURPLE_HAZE_BLASTWAVE.get();
         ModParticles.DISTORTION_SMOKE = ForgeParticles.DISTORTION_SMOKE.get();
-        ModParticles.PUZZLE_PARTICLE_A = ForgeParticles.PUZZLE_PARTICLE_A.get();
-        ModParticles.PUZZLE_PARTICLE_B = ForgeParticles.PUZZLE_PARTICLE_B.get();
+        ModParticles.PUZZLE_PARTICLE = ForgeParticles.PUZZLE_PARTICLE.get();
 
         FireBlock fire = (FireBlock) Blocks.FIRE;
         ((IFireBlock) fire).roundabout$bootstrap();

@@ -1275,6 +1275,15 @@ public class ClientUtil {
             }
         } else if (context == PacketDataIndex.S2C_HALLUCINATION_INDICATOR) {
             HallucinationIndicatorRenderer.update(data, data2);
+        } else if (context == PacketDataIndex.S2C_KING_NOTHING_HIGHLIGHT) {
+            if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing KN) {
+                if (data2 == 0) {
+                    KN.removeItemHolder(data);
+                }
+                else if (data2 == 1) {
+                    KN.addItemHolder(data);
+                }
+            }
         }
     }
 

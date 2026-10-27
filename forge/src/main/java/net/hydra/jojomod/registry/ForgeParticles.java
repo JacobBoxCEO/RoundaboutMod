@@ -358,15 +358,8 @@ public class ForgeParticles {
                 }
             });
 
-    public static final RegistryObject<ParticleType<PuzzleColorParticleOptions>> PUZZLE_PARTICLE_A =
-            PARTICLES.register("kn_piece_a", () -> new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
-                @Override
-                public com.mojang.serialization.Codec<PuzzleColorParticleOptions> codec() {
-                    return PuzzleColorParticleOptions.codec(this);
-                }
-            });
-    public static final RegistryObject<ParticleType<PuzzleColorParticleOptions>> PUZZLE_PARTICLE_B =
-            PARTICLES.register("kn_piece_b", () -> new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
+    public static final RegistryObject<ParticleType<PuzzleColorParticleOptions>> PUZZLE_PARTICLE =
+            PARTICLES.register("kn_piece", () -> new ParticleType<>(false, PuzzleColorParticleOptions.DESERIALIZER) {
                 @Override
                 public com.mojang.serialization.Codec<PuzzleColorParticleOptions> codec() {
                     return PuzzleColorParticleOptions.codec(this);

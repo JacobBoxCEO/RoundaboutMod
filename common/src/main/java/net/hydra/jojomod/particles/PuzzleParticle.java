@@ -28,6 +28,13 @@ public class PuzzleParticle extends TextureSheetParticle {
     }
 
     @Override
+    public void setSpriteFromAge(SpriteSet $$0) {
+        if (!this.removed) {
+            this.setSprite($$0.get(this.random));
+        }
+    }
+
+    @Override
     public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }

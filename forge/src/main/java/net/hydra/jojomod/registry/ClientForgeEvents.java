@@ -643,8 +643,7 @@ public class ClientForgeEvents {
         event.registerSpriteSet(ForgeParticles.PURPLE_HAZE_SMOKE.get(), PurpleHazeSmokeParticle.Provider::new);
         event.registerSpriteSet(ForgeParticles.PURPLE_HAZE_BLASTWAVE.get(), PurpleHazeSmokeParticle.Provider::new);
         event.registerSpriteSet(ForgeParticles.DISTORTION_SMOKE.get(), DistortionSmokeParticle.Provider::new);
-        event.registerSpriteSet(ForgeParticles.PUZZLE_PARTICLE_A.get(), PuzzleParticle.Provider::new);
-        event.registerSpriteSet(ForgeParticles.PUZZLE_PARTICLE_B.get(), PuzzleParticle.Provider::new);
+        event.registerSpriteSet(ForgeParticles.PUZZLE_PARTICLE.get(), PuzzleParticle.Provider::new);
     }
 
     @SubscribeEvent

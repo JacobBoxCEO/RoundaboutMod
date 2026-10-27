@@ -138,6 +138,7 @@ public class PacketDataIndex {
     public static final byte S2C_DISC_REMOVE_INT = 28;
     public static final byte S2C_MERGE_TIME_INT = 29;
     public static final byte S2C_HALLUCINATION_INDICATOR = 30;
+    public static final byte S2C_KING_NOTHING_HIGHLIGHT = 31;
 
 
     /**S2C BUNDLE packets*/
