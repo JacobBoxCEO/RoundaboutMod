@@ -10,6 +10,7 @@ import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.KeyInputRegistry;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
+import net.hydra.jojomod.entity.mobs.StrayCatEntity;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.entity.visages.CloneEntity;
@@ -24,6 +25,7 @@ import net.hydra.jojomod.event.powers.*;
 import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.item.SignBlockItem;
+import net.hydra.jojomod.item.StrayCatItem;
 import net.hydra.jojomod.particles.PuzzleColorParticleOptions;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
@@ -41,23 +43,25 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -67,6 +71,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.*;
 import net.hydra.jojomod.event.index.SoundIndex;
 
@@ -165,6 +172,11 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public boolean canSummonStandAsEntity() {
         return !isTrackingItem();
+    }
+
+    @Override
+    public boolean returnFakeStandForHud() {
+        return super.returnFakeStandForHud() || !canSummonStandAsEntity();
     }
 
     @Override
@@ -360,8 +372,8 @@ public class PowersKingNothing extends NewDashPreset {
                 }
             }
             case 3 -> {
-                if (isHoldingSneak() && (isPhasing() || isTrackingItem() ||
-                        getFormPrediction(getSelf().getMainHandItem().getItem()) == null    )) {
+                if ((isHoldingSneak() && (isTrackingItem() ||
+                        getFormPrediction(getSelf().getMainHandItem().getItem()) == null)) || isPhasing()) {
                     return true;
                 }
             }
@@ -390,7 +402,7 @@ public class PowersKingNothing extends NewDashPreset {
                         "ability.roundabout.kn_track_item", "instruction.roundabout.press_skill_crouch",
                         StandIcons.KING_NOTHING_SNIFF_ITEM, 1, level, bypass));
                 case 2 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
-                        "ability.roundabout.kn_phase_hand", "instruction.roundabout.press_skill",
+                        "ability.roundabout.phase_grab", "instruction.roundabout.press_skill",
                         StandIcons.KING_NOTHING_PHASE_GRAB, 2, level, bypass));
                 case 3 -> $$1.add(drawSingleGUIIcon(context, 18, leftPos + leftOffset, topPos + topOffset, 0,
                         "ability.roundabout.kn_phase_item", "instruction.roundabout.press_skill_crouch",
@@ -576,8 +588,10 @@ public class PowersKingNothing extends NewDashPreset {
                     if (foundItem) {
                         if (!level.isClientSide()) {
                             ParticleData pdata = COLOR_MAP_1.getOrDefault(this.standSkin, COLOR_MAP_1.get(MANGA));
-                            int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
-                            int color2 = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
+                            int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
+                                    pdata.color1() : pdata.color2();
+                            int color2 = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
+                                    pdata.color1() : pdata.color2();
                             MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                     PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
                                     ent.getX(), ent.getY() + ent.getEyeHeight() + 0.5, ent.getZ(),
@@ -702,7 +716,7 @@ public class PowersKingNothing extends NewDashPreset {
                                     tryPhaseItemGrab(stand, BB1, BB2);
                                 }
                                 else {
-                                    tryPhaseAttack(stand, BB1, BB2);
+                                    tryPhaseInteractMob(stand, BB1, BB2);
                                 }
                             }
 
@@ -883,13 +897,14 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     private boolean exitPhase() {
-        getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-        tryPowerPacket(PowerIndex.NONE);
+        setPowerNone();
         animateStand(KingNothingEntity.RETURN);
         playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
         return false;
     }
 
+    // kills dimensional desync
+    private ResourceKey<Level> dimension = null;
     @Override
     public boolean setPowerNone() {
         this.attackTimeDuring = -1;
@@ -901,6 +916,14 @@ public class PowersKingNothing extends NewDashPreset {
                 addItem(stand);
             }
             stand.setHeldItem(ItemStack.EMPTY);
+        }
+        // server-client desync fix?
+        if (!getSelf().level().dimension().equals(dimension)) {
+            if (isTrackingItem()) {
+                playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
+            }
+            trackedItem = null;
+            dimension = getSelf().level().dimension();
         }
         return true;
     }
@@ -934,8 +957,7 @@ public class PowersKingNothing extends NewDashPreset {
             }
             playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
             animateStand(KingNothingEntity.RETURN);
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-            tryPowerPacket(PowerIndex.NONE);
+            setPowerNone();
         }
         return true;
     }
@@ -1067,12 +1089,37 @@ public class PowersKingNothing extends NewDashPreset {
         List<Entity> $$3 = stand.level().getEntities(stand, $$2);
         if (!$$3.isEmpty()) {
             for (Entity $$4 : $$3) {
-                if ($$4 instanceof ItemEntity IE && stand.getSensing().hasLineOfSight($$4)) {
-                    if (!(IE.getItem().getItem() instanceof BlockItem BI &&
-                            (BI.getBlock() instanceof ShulkerBoxBlock ||
-                                    BI.getBlock() instanceof FancyLighterBlock))) {
-                        stand.canAcquireHeldItem = true;
-                        stand.setHeldItem(IE.getItem().copyWithCount(1));
+                if (stand.getSensing().hasLineOfSight($$4)) {
+                    boolean gotItem = false;
+                    if ($$4 instanceof ItemEntity IE) {
+                        if (!(IE.getItem().getItem() instanceof BlockItem BI &&
+                                (BI.getBlock() instanceof ShulkerBoxBlock ||
+                                        BI.getBlock() instanceof FancyLighterBlock))) {
+                            stand.canAcquireHeldItem = true;
+                            stand.setHeldItem(IE.getItem().copyWithCount(1));
+
+                            IE.getItem().shrink(1);
+                            itemNearby(IE.getId());
+                            gotItem = true;
+                        }
+                    }
+                    else if ($$4 instanceof StrayCatEntity SC) {
+                        if (Objects.equals(SC.getOwner(), getSelf()) && SC.getPotted()) {
+                            ItemStack catto;
+                            if (SC.getBreed() == (byte) 1) {
+                                catto = new ItemStack(ModItems.STRAY_CAT_MANGA);
+                            }
+                            else {
+                                catto = new ItemStack(ModItems.STRAY_CAT_ANIME);
+                            }
+                            StrayCatItem.saveStrayCatEntityInfo(catto, SC);
+                            SC.discard();
+                            stand.canAcquireHeldItem = true;
+                            stand.setHeldItem(catto);
+                            gotItem = true;
+                        }
+                    }
+                    if (gotItem) {
                         playSoundIfPossible(self.level(), null, this.getSelf().blockPosition(),
                                 ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
@@ -1080,7 +1127,8 @@ public class PowersKingNothing extends NewDashPreset {
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setCooldown(PowerIndex.SKILL_2,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                        S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()),
+                                PowerIndex.SKILL_2_SNEAK,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
                         this.setCooldown(PowerIndex.SKILL_2_SNEAK,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
@@ -1088,9 +1136,6 @@ public class PowersKingNothing extends NewDashPreset {
                         poseStand(OffsetIndex.FOLLOW_NOLEAN);
                         animateStand(KingNothingEntity.RETURN);
                         playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
-
-                        IE.getItem().shrink(1);
-                        itemNearby(IE.getId());
                         return;
                     }
                 }
@@ -1098,7 +1143,7 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    public void tryPhaseAttack(StandEntity stand, AABB bb1, AABB bb2) {
+    public void tryPhaseInteractMob(StandEntity stand, AABB bb1, AABB bb2) {
         bb1 = bb1.inflate(1.6F);
         bb2 = bb2.inflate(1.6F);
 
@@ -1107,15 +1152,27 @@ public class PowersKingNothing extends NewDashPreset {
         if (!$$3.isEmpty()) {
             for (Entity $$4 : $$3) {
                 LivingEntity self = getSelf();
-                if (!$$4.equals(stand) && !$$4.equals(self) &&
-                        stand.getSensing().hasLineOfSight($$4)) {
-                    if ($$4.isAttackable() && !($$4 instanceof LivingEntity LE && LE.isDeadOrDying())
-                            && !($$4 instanceof Player PE && (PE.isCreative() || PE.isSpectator()))) {
-                        ItemStack held = stand.getHeldItem();
-                        int cooldown = ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown
-                                + (int) (1F / stand.getAttributeValue(Attributes.ATTACK_SPEED) * 20);
+                if (!$$4.equals(stand) && !$$4.equals(self) && stand.getSensing().hasLineOfSight($$4)
+                        && !($$4 instanceof LivingEntity LE && LE.isDeadOrDying())) {
+                    ItemStack held = stand.getHeldItem();
+                    int cooldown = ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown;
+                    boolean didThing = false;
+                    if ($$4 instanceof Bucketable BE && held.is(Items.WATER_BUCKET)) {
+                        ItemStack bucketItem = BE.getBucketItemStack();
+                        BE.saveToBucketTag(bucketItem);
+                        stand.setHeldItem(bucketItem);
+                        getSelf().level().playSound(null, getSelf().blockPosition(), BE.getPickupSound(), SoundSource.PLAYERS);
+                        $$4.discard();
+                        didThing = true;
+                    }
+                    else if ($$4.isAttackable() && !($$4 instanceof Player PE && (PE.isCreative() ||
+                            PE.isSpectator())) && !($$4 instanceof OwnableEntity OE &&
+                            Objects.equals(OE.getOwner(), getSelf())) && !($$4 instanceof Boat || $$4 instanceof Minecart)) {
+                        cooldown += (int) (1F / stand.getAttributeValue(Attributes.ATTACK_SPEED) * 20);
                         doPhaseAttack(held, stand, self, $$4);
-                        stand.getAttribute(Attributes.ATTACK_SPEED);
+                        didThing = true;
+                    }
+                    if (didThing) {
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
                         S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
@@ -1290,8 +1347,7 @@ public class PowersKingNothing extends NewDashPreset {
             PowerTypes.copyPlaneOfExisting(self, $$4);
             this.getSelf().level().addFreshEntity($$4);
             stand.setHeldItem(ItemStack.EMPTY);
-            this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-            tryPowerPacket(PowerIndex.NONE);
+            setPowerNone();
             animateStand(KingNothingEntity.RETURN);
             playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
         }
@@ -1305,6 +1361,9 @@ public class PowersKingNothing extends NewDashPreset {
     public void onStandSummon(boolean desummon) {
         super.onStandSummon(desummon);
         if (desummon) {
+            if (isPhasing()) {
+                animateStand(StandEntity.IDLE);
+            }
             isOut = false;
             this.trackedItem = null;
             if (getSelf().level().isClientSide()) {

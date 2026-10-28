@@ -2404,6 +2404,13 @@
   "ability.roundabout.tusk_act_change": "Act Change",
   "ability.roundabout.tusk_act_change.desc": "Swap between acts.",
 
+  "ability.roundabout.kn_smell_track": "Track Scent (TODO)",
+  "ability.roundabout.kn_smell_track.desc": "Send out King Nothing to track the scent of the Block, Mob, or Player you currently have memorized.",
+  "abilitiy.roundabout.kn_item_track": "Track Item",
+  "abilitiy.roundabout.kn_item_track.desc": "King Nothing smells your held item and detects other Players or Chests which have that item.",
+  "ability.roundabout.kn_phase_item": "Phase Item",
+  "ability.roundabout.kn_phase_item.desc": "Like Phase Grab but King Nothing takes your held item and does stuff with it. ",
+
 
 
   "ability.roundabout.blood_drink": "Blood Suck",
