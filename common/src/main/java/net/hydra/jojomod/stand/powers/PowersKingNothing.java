@@ -677,34 +677,46 @@ public class PowersKingNothing extends NewDashPreset {
                             Vec3 vec3dST = new Vec3((vec3daST.x + vec3DbST.x) / 2, (vec3daST.y + vec3DbST.y + 0.6) / 2,
                                     (vec3daST.z + vec3DbST.z) / 2);
                             Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
-                            BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
-                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
+                            boolean isHoldingBucket = held.is(Items.BUCKET);
+                            BlockHitResult blockHit = isHoldingBucket ? stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
+                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand)) : stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
+                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, stand));
                             BlockPos bpos = blockHit.getBlockPos();
                             BlockState state = stand.level().getBlockState(bpos);
                             if (!state.isAir()) {
-                                if (this.getSelf().level().getGameRules().getBoolean(
-                                        ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
-                                        && !isHoldingItem) {
-                                    Block blk = state.getBlock();
-                                    if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
-                                            || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
-                                            || (blk instanceof FenceGateBlock))
-                                            && this.getSelf() instanceof Player PE) {
-                                        blk.use(state, PE.level(), bpos, PE, PE.getUsedItemHand(),
-                                                blockHit);
-                                        ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
-                                        playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
-                                        animateStand(KingNothingEntity.RETURN);
-                                        return;
+                                if (!isHoldingBucket) {
+                                    if (this.getSelf().level().getGameRules().getBoolean(
+                                            ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE)
+                                            && !isHoldingItem) {
+                                        Block blk = state.getBlock();
+                                        if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
+                                                || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
+                                                || (blk instanceof FenceGateBlock))
+                                                && this.getSelf() instanceof Player PE) {
+                                            blk.use(state, PE.level(), bpos, PE, PE.getUsedItemHand(),
+                                                    blockHit);
+                                            ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
+                                            playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
+                                            animateStand(KingNothingEntity.RETURN);
+                                            return;
+                                        }
+                                    }
+                                    else if (held.getItem() instanceof BlockItem BI) {
+                                        if (tryPlaceBlock(BI, blockHit, bpos, stand, held)) {
+                                            return;
+                                        }
+                                    }
+                                    else if (held.getItem() instanceof BucketItem && !held.is(Items.LAVA_BUCKET)) {
+
+                                    }
+                                    else if (isHoldingItem) {
+                                        if (tryMineBlock(held, state, bpos, stand)) {
+                                            return;
+                                        }
                                     }
                                 }
-                                else if (held.getItem() instanceof BlockItem BI) {
-                                    if (tryPlaceBlock(BI, blockHit, bpos, stand, held)) {
-                                        return;
-                                    }
-                                }
-                                else if (isHoldingItem) {
-                                    if (tryMineBlock(held, state, bpos, stand)) {
+                                else {
+                                    if (tryPickupFluid(state, blockHit, bpos, stand)) {
                                         return;
                                     }
                                 }
@@ -738,6 +750,44 @@ public class PowersKingNothing extends NewDashPreset {
                 }
             }
         }
+    }
+
+    private boolean tryPickupFluid(BlockState state, BlockHitResult bhit, BlockPos bpos, StandEntity stand) {
+        BlockPos pos = bpos;
+        BlockState bstate = state;
+        FluidState fstate =  state.getFluidState();
+        if (fstate.isEmpty()) {
+            Direction dir = bhit.getDirection();
+            pos = bpos.relative(dir);
+            bstate = stand.level().getBlockState(pos);
+            fstate = bstate.getFluidState();
+        }
+        boolean picksUpFluid = fstate.isSource() && getSelf() instanceof ServerPlayer SP &&
+                SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
+                !SP.blockActionRestricted(SP.level(), pos, SP.gameMode.getGameModeForPlayer())
+                && SP.level().mayInteract(SP, pos) && MainUtil.canPlaceOnClaim(SP, pos);
+        if (picksUpFluid) {
+            ItemStack stack = new ItemStack(fstate.getType().getBucket());
+            if (bstate.hasProperty(BlockStateProperties.WATERLOGGED) && bstate.getValue(BlockStateProperties.WATERLOGGED)) {
+                bstate.setValue(BlockStateProperties.WATERLOGGED, false);
+            }
+            else {
+                stand.level().setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            }
+            stand.setHeldItem(stack);
+            getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
+            animateStand(KingNothingEntity.RETURN);
+        }
+        return picksUpFluid;
     }
 
     public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand,
