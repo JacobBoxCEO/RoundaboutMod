@@ -891,6 +891,8 @@ public class Config implements Cloneable {
         public Boolean forwardBarrageCanSteer;
         @BooleanOption(group = "inherit", value = false)
         public Boolean HazeMelts;
+        @BooleanOption(group = "inherit", value = false)
+        public Boolean CanonDistortion;
     }
     public static class LyinEyesSettings {
         @BooleanOption(group = "inherit", value = true)

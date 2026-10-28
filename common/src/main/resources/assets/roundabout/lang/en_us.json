@@ -852,6 +852,7 @@
   "block.roundabout.barbed_wire": "Barbed Wire Trap",
   "block.roundabout.barbed_wire_bundle": "Barbed Wire Bunch",
   "block.roundabout.goddess_statue": "Love Goddess Statue",
+  "block.roundabout.magicians_statue": "Magician's Red Statue",
   "block.roundabout.ceiling_light": "Ceiling Light",
   "block.roundabout.mirror": "Mirror",
   "block.roundabout.stereo": "Stereo",
@@ -1427,8 +1428,11 @@
   "sounds.roundabout.purple_haze_distortion_smoke":  "Distortion Haze Spreads",
   "sounds.roundabout.purple_haze_pod_bite":  "Pod Cracks",
   "sounds.roundabout.purple_haze_barrage_finisher": "Heavy Punch",
+  "sounds.roundabout.ph_strangle": "Purple haze growls",
+  "sounds.roundabout.ph_type_switch": "Distorcion switch",
+  "sounds.roundabout.ph_pod_launch": "Pod launch",
 
-  "sounds.roundabout.bullet_ricochet":  "Bullet ricochetted",
+  "sounds.roundabout.bullet_ricochet":  "Bullet ricocheted",
 
   "sounds.roundabout.snubnose_fire":  "Gun fired!",
   "sounds.roundabout.snubnose_dry_fire":  "Gun click",
@@ -1870,6 +1874,10 @@
   "sounds.roundabout.silver_chariot_rapier_shot_redirect": "Rapier shot bounce",
   "sounds.roundabout.silver_chariot_rapier_shot_block_impact": "Rapier shot block hit",
   "sounds.roundabout.silver_chariot_rapier_shot_entity_impact": "Rapier shot entity hit",
+  "sounds.roundabout.silver_chariot_statue_cutting": "Statue cutting",
+  "sounds.roundabout.silver_chariot_slab_cutting": "Slab cutting",
+  "sounds.roundabout.silver_chariot_self_grab": "Self grab",
+  "sounds.roundabout.silver_chariot_self_throw": "Self throw",
 
   "sounds.roundabout.blood_suck":  "Blood",
   "sounds.roundabout.blood_suck_crit":  "Blood",
@@ -4263,6 +4271,8 @@
   "config.roundabout.forwardBarrageCanSteer.desc": "Decide if Purple Haze´s Forward Barrage can be slightly steered while travelling forward.",
   "config.roundabout.HazeMelts.name": "Haze Melting",
   "config.roundabout.HazeMelts.desc": "If the Purple Haze adds an effect of Melting and the Distortion Haze add an effect of Melting 2.",
+  "config.roundabout.CanonDistortion.name": "Canon Distortion",
+  "config.roundabout.CanonDistortion.desc": "If the distortion becomes a far stronger virus.",
 
   "config.roundabout.enableSilverChariot.name": "Enable Silver Chariot",
   "config.roundabout.enableSilverChariot.desc": "Enable Silver Chariot",
