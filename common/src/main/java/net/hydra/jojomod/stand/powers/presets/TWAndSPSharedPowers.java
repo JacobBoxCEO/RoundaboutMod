@@ -1054,7 +1054,7 @@ public class TWAndSPSharedPowers extends BlockGrabPreset{
             }
         }
 
-            super.barrageImpact(entity,hitNumber);
+        super.barrageImpact(entity,hitNumber);
     }
 
 
