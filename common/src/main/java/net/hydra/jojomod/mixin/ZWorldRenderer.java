@@ -10,6 +10,7 @@ import net.hydra.jojomod.event.powers.StandUser;
 import net.hydra.jojomod.event.powers.TimeStop;
 import net.hydra.jojomod.stand.powers.PowersD4C;
 import net.hydra.jojomod.stand.powers.PowersDiverDown;
+import net.hydra.jojomod.stand.powers.PowersKingNothing;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -32,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+import java.util.ArrayList;
 
 @Mixin(LevelRenderer.class)
 public class ZWorldRenderer {
@@ -195,6 +198,22 @@ public class ZWorldRenderer {
                             0.85F, // B (makes diver down's green/teal color for highlighting)
                             1.0F // A
                     );
+            }
+        }
+        // stealing diver down's block highlight for the king
+        if (ClientUtil.getPlayer() != null
+                && ((StandUser) ClientUtil.getPlayer()).roundabout$getStandPowers() instanceof PowersKingNothing pkn) {
+            if (pkn.isTrackingItem() && !pkn.itemHoldingBlocks.isEmpty()) {
+                ClientEffectUtil.highlightBlocksNoThroughWalls(
+                        poseStack,
+                        mc.renderBuffers().bufferSource(),
+                        camera,
+                        new ArrayList<>(pkn.itemHoldingBlocks),
+                        ((pkn.getVisualInfo().highlightColor() >> 16) & 0xFF) / 255.0F,
+                        ((pkn.getVisualInfo().highlightColor() >> 8) & 0xFF) / 255.0F,
+                        (pkn.getVisualInfo().highlightColor() & 0xFF) / 255.0F,
+                        1.0f
+                );
             }
         }
     }

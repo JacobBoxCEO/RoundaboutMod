@@ -13,7 +13,6 @@ import net.hydra.jojomod.client.gui.diverdown.*;
 import net.hydra.jojomod.client.models.layers.anubis.AnubisLayer;
 import net.hydra.jojomod.client.models.visages.parts.FirstPersonArmsModel;
 import net.hydra.jojomod.client.models.visages.parts.FirstPersonArmsSlimModel;
-import net.hydra.jojomod.entity.KingCrimsonCloneEntity;
 import net.hydra.jojomod.entity.KingCrimsonProjectionEntity;
 import net.hydra.jojomod.entity.TickableSoundInstances.RoadRollerAmbientSound;
 import net.hydra.jojomod.entity.TickableSoundInstances.RoadRollerExplosionSound;
@@ -40,7 +39,6 @@ import net.hydra.jojomod.item.*;
 import net.hydra.jojomod.entity.TickableSoundInstances.BowlerHatFlyingSound;
 import net.hydra.jojomod.menu.GamblingTableMenu;
 import net.hydra.jojomod.menu.gambling_games.CoinDropGame;
-import net.hydra.jojomod.platform.ClientServices;
 import net.hydra.jojomod.powers.GeneralPowers;
 import net.hydra.jojomod.powers.power_types.PunchingGeneralPowers;
 import net.hydra.jojomod.powers.power_types.VampireGeneralPowers;
@@ -67,10 +65,8 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.hydra.jojomod.networking.ServerToClientPackets;
@@ -1250,6 +1246,15 @@ public class ClientUtil {
             if (user.roundabout$getStandPowers() instanceof PowersKingCrimson ckb){
                 ckb.disengageTargetInt = data;
             }
+        } else if (context == PacketDataIndex.S2C_KN_ADD_HIGHLIGHT_ENTITY) {
+            if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing kn) {
+                kn.addItemEntity(data);
+            }
+        }
+        else if (context == PacketDataIndex.S2C_KN_RM_HIGHLIGHT_ENTITY) {
+            if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing kn) {
+                kn.removeItemEntity(data);
+            }
         }
     }
     public static void handleDoubleIntPacketS2C(Player player, int data, int data2, byte context) {
@@ -1275,15 +1280,6 @@ public class ClientUtil {
             }
         } else if (context == PacketDataIndex.S2C_HALLUCINATION_INDICATOR) {
             HallucinationIndicatorRenderer.update(data, data2);
-        } else if (context == PacketDataIndex.S2C_KING_NOTHING_HIGHLIGHT) {
-            if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing KN) {
-                if (data2 == 0) {
-                    KN.removeItemHolder(data);
-                }
-                else if (data2 == 1) {
-                    KN.addItemHolder(data);
-                }
-            }
         }
     }
 

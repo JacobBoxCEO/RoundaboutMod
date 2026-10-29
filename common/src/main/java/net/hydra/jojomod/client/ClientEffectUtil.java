@@ -300,4 +300,85 @@ public class ClientEffectUtil {
         RenderSystem.enableDepthTest();
         poseStack.popPose();
     }
+
+    /**
+     * Like highlightBlocksThrough walls but not through walls
+     */
+    public static void highlightBlocksNoThroughWalls(
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            Camera camera,
+            List<BlockPos> blockPositions,
+            float r, float g, float b, float a
+    ) {
+        if (blockPositions == null || blockPositions.isEmpty()) return;
+
+        Vec3 cameraPos = camera.getPosition();
+        poseStack.pushPose();
+        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+        Matrix4f matrix = poseStack.last().pose();
+
+        // Disables depth testing so lines render through all solid ground/blocks
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.lineWidth(5F);
+
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+
+        for (BlockPos pos : blockPositions) {
+            float x0 = pos.getX();
+            float y0 = pos.getY();
+            float z0 = pos.getZ();
+            float x1 = x0 + 1.0F;
+            float y1 = y0 + 1.0F;
+            float z1 = z0 + 1.0F;
+
+            // Bottom 4 edges
+            bufferBuilder.vertex(matrix, x0, y0, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y0, z0).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y0, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y0, z1).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y0, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y0, z1).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x0, y0, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y0, z0).color(r, g, b, a).endVertex();
+
+            // Top 4 edges
+            bufferBuilder.vertex(matrix, x0, y1, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y1, z0).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y1, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y1, z1).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x0, y1, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y1, z0).color(r, g, b, a).endVertex();
+
+            // Vertical 4 edges
+            bufferBuilder.vertex(matrix, x0, y0, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y1, z0).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y0, z0).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y1, z0).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x1, y0, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
+
+            bufferBuilder.vertex(matrix, x0, y0, z1).color(r, g, b, a).endVertex();
+            bufferBuilder.vertex(matrix, x0, y1, z1).color(r, g, b, a).endVertex();
+        }
+
+        tesselator.end();
+
+        // Restore OpenGL state
+        RenderSystem.lineWidth(1.0F);
+        RenderSystem.enableDepthTest();
+        poseStack.popPose();
+    }
 }
