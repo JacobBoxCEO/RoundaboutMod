@@ -687,9 +687,8 @@ public class PowersKingNothing extends NewDashPreset {
                                     (vec3daST.z + vec3DbST.z) / 2);
                             Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
                             boolean isHoldingBucket = held.is(Items.BUCKET);
-                            BlockHitResult blockHit = /*!isHoldingBucket ?*/ stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
-                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand)) /*: stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
-                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, stand))*/;
+                            BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
+                                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
                             BlockPos bpos = blockHit.getBlockPos();
                             BlockState state = stand.level().getBlockState(bpos);
                             if (!state.isAir()) {
@@ -716,7 +715,9 @@ public class PowersKingNothing extends NewDashPreset {
                                         && tryPlaceBlock(BI, blockHit, bpos, stand, held)) {
                                         return;
                                 }
-                                else if (held.getItem() instanceof BucketItem && !held.is(Items.LAVA_BUCKET)) {
+                                else if (held.getItem() instanceof BucketItem BU && !held.is(Items.LAVA_BUCKET)
+                                        && tryBucketPlace(BU, stand, bpos, blockHit)) {
+                                    return;
                                 }
                                 else if (isHoldingItem && tryMineBlock(held, state, bpos, stand)) {
                                     return;
@@ -753,24 +754,50 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
+    private boolean tryBucketPlace(BucketItem bucket, StandEntity stand, BlockPos bpos, BlockHitResult blockHit) {
+        BlockPos placePos = bpos.relative(blockHit.getDirection());
+        boolean placesNotfr = canModifyPos(placePos);
+        if (placesNotfr && bucket.emptyContents(null, stand.level(), placePos, null)) {
+            if (!getCreative()) {
+                stand.setHeldItem(Items.BUCKET.getDefaultInstance());
+            }
+            getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
+            animateStand(KingNothingEntity.RETURN);
+        }
+        return placesNotfr;
+    }
+
     public boolean tryBucketPickup(BlockState state, BlockHitResult blockHit, BlockPos pos, StandEntity stand) {
         BlockState bstate = state;
         BlockPos bpos = pos;
+        BucketPickup pickup = null ;
         if (!(bstate.getBlock() instanceof BucketPickup) || bstate.getBlock() instanceof SimpleWaterloggedBlock
                 && bstate.getFluidState().isEmpty()) {
             Direction dir = blockHit.getDirection();
             bpos = bpos.relative(dir);
             bstate = stand.level().getBlockState(bpos);
         }
-        boolean pickupfrfrfr = bstate.getBlock() instanceof BucketPickup BU
-                && !(BU instanceof SimpleWaterloggedBlock && !bstate.getValue(BlockStateProperties.WATERLOGGED))
-                && !(BU instanceof LiquidBlock && !bstate.getFluidState().isSource())
-                && getSelf() instanceof ServerPlayer SP
-                && SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
-                && !SP.blockActionRestricted(SP.level(), pos, SP.gameMode.getGameModeForPlayer())
-                && SP.level().mayInteract(SP, pos) && MainUtil.canPlaceOnClaim(SP, pos);
+        if (bstate.getBlock() instanceof BucketPickup BU) {
+            pickup = BU;
+        }
+        boolean pickupfrfrfr = pickup != null
+                && !(pickup instanceof SimpleWaterloggedBlock && !bstate.getValue(BlockStateProperties.WATERLOGGED))
+                && !(pickup instanceof LiquidBlock && !bstate.getFluidState().isSource())
+                && canModifyPos(pos);
         if (pickupfrfrfr) {
-            ItemStack stacko = ((BucketPickup) bstate.getBlock()).pickupBlock(stand.level(), bpos, bstate);
+            if (pickup.getPickupSound().isPresent()) {
+                getSelf().playSound(pickup.getPickupSound().get(), 1.0f, 1.0f);
+            }
+            ItemStack stacko = pickup.pickupBlock(stand.level(), bpos, bstate);
             if (!stacko.isEmpty()) {
                 stand.setHeldItem(stacko);
             }
@@ -789,41 +816,46 @@ public class PowersKingNothing extends NewDashPreset {
         return pickupfrfrfr;
     }
 
+    public boolean canModifyPos(BlockPos pos) {
+        return getSelf() instanceof ServerPlayer SP
+                && SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
+                && !SP.blockActionRestricted(SP.level(), pos, SP.gameMode.getGameModeForPlayer())
+                && SP.level().mayInteract(SP, pos) && MainUtil.canPlaceOnClaim(SP, pos);
+    }
+
     public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand,
                                  ItemStack held) {
         Direction dir = blockHit.getDirection();
         BlockPos placePos = bpos.relative(dir);
         BlockState placeState = stand.level().getBlockState(placePos);
+        ItemStack returnStack = stand.getHeldItem().copy();
         boolean placesfrfr = (placeState.canBeReplaced() || placeState.isAir())
-                && getSelf() instanceof ServerPlayer SP &&
-                SP.level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING) &&
-                !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer())
-                && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos);
-        if (placesfrfr) {
-            if (blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
+                && canModifyPos(bpos);
+        if (placesfrfr && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                     != InteractionResult.FAIL) {
-                getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
-                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
-                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                this.setCooldown(PowerIndex.SKILL_2,
-                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
-                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                this.setCooldown(PowerIndex.SKILL_2_SNEAK,
-                        ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
-                playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
-                animateStand(KingNothingEntity.RETURN);
+            if (getCreative()) {
+                stand.setHeldItem(returnStack);
             }
+            else if (blockItem instanceof SolidBucketItem) {
+                stand.setHeldItem(Items.BUCKET.getDefaultInstance());
+            }
+            getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            this.setCooldown(PowerIndex.SKILL_2_SNEAK,
+                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
+            animateStand(KingNothingEntity.RETURN);
         }
         return placesfrfr;
     }
 
     public boolean tryMineBlock(ItemStack held, BlockState state, BlockPos bpos, StandEntity stand) {
-        boolean minesfr = held.isCorrectToolForDrops(state) && (this.getSelf() instanceof ServerPlayer SP &&
-                this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING)
-                && this.getSelf().level().getGameRules().getBoolean(ModGamerules.ROUNDABOUT_STAND_GRIEFING_OBTAINMENT)
-                && !SP.blockActionRestricted(SP.level(), bpos, SP.gameMode.getGameModeForPlayer()))
-                && SP.level().mayInteract(SP, bpos) && MainUtil.canPlaceOnClaim(SP, bpos);
+        boolean minesfr = held.isCorrectToolForDrops(state) && canModifyPos(bpos);
         if (minesfr) {
             this.getSelf().level().destroyBlock(bpos, false);
             BlockEntity $$6 = state.hasBlockEntity() ? getSelf().level().getBlockEntity(bpos) : null;
@@ -962,10 +994,7 @@ public class PowersKingNothing extends NewDashPreset {
         poseStand(OffsetIndex.FOLLOW);
         StandEntity stand = getStandEntity(getSelf());
         if (stand != null) {
-            if (!getSelf().level().isClientSide()) {
-                addItem(stand);
-            }
-            stand.setHeldItem(ItemStack.EMPTY);
+            addItem(stand);
         }
         // server-client desync fix?
         if (!getSelf().level().dimension().equals(dimension)) {
@@ -1170,8 +1199,6 @@ public class PowersKingNothing extends NewDashPreset {
                         }
                     }
                     if (gotItem) {
-                        playSoundIfPossible(self.level(), null, this.getSelf().blockPosition(),
-                                ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
                         this.getStandUserSelf().roundabout$tryPower(PowerIndex.NONE, true);
                         S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                                 ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
@@ -1265,7 +1292,7 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     private void damageHeld(ItemStack held, StandEntity stand, LivingEntity self) {
-        if (held.isDamageableItem() && !(self instanceof Player PE && PE.isCreative())) {
+        if (held.isDamageableItem() && !getCreative()) {
             if (held.hurt(1, stand.level().getRandom(), null)) {
                 stand.setHeldItem(ItemStack.EMPTY);
                 playSoundIfPossible(self.level(), null, self.blockPosition(),
@@ -1330,6 +1357,10 @@ public class PowersKingNothing extends NewDashPreset {
 
     public void addItemLight(StandEntity standEntity) {
         if (canAddItem(standEntity.getHeldItem(), ((Player) this.getSelf()).getInventory())) {
+            if (!standEntity.getHeldItem().isEmpty()) {
+                playSoundIfPossible(getSelf().level(), null, this.getSelf().blockPosition(),
+                        ModSounds.BLOCK_GRAB_EVENT, SoundSource.PLAYERS, 1.7F, 1.3F);
+            }
             ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
         }
         else {
