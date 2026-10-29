@@ -24,9 +24,11 @@ import net.hydra.jojomod.item.MaxStandDiscItem;
 import net.hydra.jojomod.particles.HazeColorParticleOptions;
 import net.hydra.jojomod.util.C2SPacketUtil;
 import net.hydra.jojomod.util.config.ConfigManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -832,6 +834,15 @@ public class PowersPurpleHaze extends NewPunchingStand {
             super.renderAttackHud(context,playerEntity,
                     scaledWidth,scaledHeight,ticks,vehicleHeartCount, flashAlpha, otherFlashAlpha);
         }
+
+        if (onCooldown(PowerIndex.SNEAK_ATTACK)) {
+            CooldownInstance cd = getCooldown(PowerIndex.SNEAK_ATTACK);
+            if (cd != null) {
+                int ClashTime = Math.round(((float) cd.time / cd.maxTime) * 15);
+                context.blit(StandIcons.JOJO_ICONS, k, j+17, 213, 97, 15, 4);
+                context.blit(StandIcons.JOJO_ICONS, k, j+17, 213, 102, ClashTime, 4);
+            }
+        }
     }
 
     @Override
@@ -981,6 +992,10 @@ public class PowersPurpleHaze extends NewPunchingStand {
         RenderSystem.enableBlend();
         context.setColor(1f, 1f, 1f, 1f);
 
+        if (getPods() <= 0) {
+            context.setColor(0.62f, 0.62f, 0.62f, 0.8f);
+        }
+
         x += slot * 25;
         y -= 1;
 
@@ -1008,13 +1023,12 @@ public class PowersPurpleHaze extends NewPunchingStand {
             context.blit(StandIcons.PODS_0, x - 3, y - 3,
                     0, 0, squareWidth, squareHeight, squareWidth, squareHeight);
         }
-    }
-    private static final float PURPLE_HAZE_RANGE = 8.0F;
 
-    private boolean purpleHazeFieldActive = false;
+
+    }
+
     private boolean indistortionmode = false;
 
-    private int purpleHazeFieldTicks = 0;
 
     private static final int PURPLE_HAZE_FIELD_DURATION = 400;
     private static final int DISTORTION_FIELD_DURATION = 300;
@@ -1022,10 +1036,6 @@ public class PowersPurpleHaze extends NewPunchingStand {
 
     private PHCapsuleEntity purpleHazePod = null;
     private boolean purpleHazePodDistortionMode = false;
-    private Vec3 purpleHazeFieldPosition = null;
-
-    private static final int VIRUS_INFECTION_DELAY = 40;
-    private boolean purpleHazeFieldDistortionMode = false;
 
     //Pod count
     private static final int MAX_PODS = 6;
@@ -1417,7 +1427,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
         animateStand(PurpleHazeEntity.STRANGLE_GRAB);
 
         playSoundIfPossible(self.level(), null, this.self.blockPosition(),
-                ModSounds.SOFT_AND_WET_BARRAGE_EVENT /*placeholder*/, SoundSource.PLAYERS, 1.0F, 1.0F);
+                ModSounds.PURPLE_HAZE_KICK_BARRAGE_CRY_EVENT /*placeholder*/, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 
     private void tickStranglePin(StandEntity stand) {
