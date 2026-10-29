@@ -1429,6 +1429,8 @@
   "sounds.roundabout.purple_haze_pod_bite":  "Pod Cracks",
   "sounds.roundabout.purple_haze_barrage_finisher": "Heavy Punch",
   "sounds.roundabout.ph_strangle": "Purple haze growls",
+  "sounds.roundabout.ph_strangle_run": "Strangle run",
+  "sounds.roundabout.ph_strangle_grab": "Strangle grab",
   "sounds.roundabout.ph_type_switch": "Distorcion switch",
   "sounds.roundabout.ph_pod_launch": "Pod launch",
 
@@ -1926,6 +1928,7 @@
   "instruction.roundabout.press_skill_submerged": "Press Skill %1$s While Submerged",
   "instruction.roundabout.press_skill_phase_item": "Press Skill %1$s While using Phase Item",
   "instruction.roundabout.press_skill_tracking": "Press Skill %1$s While Tracking",
+  "instruction.roundabout.press_skill_item": "Press Skill %1$s With A Compatible Item",
 
 
   "ability.roundabout.ice_guard": "Guard",
@@ -2690,7 +2693,9 @@
   "ability.roundabout.gold_experience_placeholder": "I can't believe 88 is making popularslop.",
   "ability.roundabout.gold_experience_placeholder.desc": "He should make less standslop.",
   "ability.roundabout.gold_experience_life_punch": "Life Infusion Punch",
-  "ability.roundabout.gold_experience_life_punch.desc": "Your stand infused whatever you hit with life. This punch can act as bonemeal, make trees wilt and explode, or knock the soul out of your enemies.",
+  "ability.roundabout.gold_experience_life_punch.desc": "Your stand infused whatever you hit with life. This punch can act as bonemeal, make trees wilt and explode, or make your enemy's senses go berserk.",
+  "ability.roundabout.gold_experience_dna_creation": "DNA Creation",
+  "ability.roundabout.gold_experience_dna_creation.desc": "Use the DNA from an item to create a new lifeform from the cells. This mob takes time to grow, but is permanent",
 
   "ability.roundabout.emperor_shoot": "Shoot",
   "ability.roundabout.emperor_shoot.desc": "Shoot a bullet from the emperor.",

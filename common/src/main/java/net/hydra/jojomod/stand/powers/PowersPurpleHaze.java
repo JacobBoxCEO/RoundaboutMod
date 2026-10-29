@@ -3,15 +3,12 @@ package net.hydra.jojomod.stand.powers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.hydra.jojomod.access.IGravityEntity;
-import net.hydra.jojomod.access.IPermaCasting;
 import net.hydra.jojomod.access.IPlayerEntity;
 import net.hydra.jojomod.client.ClientNetworking;
 import net.hydra.jojomod.client.StandIcons;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.projectile.PHCapsuleEntity;
 import net.hydra.jojomod.entity.projectile.VirusSpitEntity;
-import net.hydra.jojomod.entity.stand.KillerQueenEntity;
-import net.hydra.jojomod.entity.stand.PlanetWavesEntity;
 import net.hydra.jojomod.entity.stand.PurpleHazeEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.entity.substand.PurpleSmokeEntity;
@@ -23,16 +20,13 @@ import net.hydra.jojomod.event.powers.*;
 import net.hydra.jojomod.item.MaxStandDiscItem;
 import net.hydra.jojomod.particles.HazeColorParticleOptions;
 import net.hydra.jojomod.util.C2SPacketUtil;
-import net.hydra.jojomod.util.config.ConfigManager;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.hydra.jojomod.event.PermanentZoneCastInstance;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
 import net.hydra.jojomod.stand.powers.presets.NewPunchingStand;
@@ -53,7 +47,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -61,12 +54,10 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.core.particles.DustParticleOptions;
 import org.joml.Vector3f;
 import net.minecraft.server.level.ServerLevel;
 
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -187,10 +178,6 @@ public class PowersPurpleHaze extends NewPunchingStand {
         if (!this.self.level().isClientSide()) {
             playStandUserOnlySoundsIfNearby(SoundIndex.BARRAGE_CRY_SOUND_2, 32, false, true);
         }
-    }
-
-    public int getLeapLevel() {
-        return 3;
     }
 
     public int bonusLeapCount = -2;
@@ -851,7 +838,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
                 || activePower == PowerIndex.BARRAGE_CHARGE || activePower == PowerIndex.BARRAGE_CHARGE_2)) {
             setSkillIcon(context, x, y, 1, StandIcons.PH_FORWARD_BARRAGE, PowerIndex.NO_CD);
         } else if (isHoldingSneak()) {
-            if (canExecuteMoveWithLevel(4)) {
+            if (canExecuteMoveWithLevel(getDistortionAndPodBiteLevel())) {
                 if(indistortionmode()){
                     setSkillIcon(context, x, y, 1, StandIcons.DISTORTION_MODE, PowerIndex.SKILL_1_SNEAK);
 
@@ -862,24 +849,26 @@ public class PowersPurpleHaze extends NewPunchingStand {
 
             } else setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD);
         } else {
-            if (canExecuteMoveWithLevel(4)) {
+            if (canExecuteMoveWithLevel(getDistortionAndPodBiteLevel())) {
                 if(self.hasEffect(ModEffects.VIRUS_IMMUNITY)){
                     setSkillIcon(context, x, y, 1, StandIcons.VIRUS_SPIT, PowerIndex.POWER_1_BONUS);
                 }else setSkillIcon(context, x, y, 1, StandIcons.POD_BITE, PowerIndex.SKILL_1);
             } else setSkillIcon(context, x, y, 1, StandIcons.LOCKED, PowerIndex.NO_CD);
         }
 
-        if (canExecuteMoveWithLevel(2)) {
+        if (canExecuteMoveWithLevel(getStrangleLevel())) {
             setSkillIcon(context, x, y, 2, StandIcons.PURPLE_HAZE_STRANGLE, PowerIndex.SKILL_2);
         } else setSkillIcon(context, x, y, 2, StandIcons.LOCKED, PowerIndex.NO_CD);
 
         if (isHoldingSneak()) {
-            boolean jojoveinLikeKeys = !ClientNetworking.getAppropriateConfig().generalStandSettings.standJumpAndDashShareCooldown;
-            if (jojoveinLikeKeys){
-                setSkillIcon(context, x, y, 3, StandIcons.STAND_LEAP_PURPLE_HAZE, PowerIndex.SKILL_3);
-            } else {
-                setSkillIcon(context, x, y, 3, StandIcons.STAND_LEAP_PURPLE_HAZE, PowerIndex.GLOBAL_DASH);
-            }
+            if (canExecuteMoveWithLevel(getLeapLevel())) {
+                boolean jojoveinLikeKeys = !ClientNetworking.getAppropriateConfig().generalStandSettings.standJumpAndDashShareCooldown;
+                if (jojoveinLikeKeys){
+                    setSkillIcon(context, x, y, 3, StandIcons.STAND_LEAP_PURPLE_HAZE, PowerIndex.SKILL_3);
+                } else {
+                    setSkillIcon(context, x, y, 3, StandIcons.STAND_LEAP_PURPLE_HAZE, PowerIndex.GLOBAL_DASH);
+                }
+            } else setSkillIcon(context, x, y, 3, StandIcons.LOCKED, PowerIndex.NO_CD);
         } else {
             if (canVault()) {
                 setSkillIcon(context, x, y, 3, StandIcons.PURPLE_HAZE_LEDGE_GRAB, PowerIndex.GLOBAL_DASH);
@@ -938,22 +927,24 @@ public class PowersPurpleHaze extends NewPunchingStand {
                 "instruction.roundabout.hold_attack", StandIcons.MINING,0,level,bypas));
         return $$1;
     }
-    @Override
-    public byte getMaxLevel() {
-        return 5;
-    }
+
+    private int getStrangleLevel() { return 2; }
+    private int getLeapLevel() { return 3; }
+    private int getDistortionAndPodBiteLevel() { return 4; }
+    private int getPodRegenLevel() { return 4; }
+
+    @Override  public byte getMaxLevel() { return 5; }
+
 
     @Override
-    public int getExpForLevelUp(int currentLevel) {
+    public int getExpForLevelUp(int currentLevel){
         int amt;
-        if (currentLevel == 1) {
+        if (currentLevel == 1){
             amt = 100;
-        } else if (currentLevel == 2) {
-            amt = 200;
-        } else if (currentLevel == 3) {
-            amt = 400;
-        } else amt = 500;
-        amt = (int) (amt * (getLevelMultiplier()));
+        } else {
+            amt = (100+((currentLevel-1)*60));
+        }
+        amt= (int) (amt*getLevelMultiplier());
         return amt;
     }
 
@@ -1093,9 +1084,9 @@ public class PowersPurpleHaze extends NewPunchingStand {
             return;
         }
 
-        IPlayerEntity playerData = (IPlayerEntity) player;
+        //IPlayerEntity playerData = (IPlayerEntity) player;
 
-        if (playerData.roundabout$getStandLevel() < 5) {
+        if (canExecuteMoveWithLevel(getPodRegenLevel())) {
             podRechargeTicks = 0;
             return;
         }
@@ -1113,7 +1104,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
         }
     }
     public void attemptDistortion() {
-        if (canExecuteMoveWithLevel(4) && !(activePower == PowerIndex.BARRAGE || activePower == PowerIndex.BARRAGE_2
+        if (canExecuteMoveWithLevel(getDistortionAndPodBiteLevel()) && !(activePower == PowerIndex.BARRAGE || activePower == PowerIndex.BARRAGE_2
                 || activePower == PowerIndex.BARRAGE_CHARGE || activePower == PowerIndex.BARRAGE_CHARGE_2) && getPods()>0 ) {
             Distortion();
         }
@@ -1169,7 +1160,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
     }
 
     public void attemptVirusSpit() {
-        if (canExecuteMoveWithLevel(4) && !(activePower == PowerIndex.BARRAGE || activePower == PowerIndex.BARRAGE_2
+        if (canExecuteMoveWithLevel(getDistortionAndPodBiteLevel()) && !(activePower == PowerIndex.BARRAGE || activePower == PowerIndex.BARRAGE_2
                 || activePower == PowerIndex.BARRAGE_CHARGE || activePower == PowerIndex.BARRAGE_CHARGE_2)) {
             VirusSpit();
         }
@@ -1215,7 +1206,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
         }
     }
     public void attemptDistortionModeChange() {
-        if (canExecuteMoveWithLevel(4)) {
+        if (canExecuteMoveWithLevel(getDistortionAndPodBiteLevel())) {
             DistortionModeChange();
 
         }
@@ -1252,7 +1243,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
     private int strangleHoldTicks = 0;
 
     public void attemptStrangle() {
-        if ((!(self instanceof Player) || canExecuteMoveWithLevel(2)) && activePower == NONE) {
+        if ((!(self instanceof Player) || canExecuteMoveWithLevel(getStrangleLevel())) && (activePower == NONE || activePower == GUARD)) {
             Strangle();
         }
     }
@@ -1265,6 +1256,8 @@ public class PowersPurpleHaze extends NewPunchingStand {
         if (Objects.isNull(stand)) {
             return;
         }
+
+
         this.setActivePower(PowerIndex.POWER_2);
         this.setAttackTimeDuring(0);
         this.strangleTicks = 0;
@@ -1272,6 +1265,14 @@ public class PowersPurpleHaze extends NewPunchingStand {
 
         animateStand(PurpleHazeEntity.STRANGLE_WINDUP);
         poseStand(OffsetIndex.LOOSE);
+        Vec3 pos = self.getPosition(1).add(new Vec3(
+                Mth.sin(rotation.x * ((float) Math.PI / 180)),
+                0,
+                -Mth.cos(rotation.x * ((float) Math.PI / 180)))
+                .scale(-1.25f));
+
+        stand.absMoveTo(pos.x, pos.y, pos.z, rotation.x, rotation.y);
+
         playSoundIfPossible(self.level(), null, this.self.blockPosition(),
                 ModSounds.PURPLE_HAZE_STRANGLE_START_EVENT, SoundSource.PLAYERS, 1.0F, 1.0F);
 
@@ -1349,7 +1350,7 @@ public class PowersPurpleHaze extends NewPunchingStand {
 
 
         playSoundIfPossible(self.level(), null, this.self.blockPosition(),
-                ModSounds.PURPLE_HAZE_POD_BITE_EVENT /*placeholder*/, SoundSource.PLAYERS, 1.0F, 1.0F);
+                ModSounds.PURPLE_HAZE_STRANGLE_RUN_EVENT, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
     private void tickStrangleTravel(StandEntity stand) {
         double traveled = strangleTravelTicks * STRANGLE_SPEED;
@@ -1419,15 +1420,13 @@ public class PowersPurpleHaze extends NewPunchingStand {
         this.strangleBaseY = victim.getY();
         this.strangleGrabTicks = 0;
 
-        if (victim instanceof StandUser SU) {
-            SU.roundabout$setRestrainedTicks(20);
-        }
+        ((StandUser) victim).roundabout$setRestrainedTicks(20);
 
         stand.setPos(getStrangleStandPos(victim));
         animateStand(PurpleHazeEntity.STRANGLE_GRAB);
 
         playSoundIfPossible(self.level(), null, this.self.blockPosition(),
-                ModSounds.PURPLE_HAZE_KICK_BARRAGE_CRY_EVENT /*placeholder*/, SoundSource.PLAYERS, 1.0F, 1.0F);
+                ModSounds.PURPLE_HAZE_STRANGLE_GRAB_EVENT, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 
     private void tickStranglePin(StandEntity stand) {
@@ -1436,9 +1435,12 @@ public class PowersPurpleHaze extends NewPunchingStand {
             return;
         }
 
-        if (strangleVictim instanceof StandUser SU) {
-            SU.roundabout$setRestrainedTicks(20);
+        if (strangleVictim != null) {
+            ((StandUser)strangleVictim).roundabout$setRestrainedTicks(20);
         }
+
+        setDazed(strangleVictim, (byte)10);
+
 
         if (strangleGrabTicks < STRANGLE_GRAB_TICKS) {
             strangleGrabTicks++;
@@ -1481,11 +1483,11 @@ public class PowersPurpleHaze extends NewPunchingStand {
     private void endStrangle() {
         if (strangleVictim != null) {
             if (strangleVictim instanceof Mob mob) {
-                mob.setNoAi(false);
+                //mob.setNoAi(false);
             }
-            if (strangleVictim instanceof StandUser SU) {
-                SU.roundabout$setRestrainedTicks(0);
-            }
+
+            ((StandUser)strangleVictim).roundabout$setRestrainedTicks(0);
+
         }
         this.strangleGrabTicks = 0;
         this.strangleVictim = null;
