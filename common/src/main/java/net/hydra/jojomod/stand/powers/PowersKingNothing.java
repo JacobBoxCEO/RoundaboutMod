@@ -569,9 +569,9 @@ public class PowersKingNothing extends NewDashPreset {
                         itemHoldingEntities.add(ent);
                     }
                     if (!foundItem && checkedEnt instanceof LivingEntity LE
-                            && (LE.getMainHandItem().getItem().equals(trackedItem) ||
-                            LE.getOffhandItem().getItem().equals(trackedItem) || LE.hasItemInSlot(
-                            LivingEntity.getEquipmentSlotForItem(new ItemStack(trackedItem))))) {
+                            && (LE.getMainHandItem().is(trackedItem) ||
+                            LE.getOffhandItem().getItem().equals(trackedItem) ||
+                            LE.getItemBySlot(LivingEntity.getEquipmentSlotForItem(new ItemStack(trackedItem))).is(trackedItem))) {
                         if (level.isClientSide() && renderHighlights) {
                             itemHoldingEntities.add(ent);
                         }
