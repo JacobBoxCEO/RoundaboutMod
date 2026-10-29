@@ -1421,11 +1421,12 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public void onStandSummon(boolean desummon) {
         super.onStandSummon(desummon);
+        this.dimension = getSelf().level().dimension();
         if (desummon) {
             if (isPhasing()) {
                 animateStand(StandEntity.IDLE);
             }
-            isOut = false;
+            this.isOut = false;
             this.trackedItem = null;
             if (getSelf().level().isClientSide()) {
                 this.itemHoldingEntities.clear();
