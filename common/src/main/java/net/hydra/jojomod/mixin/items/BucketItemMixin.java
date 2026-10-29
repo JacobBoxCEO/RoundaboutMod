@@ -55,86 +55,86 @@ public class BucketItemMixin extends Item implements IBucketItem {
 
 
                     // gasoline bucket
-                    if (block instanceof GasolineBlock) {
-                        int levelState = state.getValue(GasolineBlock.LEVEL);
-                        if (levelState < 2) {
-                            ItemStack stack = new ItemStack(ModItems.GASOLINE_BUCKET);
-                            player.awardStat(Stats.ITEM_USED.get(this));
-                            player.swing(hand);
-                            if (!level.isClientSide) {
-                                level.removeBlock(blockPos, false);
-                                itemStack.shrink(1);
-                                if (itemStack.isEmpty()) {
-                                    cir.setReturnValue(InteractionResultHolder.sidedSuccess(stack, level.isClientSide()));
-                                    return;
-                                } else {
-                                    if (!player.getInventory().add(stack)) {
-                                        player.drop(stack, false);
-                                    }
-                                }
-                                SoundEvent $$6 = SoundEvents.BUCKET_FILL;
-                                level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
-                            }
-                            cir.setReturnValue(InteractionResultHolder.pass(itemStack));
-                        }
-
-
-
-                    //flesh bucket
-                    } else if (block instanceof FleshBlock) {
-
-                        ItemStack stack = new ItemStack(ModItems.FLESH_BUCKET);
-
-
-                        int bucketFill = 0;
-                        for (int x=-2;x<3;x++) {
-                            for (int z=-2;z<3;z++) {
-                                for (int y=1;y>-2;y--) {
-                                    if (bucketFill == FleshBucketItem.BASE_CAPACITY) {break;}
-                                    BlockPos pos = BHR.getBlockPos().offset(x,y,z);
-                                    BlockState BS = level.getBlockState(pos);
-                                    if (BS.getBlock() instanceof FleshBlock) {
-                                        int amount = BS.getValue(ModBlocks.FLESH_LAYER);
-                                        int newAmount = bucketFill+amount;
-
-                                        if (newAmount > FleshBucketItem.BASE_CAPACITY) {
-                                            int extra = newAmount - FleshBucketItem.BASE_CAPACITY;
-                                            level.setBlockAndUpdate(pos,BS.setValue(ModBlocks.FLESH_LAYER,extra) );
-                                        } else {
-                                            level.removeBlock(pos,false);
-                                        }
-                                        bucketFill = Math.min(newAmount, FleshBucketItem.BASE_CAPACITY);
-
-
-                                    }
-                                }
-
-                            }
-                        }
-                        FleshBucketItem.setFleshMissing(stack, FleshBucketItem.BASE_CAPACITY - bucketFill);
-
-
-
-
-                        if (!level.isClientSide) {
-                            player.awardStat(Stats.ITEM_USED.get(this));
-                            player.swing(hand);
-                            itemStack.shrink(1);
-                            SoundEvent $$6 = SoundEvents.BUCKET_FILL;
-                            level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
-                            if (itemStack.isEmpty()) {
-
-                                cir.setReturnValue(InteractionResultHolder.sidedSuccess(stack, level.isClientSide()));
-                                return;
-                            } else {
-                                if (!player.getInventory().add(stack)) {
-                                    player.drop(stack, false);
-                                }
-                            }
-                        }
-                        cir.setReturnValue(InteractionResultHolder.pass(itemStack));
-
-                    }
+//                    if (block instanceof GasolineBlock) {
+//                        int levelState = state.getValue(GasolineBlock.LEVEL);
+//                        if (levelState < 2) {
+//                            ItemStack stack = new ItemStack(ModItems.GASOLINE_BUCKET);
+//                            player.awardStat(Stats.ITEM_USED.get(this));
+//                            player.swing(hand);
+//                            if (!level.isClientSide) {
+//                                level.removeBlock(blockPos, false);
+//                                itemStack.shrink(1);
+//                                if (itemStack.isEmpty()) {
+//                                    cir.setReturnValue(InteractionResultHolder.sidedSuccess(stack, level.isClientSide()));
+//                                    return;
+//                                } else {
+//                                    if (!player.getInventory().add(stack)) {
+//                                        player.drop(stack, false);
+//                                    }
+//                                }
+//                                SoundEvent $$6 = SoundEvents.BUCKET_FILL;
+//                                level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
+//                            }
+//                            cir.setReturnValue(InteractionResultHolder.pass(itemStack));
+//                        }
+//
+//
+//
+//                    //flesh bucket
+////                    } else if (block instanceof FleshBlock) {
+////
+////                        ItemStack stack = new ItemStack(ModItems.FLESH_BUCKET);
+////
+////
+////                        int bucketFill = 0;
+////                        for (int x=-2;x<3;x++) {
+////                            for (int z=-2;z<3;z++) {
+////                                for (int y=1;y>-2;y--) {
+////                                    if (bucketFill == FleshBucketItem.BASE_CAPACITY) {break;}
+////                                    BlockPos pos = BHR.getBlockPos().offset(x,y,z);
+////                                    BlockState BS = level.getBlockState(pos);
+////                                    if (BS.getBlock() instanceof FleshBlock) {
+////                                        int amount = BS.getValue(ModBlocks.FLESH_LAYER);
+////                                        int newAmount = bucketFill+amount;
+////
+////                                        if (newAmount > FleshBucketItem.BASE_CAPACITY) {
+////                                            int extra = newAmount - FleshBucketItem.BASE_CAPACITY;
+////                                            level.setBlockAndUpdate(pos,BS.setValue(ModBlocks.FLESH_LAYER,extra) );
+////                                        } else {
+////                                            level.removeBlock(pos,false);
+////                                        }
+////                                        bucketFill = Math.min(newAmount, FleshBucketItem.BASE_CAPACITY);
+////
+////
+////                                    }
+////                                }
+////
+////                            }
+////                        }
+////                        FleshBucketItem.setFleshMissing(stack, FleshBucketItem.BASE_CAPACITY - bucketFill);
+////
+////
+////
+////
+////                        if (!level.isClientSide) {
+////                            player.awardStat(Stats.ITEM_USED.get(this));
+////                            player.swing(hand);
+////                            itemStack.shrink(1);
+////                            SoundEvent $$6 = SoundEvents.BUCKET_FILL;
+////                            level.playSound(null, blockPos, $$6, SoundSource.BLOCKS, 1F, 1.5F);
+////                            if (itemStack.isEmpty()) {
+////
+////                                cir.setReturnValue(InteractionResultHolder.sidedSuccess(stack, level.isClientSide()));
+////                                return;
+////                            } else {
+////                                if (!player.getInventory().add(stack)) {
+////                                    player.drop(stack, false);
+////                                }
+////                            }
+////                        }
+////                        cir.setReturnValue(InteractionResultHolder.pass(itemStack));
+//
+//                    }
 
 
                 }
