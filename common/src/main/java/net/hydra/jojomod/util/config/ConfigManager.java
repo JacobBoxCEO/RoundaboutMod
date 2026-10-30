@@ -212,37 +212,6 @@ public abstract class ConfigManager {
             }
         }
 
-        if (getAdvancedConfig().kingNothingScentIconOverrides != null) {
-            MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.clear();
-            for (String entry : getAdvancedConfig().kingNothingScentIconOverrides) {
-                try {
-                    String[] split = entry.split(":");
-
-                    if (split.length != 4) {
-                        Roundabout.LOGGER.warn("Invalid scent icon override entry: {}", entry);
-                        continue;
-                    }
-
-                    ResourceLocation sourceId = new ResourceLocation(split[0], split[1]);
-                    Block sourceBlock = BuiltInRegistries.BLOCK.get(sourceId);
-                    if (sourceBlock.asItem().equals(Items.AIR) || sourceBlock.equals(Blocks.AIR)
-                            || sourceBlock.defaultDestroyTime() < 0) {
-                        Roundabout.LOGGER.warn("Invalid scent icon override input: {}", sourceId);
-                        continue;
-                    }
-                    ResourceLocation targetId = new ResourceLocation(split[2], split[3]);
-                    Item targetItem = BuiltInRegistries.ITEM.get(targetId);
-                    if (targetItem.equals(Items.AIR)) {
-                        Roundabout.LOGGER.warn("Invalid scent icon override output: {}", targetId);
-                        continue;
-                    }
-                    MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.put(sourceBlock, targetItem);
-                } catch (Exception e) {
-                    Roundabout.LOGGER.error("Failed to parse scent icon override entry '{}'", entry, e);
-                }
-            }
-        }
-
         if (getAdvancedConfig().kingNothingBlockSniffBlacklist != null) {
             MainUtil.kingNothingBlockSniffBlacklist.clear();
             MainUtil.kingNothingBlockSniffBlacklist.addAll(getAdvancedConfig().kingNothingBlockSniffBlacklist);

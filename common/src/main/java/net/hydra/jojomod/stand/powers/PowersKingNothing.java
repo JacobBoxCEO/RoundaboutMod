@@ -311,9 +311,7 @@ public class PowersKingNothing extends NewDashPreset {
 
     public ItemStack getMemorizedScentIcon() {
         if (memorizedBlock != null) {
-            return MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock) == null ?
-                    memorizedBlock.asItem().getDefaultInstance():
-                    MainUtil.KING_NOTHING_SCENT_ICON_OVERRIDES.get(memorizedBlock).getDefaultInstance();
+            return memorizedBlock.asItem().getDefaultInstance();
         }
         else if (memorizedEntityType != null) {
             return new ItemStack(Items.EGG);
@@ -511,6 +509,18 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
+    public void addItemBlockPos(BlockPos pos) {
+        if (getSelf().level().isClientSide()) {
+            itemHoldingBlocks.add(pos);
+        }
+    }
+
+    public void removeItemBlockPos(BlockPos pos) {
+        if (getSelf().level().isClientSide()) {
+            itemHoldingBlocks.remove(pos);
+        }
+    }
+
     @Override
     public boolean highlightsEntity(Entity ent, Player player) {
         return itemHoldingEntities.contains(ent) && player.hasLineOfSight(ent) &&
@@ -521,6 +531,8 @@ public class PowersKingNothing extends NewDashPreset {
     public int highlightsEntityColor(Entity ent, Player player) {
         return getVisualInfo().highlightColor();
     }
+
+    int passiveParticlesCounter = 0;
 
     @Override
     public void tickPower() {
@@ -563,6 +575,7 @@ public class PowersKingNothing extends NewDashPreset {
             List<Entity> targets = MainUtil.getEntitiesInRange(getSelf().level(), getSelf().blockPosition(),
                     checkRangeEnt, getSelf());
             boolean renderHighlights = ConfigManager.getClientConfig().kingNothingSettings.highlightEntitiesWhileTrackingItem;
+            boolean foundTem = false;
             if (level.isClientSide() && renderHighlights) {
                 itemHoldingEntities.removeIf((entity) -> !targets.contains(entity));
             }
@@ -597,10 +610,11 @@ public class PowersKingNothing extends NewDashPreset {
                         }
                         else if (!level.isClientSide()) {
                             S2CPacketUtil.sendGenericIntToClientPacket(((ServerPlayer) getSelf()),
-                                    PacketDataIndex.S2C_KN_RM_HIGHLIGHT_ENTITY, ent.getId());
+                                    PacketDataIndex.S2C_KN_REMOVE_HIGHLIGHT_ENTITY, ent.getId());
                         }
                     }
                     if (foundItem) {
+                        foundTem = true;
                         if (!level.isClientSide()) {
                             ParticleData pdata = getVisualInfo();
                             int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
@@ -610,11 +624,11 @@ public class PowersKingNothing extends NewDashPreset {
                             MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                     PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
                                     ent.getX(), ent.getY() + ent.getEyeHeight() + 0.5, ent.getZ(),
-                                    1, 0.1, 0.1, 0.1, 0.01);
+                                    1, 0.1, 0.05, 0.1, 0.01);
                             MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                     PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color2),
                                     ent.getX(), ent.getY() + ent.getEyeHeight() + 0.5, ent.getZ(),
-                                    1, 0.1, 0.1, 0.1, 0.01);
+                                    1, 0.1, 0.05, 0.1, 0.01);
                         }
                     }
                     else if (level.isClientSide() && renderHighlights) itemHoldingEntities.remove(ent);
@@ -624,34 +638,52 @@ public class PowersKingNothing extends NewDashPreset {
             if (!level.isClientSide()) {
                 Set<BlockPos> secondChests = new HashSet<>();
                 BlockPos selfPos = getSelf().blockPosition();
+                itemHoldingBlocks.clear();
                 for (BlockPos pos : BlockPos.betweenClosed(
                         selfPos.offset(-checkRangeChest / 2, -2, -checkRangeChest / 2),
                         selfPos.offset(checkRangeChest / 2, checkRangeChest / 2, checkRangeChest / 2))) {
                     if (secondChests.contains(pos)) continue;
                     BlockState bstate = level.getBlockState(pos);
                     BlockEntity bentity = level.getBlockEntity(pos);
+                    float xSpreadBonus = 0;
+                    float zSpreadBonus = 0;
                     if (bentity instanceof RandomizableContainerBlockEntity CO) {
                         boolean chestHasItem = false;
                         BlockPos otherChestPos = null;
                         if (bstate.hasProperty(ChestBlock.TYPE) && bstate.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
                             boolean isLeft = bstate.getValue(ChestBlock.TYPE) == ChestType.LEFT;
                             switch (bstate.getValue(ChestBlock.FACING)) {
-                                case NORTH -> otherChestPos = isLeft ? pos.east() : pos.west();
-                                case SOUTH -> otherChestPos = isLeft ? pos.west() : pos.east();
-                                case WEST -> otherChestPos = isLeft ? pos.north() : pos.south();
-                                case EAST -> otherChestPos = isLeft ? pos.south() : pos.north();
+                                case NORTH -> {
+                                    otherChestPos = isLeft ? pos.east() : pos.west();
+                                    xSpreadBonus += 0.2f;
+                                }
+                                case SOUTH -> {
+                                    otherChestPos = isLeft ? pos.west() : pos.east();
+                                    xSpreadBonus += 0.2f;
+                                }
+                                case WEST -> {
+                                    otherChestPos = isLeft ? pos.north() : pos.south();
+                                    zSpreadBonus += 0.2f;
+                                }
+                                case EAST -> {
+                                    otherChestPos = isLeft ? pos.south() : pos.north();
+                                    zSpreadBonus += 0.2f;
+                                }
                             }
                         }
                         for (int i = 0; i < CO.getContainerSize(); i++) {
                             if (CO.getItem(i).is(trackedItem)) {
                                 chestHasItem = true;
+                                S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, false);
                                 if (otherChestPos != null) {
                                     secondChests.add(otherChestPos);
+                                    S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), otherChestPos, false);
                                 }
                                 break;
                             }
                         }
                         if (chestHasItem) {
+                            foundTem = true;
                             ParticleData pdata = getVisualInfo();
                             int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
                                     pdata.color1() : pdata.color2();
@@ -659,19 +691,43 @@ public class PowersKingNothing extends NewDashPreset {
                                     pdata.color1() : pdata.color2();
                             Vec3 spawnPos = otherChestPos == null ? pos.getCenter() :
                                     pos.getCenter().lerp(otherChestPos.getCenter(), 0.5);
-                            int yOffset = 1 + ((level.getBlockState(pos.above()).isAir() ||
-                                    (otherChestPos != null && level.getBlockState(otherChestPos).isAir())) ? 0 : 1);
+                            int yOffset = 1 + (level.getBlockState(pos.above()).isAir() ||
+                                    (level.getBlockEntity(pos.above()) instanceof RandomizableContainerBlockEntity) ||
+                                    otherChestPos != null && (level.getBlockState(otherChestPos).isAir()
+                                            || (level.getBlockEntity(
+                                            otherChestPos.above()) instanceof RandomizableContainerBlockEntity)) ? 0 : 1);
                             MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                     PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
                                     spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
-                                    1, 0.1, 0.1, 0.1, 0.01);
+                                    1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus, 0.01);
                             MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                     PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color2),
                                     spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
-                                    1, 0.1, 0.1, 0.1, 0.01);
+                                    1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus, 0.01);
+                        }
+                        else {
+                            S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
+                            if (otherChestPos != null) {
+                                S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), otherChestPos, true);
+                            }
                         }
                     }
+                    else S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
                 }
+            }
+            if (!foundTem) {
+                if (passiveParticlesCounter == 6) {
+                    ParticleData pdata = getVisualInfo();
+                    for (int i = 0; i < 4; i++) {
+                        int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
+                        Vec3 offset = getSelf().getEyePosition().offsetRandom(level.getRandom(), 5);
+                        MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
+                                offset.x(), offset.y(), offset.z(), 1, 0.5, 0.5, 0.5, 0.05);
+                    }
+                    passiveParticlesCounter = 0;
+                }
+                else passiveParticlesCounter++;
             }
         }
     }
@@ -739,8 +795,8 @@ public class PowersKingNothing extends NewDashPreset {
                             Vec3 vec3d2ST = stand.getViewVector(0);
                             Vec3 vec3daST = stand.getPosition(0);
                             Vec3 vec3DbST = stand.getEyePosition(0);
-                            Vec3 vec3dST = new Vec3((vec3daST.x + vec3DbST.x) / 2, (vec3daST.y + vec3DbST.y + 0.6) / 2,
-                                    (vec3daST.z + vec3DbST.z) / 2);
+                            Vec3 vec3dST = /*new Vec3((vec3daST.x + vec3DbST.x) / 2, (vec3daST.y + vec3DbST.y + 0.6) / 2,
+                                    (vec3daST.z + vec3DbST.z) / 2)*/ vec3daST.lerp(vec3DbST, 0.5);
                             Vec3 vec3d3ST = vec3dST.add(vec3d2ST.x * 3, vec3d2ST.y * 3, vec3d2ST.z * 3);
                             BlockHitResult blockHit = stand.level().clip(new ClipContext(vec3dST, vec3d3ST,
                                     ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, stand));
@@ -1083,6 +1139,7 @@ public class PowersKingNothing extends NewDashPreset {
             this.trackedItem = null;
             if (getSelf().level().isClientSide()) {
                 this.itemHoldingEntities.clear();
+                this.itemHoldingBlocks.clear();
             }
             disintegrateAnimTicks = 0;
             if (getSelf() instanceof ServerPlayer) {
@@ -1518,6 +1575,7 @@ public class PowersKingNothing extends NewDashPreset {
             this.trackedItem = null;
             if (getSelf().level().isClientSide()) {
                 this.itemHoldingEntities.clear();
+                this.itemHoldingBlocks.clear();
             }
         }
         else if (!isOut) {

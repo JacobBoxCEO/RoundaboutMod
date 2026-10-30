@@ -137,7 +137,7 @@ public class PacketDataIndex {
     public static final byte S2C_MERGE_TIME_INT = 29;
     public static final byte S2C_HALLUCINATION_INDICATOR = 30;
     public static final byte S2C_KN_ADD_HIGHLIGHT_ENTITY = 31;
-    public static final byte S2C_KN_RM_HIGHLIGHT_ENTITY = 32;
+    public static final byte S2C_KN_REMOVE_HIGHLIGHT_ENTITY = 32;
 
 
     /**S2C BUNDLE packets*/

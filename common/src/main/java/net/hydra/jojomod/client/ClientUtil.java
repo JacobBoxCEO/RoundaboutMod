@@ -1100,6 +1100,15 @@ public class ClientUtil {
                     }
                 }
 
+                else if (message.equals(ServerToClientPackets.S2CPackets.MESSAGES.KnUpdateItemContainers.value)) {
+                    BlockPos pos = (BlockPos) vargs[0];
+                    boolean remove = (Boolean) vargs[1];
+                    if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing pkn) {
+                        if (remove) pkn.removeItemBlockPos(pos);
+                        else pkn.addItemBlockPos(pos);
+                    }
+                }
+
                 // theoretical deregister dynamic worlds packet
                 // String name = buf.readUtf();
                 //        ResourceKey<Level> LEVEL_KEY = ResourceKey.create(Registries.DIMENSION, Roundabout.location(name));
@@ -1251,7 +1260,7 @@ public class ClientUtil {
                 kn.addItemEntity(data);
             }
         }
-        else if (context == PacketDataIndex.S2C_KN_RM_HIGHLIGHT_ENTITY) {
+        else if (context == PacketDataIndex.S2C_KN_REMOVE_HIGHLIGHT_ENTITY) {
             if (((StandUser) player).roundabout$getStandPowers() instanceof PowersKingNothing kn) {
                 kn.removeItemEntity(data);
             }

@@ -362,14 +362,6 @@ public class AdvancedConfig implements Cloneable {
             )
     );
 
-    public Set<String> kingNothingScentIconOverrides = new HashSet<>(
-            Arrays.asList(
-                    "minecraft:wheat:minecraft:wheat",
-                    "minecraft:beetroots:minecraft:beetroot",
-                    "roundabout:locacaca_plant:roundabout:locacaca"
-            )
-    );
-
     public Set<String> kingNothingBlockSniffBlacklist = new HashSet<>(
             Arrays.asList(
                     "minecraft:barrier",

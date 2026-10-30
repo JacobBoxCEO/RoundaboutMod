@@ -30,10 +30,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.OptionalDouble;
+import java.util.*;
 
 import org.joml.Matrix4f;
 
@@ -302,7 +299,7 @@ public class ClientEffectUtil {
     }
 
     /**
-     * Like highlightBlocksThrough walls but not through walls
+     * Like highlightBlocksThroughW alls but not through walls
      */
     public static void highlightBlocksNoThroughWalls(
             PoseStack poseStack,
@@ -319,8 +316,9 @@ public class ClientEffectUtil {
         Matrix4f matrix = poseStack.last().pose();
 
         // Disables depth testing so lines render through all solid ground/blocks
+        RenderSystem.enableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.lineWidth(5F);
+        RenderSystem.lineWidth(1.0F);
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -378,7 +376,6 @@ public class ClientEffectUtil {
 
         // Restore OpenGL state
         RenderSystem.lineWidth(1.0F);
-        RenderSystem.enableDepthTest();
         poseStack.popPose();
     }
 }
