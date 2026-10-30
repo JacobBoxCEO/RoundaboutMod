@@ -975,11 +975,7 @@ public class PowersKingNothing extends NewDashPreset {
             }
             damageHeld(held, stand, this.getSelf());
             ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
-            int efficiencyLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, held);
-            int cooldown = Math.max(Mth.ceil(1 / ((held.getDestroySpeed(
-                            state) + efficiencyLevel * efficiencyLevel +
-                            (efficiencyLevel > 0 ? 1 : 0)) / state.getBlock().defaultDestroyTime() / 30)),
-                    ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
+            int cooldown = ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown;
             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                     ClientNetworking.getAppropriateConfig().generalStandSettings.objectPocketCooldown);
             this.setCooldown(PowerIndex.SKILL_2,

@@ -200,20 +200,19 @@ public class ZWorldRenderer {
                     );
             }
         }
-        // stealing diver down's block highlight for the king
+        // what is a mere president to the king?
         if (ClientUtil.getPlayer() != null
                 && ((StandUser) ClientUtil.getPlayer()).roundabout$getStandPowers() instanceof PowersKingNothing pkn) {
             if (pkn.isTrackingItem() && !pkn.itemHoldingBlocks.isEmpty()) {
-                ClientEffectUtil.highlightBlocksNoThroughWalls(
-                        poseStack,
-                        mc.renderBuffers().bufferSource(),
-                        camera,
-                        new ArrayList<>(pkn.itemHoldingBlocks),
-                        ((pkn.getVisualInfo().highlightColor() >> 16) & 0xFF) / 255.0F,
-                        ((pkn.getVisualInfo().highlightColor() >> 8) & 0xFF) / 255.0F,
-                        (pkn.getVisualInfo().highlightColor() & 0xFF) / 255.0F,
-                        1.0f
-                );
+                int color = pkn.getVisualInfo().highlightColor();
+                for (BlockPos pos : pkn.itemHoldingBlocks) {
+                    ClientEffectUtil.renderBox(poseStack,
+                            mc.renderBuffers().bufferSource(),
+                            camera,
+                            pos,
+                            pos,
+                            color);
+                }
             }
         }
     }
