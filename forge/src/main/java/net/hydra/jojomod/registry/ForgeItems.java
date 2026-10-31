@@ -1000,6 +1000,8 @@ public class ForgeItems {
             () -> new MaskItem(new Item.Properties().stacksTo(1), new Daiya2Visage(null))));
     public static final RegistryObject<Item> HATO_MASK = addToTab(ITEMS.register("hato_mask",
             () -> new MaskItem(new Item.Properties().stacksTo(1), new HatoVisage(null))));
+    public static final RegistryObject<Item> NORISUKE_MASK = addToWIPTab(ITEMS.register("norisuke_mask",
+            () -> new MaskItem(new Item.Properties().stacksTo(1), new NorisukeVisage(null))));
     public static final RegistryObject<Item> LAEM_MASK = addToTab(ITEMS.register("laem_mask",
             () -> new MaskItem(new Item.Properties().stacksTo(1), new LaemVisage(null))));
     public static final RegistryObject<Item> JOSUKE_PART_EIGHT_MASK = addToTab(ITEMS.register("josuke_part_eight_mask",

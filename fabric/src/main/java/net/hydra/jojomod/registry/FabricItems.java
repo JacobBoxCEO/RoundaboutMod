@@ -389,6 +389,7 @@ public class FabricItems {
     public static Item FEM_ANASUI_MASK = registerItem("fem_anasui_mask", new MaskItem(new Item.Properties().stacksTo(1), new FemAnasuiVisage(null)));
     public static Item ANAKISS_MASK = registerItem("anakiss_mask", new MaskItem(new Item.Properties().stacksTo(1), new AnakissVisage(null)));
     public static Item HATO_MASK = registerItem("hato_mask", new MaskItem(new Item.Properties().stacksTo(1), new HatoVisage(null)));
+    public static Item NORISUKE_MASK = registerItem("norisuke_mask", new MaskItem(new Item.Properties().stacksTo(1), new NorisukeVisage(null)));
     public static Item SHIZUKA_MASK = registerItem("shizuka_mask", new MaskItem(new Item.Properties().stacksTo(1), new ShizukaVisage(null)));
     public static Item CHAKA_MASK = registerItem("chaka_mask", new MaskItem(new Item.Properties().stacksTo(1), new ChakaVisage(null)));
     public static Item ENYA_MASK = registerItem("enya_mask", new MaskItem(new Item.Properties().stacksTo(1), new EnyaVisage(null)));
@@ -854,6 +855,7 @@ public class FabricItems {
                         entries.accept(HALLUCINATORY_ACID_WALL);
                         entries.accept(ModBlocks.GAMBLING_TABLE);
                         entries.accept(ModBlocks.MAGICIANS_STATUE_BLOCK);
+                        entries.accept(NORISUKE_MASK);
                     }).build());
     public static final CreativeModeTab FOG_BLOCK_ITEMS = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
             new ResourceLocation(Roundabout.MOD_ID, "justice_fog_items"),
@@ -1122,6 +1124,7 @@ public class FabricItems {
         ModItems.ANAKISS_MASK = ANAKISS_MASK;
         ModItems.GUCCIO_MASK = GUCCIO_MASK;
         ModItems.HATO_MASK = HATO_MASK;
+        ModItems.NORISUKE_MASK = NORISUKE_MASK;
         ModItems.SHIZUKA_MASK = SHIZUKA_MASK;
         ModItems.CHAKA_MASK = CHAKA_MASK;
         ModItems.DAIYA_MASK = DAIYA_MASK;

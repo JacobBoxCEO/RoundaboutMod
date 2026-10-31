@@ -313,7 +313,7 @@ public class FabricEntityClient {
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_LAYER, GrabbedPlayerSoulSteveModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_SLIM_LAYER, GrabbedPlayerSoulAlexModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.DARK_MIRAGE_LAYER, DarkMirageModel::getTexturedModelData);
-        EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModello::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A1_LAYER, TuskAct1Model::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A2_LAYER, TuskAct2Model::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A3_LAYER, TuskAct3Model::createBodyLayer);
@@ -416,6 +416,7 @@ public class FabricEntityClient {
         ModStrayModels.PonytailPart = new PonytailPart();
         ModStrayModels.BigHairPart = new BigHairPart();
         ModStrayModels.KakyoinHairPart = new KakyoinHairPart();
+        ModStrayModels.NorisukeHairPart = new NorisukeHairPart();
         ModStrayModels.gyroHatPart = new GyroHatPart();
         ModStrayModels.anakissHatPart = new AnakissHatPart();
         ModStrayModels.steelBallsPart = new SteelBallsPart();

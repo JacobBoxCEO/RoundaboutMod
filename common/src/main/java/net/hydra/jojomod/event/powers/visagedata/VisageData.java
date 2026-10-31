@@ -178,5 +178,6 @@ public class VisageData {
     public boolean rendersCape(){
         return false;
     }
+    public boolean rendersNorisukeHair() { return false; }
 
 }

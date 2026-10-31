@@ -353,7 +353,7 @@ public class ClientForgeEvents {
         event.registerLayerDefinition(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_LAYER, GrabbedPlayerSoulSteveModel::createBodyLayer);
         event.registerLayerDefinition(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_SLIM_LAYER, GrabbedPlayerSoulAlexModel::createBodyLayer);
         event.registerLayerDefinition(ModEntityRendererClient.DARK_MIRAGE_LAYER, DarkMirageModel::getTexturedModelData);
-        event.registerLayerDefinition(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModel::getTexturedModelData);
+        event.registerLayerDefinition(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModello::getTexturedModelData);
         event.registerLayerDefinition(ModEntityRendererClient.TUSK_A1_LAYER, TuskAct1Model::createBodyLayer);
         event.registerLayerDefinition(ModEntityRendererClient.TUSK_A2_LAYER, TuskAct2Model::createBodyLayer);
         event.registerLayerDefinition(ModEntityRendererClient.TUSK_A3_LAYER, TuskAct3Model::createBodyLayer);
@@ -453,6 +453,7 @@ public class ClientForgeEvents {
         ModStrayModels.JohnnyHatPart = new JohnnyHatPart();
         ModStrayModels.kosakuHairPart = new KosakuHairPart();
         ModStrayModels.DaiyaEarsPart = new DaiyaEarsPart();
+        ModStrayModels.NorisukeHairPart = new NorisukeHairPart();
         ModStrayModels.DaiyaFluffPart = new DaiyaFluffPart();
         ModStrayModels.laemBreastsPart = new LaemBreastsPart();
         ModStrayModels.laemHolstersPart = new LaemHolstersPart();

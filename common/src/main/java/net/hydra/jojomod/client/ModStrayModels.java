@@ -6,7 +6,6 @@ import net.hydra.jojomod.client.models.WornBloodyStoneMaskModel;
 import net.hydra.jojomod.client.models.WornStoneMaskModel;
 import net.hydra.jojomod.client.models.minions.head_parts.*;
 import net.hydra.jojomod.client.models.projectile.*;
-import net.hydra.jojomod.client.models.stand.AnubisHumanoidModel;
 import net.hydra.jojomod.client.models.stand.AnubisModel;
 import net.hydra.jojomod.client.models.stand.EmperorModel;
 import net.hydra.jojomod.client.models.visages.parts.*;
@@ -60,6 +59,7 @@ public class ModStrayModels {
     public static DoppioHairPart DoppioHairPart;
     public static JohnnyHatPart JohnnyHatPart;
     public static DaiyaEarsPart DaiyaEarsPart;
+    public static NorisukeHairPart NorisukeHairPart;
     public static DaiyaFluffPart DaiyaFluffPart;
     public static LaemBreastsPart laemBreastsPart;
     public static LaemHolstersPart laemHolstersPart;

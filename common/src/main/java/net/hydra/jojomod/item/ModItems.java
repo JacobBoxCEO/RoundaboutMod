@@ -263,6 +263,7 @@ public class ModItems {
     public static Item ANAKISS_MASK;
     public static Item GUCCIO_MASK;
     public static Item HATO_MASK;
+    public static Item NORISUKE_MASK;
     public static Item SHIZUKA_MASK;
     public static Item CHAKA_MASK;
     public static Item DAIYA_MASK;
