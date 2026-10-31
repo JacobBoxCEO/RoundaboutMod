@@ -648,7 +648,7 @@ public class PowersKingNothing extends NewDashPreset {
                     selfPos.offset(checkRangeChest / 2, checkRangeChest / 2, checkRangeChest / 2));
             if (!level.isClientSide()) {
                 for (BlockPos pos : fuck) {
-                    if (checkecChests > 10) break;
+                    if (checkecChests > 16) break;
                     if (locatedChests.contains(pos)) continue;
                     BlockState bstate = level.getBlockState(pos);
                     BlockEntity bentity = level.getBlockEntity(pos);
