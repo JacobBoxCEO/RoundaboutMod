@@ -1128,7 +1128,7 @@ public class PowersKingNothing extends NewDashPreset {
         this.setActivePower(PowerIndex.NONE);
         poseStand(OffsetIndex.FOLLOW);
         StandEntity stand = getStandEntity(getSelf());
-        if (stand != null) {
+        if (stand != null && getSelf() instanceof Player) {
             addItem(stand);
         }
         // server-client desync fix?
