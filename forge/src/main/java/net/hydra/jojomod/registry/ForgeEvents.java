@@ -240,7 +240,6 @@ public class ForgeEvents {
         ModBlocks.DEEPSLATE_AJA_ORE = ForgeBlocks.DEEPSLATE_AJA_ORE.get();
         ModBlocks.AJA_BLOCK = ForgeBlocks.AJA_BLOCK.get();
         ModBlocks.CLIMBING_WIRE = ForgeBlocks.CLIMBING_WIRE.get();
-        ModBlocks.SC_RAPIER_PLATFORM_BLOCK = ForgeBlocks.SC_RAPIER_PLATFORM_BLOCK.get();
         ModBlocks.FROZEN_DIRT = ForgeBlocks.FROZEN_DIRT.get();
         ModBlocks.FROZEN_STONE = ForgeBlocks.FROZEN_STONE.get();
         ModBlocks.FROZEN_COBBLESTONE = ForgeBlocks.FROZEN_COBBLESTONE.get();
@@ -336,6 +335,7 @@ public class ForgeEvents {
         ModBlocks.STAND_FIRE_BLOCK_ENTITY = ForgeBlocks.STAND_FIRE_BLOCK_ENTITY.get();
         ModBlocks.BUBBLE_SCAFFOLD_BLOCK_ENTITY = ForgeBlocks.BUBBLE_SCAFFOLD_BLOCK_ENTITY.get();
         ModBlocks.DIVER_LIMB_BLOCK_ENTITY = ForgeBlocks.DIVER_LIMB_BLOCK_ENTITY.get();
+        ModBlocks.SC_RAPIER_PLATFORM_BLOCK_ENTITY = ForgeBlocks.SC_RAPIER_PLATFORM_BLOCK_ENTITY.get();
         ModBlocks.GE_BUSH_BLOCK_ENTITY = ForgeBlocks.GE_BUSH_BLOCK_ENTITY.get();
         ModBlocks.OASIS_MUD_BLOCK_ENTITY = ForgeBlocks.OASIS_MUD_BLOCK_ENTITY.get();
         ModBlocks.HALLUCINATORY_ACID_BLOCK_ENTITY = ForgeBlocks.HALLUCINATORY_ACID_BLOCK_ENTITY.get();
@@ -620,6 +620,7 @@ public class ForgeEvents {
         ModItems.BOSS_MASK = ForgeItems.BOSS_MASK.get();
         ModItems.DOPPIO_MASK = ForgeItems.DOPPIO_MASK.get();
         ModItems.DIO_MASK = ForgeItems.DIO_MASK.get();
+        ModItems.KHAN_MASK = ForgeItems.KHAN_MASK.get();
         ModItems.GYRO_MASK = ForgeItems.GYRO_MASK.get();
         ModItems.SANDMAN_MASK = ForgeItems.SANDMAN_MASK.get();
         ModItems.SHADOW_DIO_MASK = ForgeItems.SHADOW_DIO_MASK.get();
@@ -828,6 +829,8 @@ public class ForgeEvents {
         ModEffects.HAZE_VIRUS = ForgeEffects.HAZE_VIRUS.get();
         ModEffects.DISTORTION_VIRUS = ForgeEffects.DISTORTION_VIRUS.get();
         ModEffects.VIRUS_IMMUNITY = ForgeEffects.VIRUS_IMMUNITY.get();
+
+        ModEffects.RECONSTRUCTION = ForgeEffects.RECONSTRUCTION.get();
 
 
         ModEntities.VAN_GOUGH_PAINTING = ForgeEntities.VAN_GOUGH_PAINTING.get();
