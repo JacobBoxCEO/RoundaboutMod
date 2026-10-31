@@ -87,7 +87,8 @@ public class PowersKingNothing extends NewDashPreset {
             SPINE = 2,
             NOTE = 3,
             BETA = 4,
-            WARDEN = 5;
+            WARDEN = 5,
+            SNIFFER = 6;
 
     // sounds
     public static final byte
@@ -119,6 +120,9 @@ public class PowersKingNothing extends NewDashPreset {
                 0xae41ff, 0.1f));
         VISUAL_INFO.put(KingNothingEntity.WARDEN, new ParticleData(0x022d38, 0x1d9ca4,
                 0x1d9ca4, 0.25f));
+        VISUAL_INFO.put(KingNothingEntity.SNIFFER, new ParticleData(0x93311d, 0x459d8a,
+                0x459d8a, 0.25f));
+
     }
 
     public Vec3 moveVec = Vec3.ZERO;
@@ -142,6 +146,7 @@ public class PowersKingNothing extends NewDashPreset {
             case NOTE -> "note_block";
             case BETA -> "beta";
             case WARDEN -> "warden";
+            case SNIFFER -> "sniffer";
             default -> "manga";
         };
     }
@@ -514,7 +519,10 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void removeItemBlockPos(BlockPos pos) {
-        itemHoldingBlocks.remove(pos);
+        Roundabout.LOGGER.debug("IM REMOVIN ALRIGHT?");
+        if (getSelf().level().isClientSide) {
+            itemHoldingBlocks.remove(pos);
+        }
     }
 
     @Override
@@ -716,7 +724,7 @@ public class PowersKingNothing extends NewDashPreset {
                                     1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus,
                                     0.01);
                         }
-                        else if (passiveParticlesCounter == 20) {
+                        else if (!locatedChests.contains(pos)) {
                             if (itemHoldingBlocks.contains(pos)) {
                                 itemHoldingBlocks.remove(pos);
                                 S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
@@ -727,7 +735,7 @@ public class PowersKingNothing extends NewDashPreset {
                             }
                         }
                     }
-                    else if (itemHoldingBlocks.contains(pos) && passiveParticlesCounter == 20) {
+                    else if (itemHoldingBlocks.contains(pos)) {
                         itemHoldingBlocks.remove(pos);
                         S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
                     }
@@ -736,7 +744,7 @@ public class PowersKingNothing extends NewDashPreset {
             if (!foundTem) {
                 if (passiveParticlesCounter % 5 == 0) {
                     ParticleData pdata = getVisualInfo();
-                    for (int i = 0; i < 1; i++) {
+                    for (int i = 0; i < 2; i++) {
                         int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                         Vec3 offset = getSelf().getEyePosition().offsetRandom(level.getRandom(), 5);
                         MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
@@ -1016,6 +1024,7 @@ public class PowersKingNothing extends NewDashPreset {
             $$1.add(NOTE);
             $$1.add(BETA);
             $$1.add(WARDEN);
+            $$1.add(SNIFFER);
         }
         return $$1;
     }

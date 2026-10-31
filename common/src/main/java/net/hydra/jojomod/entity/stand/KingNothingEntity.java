@@ -25,7 +25,8 @@ public class KingNothingEntity extends FollowingStandEntity {
             SPINE = 2,
             NOTE = 3,
             BETA = 4,
-            WARDEN = 5;
+            WARDEN = 5,
+            SNIFFER = 6;
 
     private byte previousAnimation = -1;
     @Override

@@ -533,6 +533,9 @@
   "item.roundabout.hato_mask": "Hato Visage",
   "item.roundabout.hato_mask.desc": "Hato Higashikata",
   "item.roundabout.hato_mask.tag": "Hato",
+  "item.roundabout.norisuke_mask": "Norisuke Visage",
+  "item.roundabout.norisuke_mask.desc": "Norisuke Higashikata IV",
+  "item.roundabout.norisuke_mask.tag": "Norisuke",
   "item.roundabout.shizuka_mask": "Shizuka Visage",
   "item.roundabout.shizuka_mask.desc": "Shizuka (JoJovein / JoJo Stars)",
   "item.roundabout.shizuka_mask.tag": "Shizuka",
@@ -2961,6 +2964,7 @@
   "skins.roundabout.king_nothing.note_block": "Note Block",
   "skins.roundabout.king_nothing.beta": "\"Beta\"",
   "skins.roundabout.king_nothing.warden": "Warden",
+  "skins.roundabout.king_nothing.sniffer": "Sniffer",
 
   "skins.roundabout.star_platinum.base": "Part 3",
   "skins.roundabout.star_platinum.manga": "Manga",
