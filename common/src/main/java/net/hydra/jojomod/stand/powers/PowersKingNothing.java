@@ -1546,7 +1546,7 @@ public class PowersKingNothing extends NewDashPreset {
             Vec3 vec3d2 = this.getSelf().getViewVector(0);
             Vec3 vec3d3 = vec3d.add(vec3d2.x * SMELL_RANGE, vec3d2.y * SMELL_RANGE, vec3d2.z * SMELL_RANGE);
             BlockHitResult blockHit = this.getSelf().level().clip(new ClipContext(vec3d, vec3d3,
-                    ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, this.getSelf()));
+                    ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.getSelf()));
             if (blockHit.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = blockHit.getBlockPos();
                 getStandUserSelf().roundabout$tryBlockPosPower(PowerIndex.POWER_4, true, pos);
