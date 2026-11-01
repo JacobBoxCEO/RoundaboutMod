@@ -11,8 +11,7 @@ import net.hydra.jojomod.client.models.*;
 import net.hydra.jojomod.client.models.badCompanyTroops.*;
 import net.hydra.jojomod.client.models.badCompanyTroops.renderers.*;
 import net.hydra.jojomod.client.models.corpses.renderers.*;
-import net.hydra.jojomod.client.models.gold_experience.GEBrambleModel;
-import net.hydra.jojomod.client.models.gold_experience.GEBrambleRenderer;
+import net.hydra.jojomod.client.models.gold_experience.*;
 import net.hydra.jojomod.client.models.minions.*;
 import net.hydra.jojomod.client.models.minions.head_parts.*;
 import net.hydra.jojomod.client.models.minions.renderers.*;
@@ -40,6 +39,7 @@ import net.hydra.jojomod.client.models.layers.MagiciansRedSpinEffectLayer;
 import net.hydra.jojomod.client.models.layers.ModEntityRendererClient;
 import net.hydra.jojomod.client.models.npcs.ZombieAestheticianModel;
 import net.hydra.jojomod.client.models.npcs.renderers.ZombieAestheticianRenderer;
+import net.hydra.jojomod.entity.stand.MandomEntity;
 import net.minecraft.client.model.SilverfishModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -107,6 +107,8 @@ public class FabricEntityClient {
         EntityRendererRegistry.register(FabricEntities.GRABBED_MOB_SOUL, GrabbedMobSoulRenderer::new);
         EntityRendererRegistry.register(FabricEntities.GRABBED_PLAYER_SOUL, GrabbedMobSoulRendererPlayerLarge::new);
         EntityRendererRegistry.register(FabricEntities.GRABBED_PLAYER_SOUL_SLIM, GrabbedMobSoulRendererPlayerSlim::new);
+        EntityRendererRegistry.register(FabricEntities.GRABBED_MANDOM, MandomBlackSabbathRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.GRABBED_HEY_YA, HeyYaBlackSabbathRenderer::new);
         EntityRendererRegistry.register(FabricEntities.PEARL_JAM, PearlJamRenderer::new);
         EntityRendererRegistry.register(FabricEntities.WALKING_HEART, WalkingHeartRenderer::new);
         EntityRendererRegistry.register(FabricEntities.DARK_MIRAGE, DarkMirageRenderer::new);
@@ -121,6 +123,9 @@ public class FabricEntityClient {
         EntityRendererRegistry.register(FabricEntities.DIVER_DOWN_WORLD, DiverDownWorldRenderer::new);
         EntityRendererRegistry.register(FabricEntities.GOLD_EXPERIENCE, GoldExperienceRenderer::new);
         EntityRendererRegistry.register(FabricEntities.GE_BRAMBLE, GEBrambleRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.GE_BAT, GEBatRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.GE_FROG, GEFrogRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.GE_BEE, GEBeeRenderer::new);
         EntityRendererRegistry.register(FabricEntities.DIVER_DROWNED, DiverDrownedRenderer::new);
         EntityRendererRegistry.register(FabricEntities.DIVER_KICK, DiverKickEntityRenderer::new);
         EntityRendererRegistry.register(FabricEntities.SILVER_CHARIOT, SilverChariotRenderer::new);
@@ -315,6 +320,8 @@ public class FabricEntityClient {
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MOB_SOUL_LAYER, GrabbedMobSoulModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_LAYER, GrabbedPlayerSoulSteveModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MOB_SOUL_PLAYER_SLIM_LAYER, GrabbedPlayerSoulAlexModel::createBodyLayer);
+        EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_MANDOM_LAYER, MandomBlackSabbathModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.GRABBED_HEY_YA_LAYER, HeyYaBlackSabbathModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.DARK_MIRAGE_LAYER, DarkMirageModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.KING_NOTHING_LAYER, KingNothingModel::getTexturedModelData);
         EntityModelLayerRegistry.registerModelLayer(ModEntityRendererClient.TUSK_A1_LAYER, TuskAct1Model::createBodyLayer);
@@ -440,6 +447,7 @@ public class FabricEntityClient {
         ModStrayModels.SpikeyHairPart = new SpikeyHairPart();
         ModStrayModels.bannerFlag = new BannerFlagModel();
         ModStrayModels.dotHanHair = new DotHanHairPart();
+        ModStrayModels.polnareffDecalsPart = new PolnareffDecalsPart();
         ModStrayModels.SandmanHairPart = new SandmanHairPart();
         ModStrayModels.sheriffHatPart = new SheriffHatPart();
         ModStrayModels.LucyHairPart = new LucyHairPart();
@@ -468,6 +476,8 @@ public class FabricEntityClient {
         ModStrayModels.LeftLeg = new LeftLegPart();
         ModStrayModels.RightHeel = new RightHeelPart();
         ModStrayModels.JohngalliaTiePart = new JohngalliaTiePart();
+        ModStrayModels.extraHairPart = new ExtraHairPart();
+        ModStrayModels.extraHairDecorationPart = new ExtraHairDecorationPart();
 
         ModStrayModels.GoatHeadPart = new GoatHeadPart();
         ModStrayModels.CatHeadPart = new CatHeadPart();

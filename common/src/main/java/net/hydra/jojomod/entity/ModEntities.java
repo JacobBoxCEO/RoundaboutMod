@@ -3,7 +3,7 @@ package net.hydra.jojomod.entity;
 
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.entity.badCompanyTroops.*;
-import net.hydra.jojomod.entity.gold_experience.GEBrambleEntity;
+import net.hydra.jojomod.entity.gold_experience.*;
 import net.hydra.jojomod.entity.mobs.AnubisGuardian;
 import net.hydra.jojomod.entity.mobs.FalconEntity;
 import net.hydra.jojomod.entity.mobs.StrayCatEntity;
@@ -91,6 +91,8 @@ public class ModEntities {
     public static EntityType<GrabbedMobSoul> GRABBED_MOB_SOUL;
     public static EntityType<GrabbedMobSoulPlayerLarge> GRABBED_PLAYER_SOUL;
     public static EntityType<GrabbedMobSoulPlayerSlim> GRABBED_PLAYER_SOUL_SLIM;
+    public static EntityType<MandomEntity> GRABBED_MANDOM;
+    public static EntityType<HeyYaEntity> GRABBED_HEY_YA;
     public static EntityType<WalkingHeartEntity> WALKING_HEART;
     public static EntityType<JusticePirateEntity> JUSTICE_PIRATE;
     public static EntityType<DarkMirageEntity> DARK_MIRAGE;
@@ -116,6 +118,9 @@ public class ModEntities {
     public static EntityType<BoneProjectileEntity> BONE_PROJECTILE;
     public static EntityType<GoldExperienceEntity> GOLD_EXPERIENCE;
     public static EntityType<GEBrambleEntity> GE_BRAMBLE;
+    public static EntityType<GEBatEntity> GE_BAT;
+    public static EntityType<GEFrogEntity> GE_FROG;
+    public static EntityType<GEBeeEntity> GE_BEE;
     public static EntityType<SilverChariotEntity> SILVER_CHARIOT;
     public static EntityType<SilverChariotEntity> SILVER_CHARIOT_PHARAOH;
     public static EntityType<SilverChariotRapierShotEntity> SILVER_CHARIOT_RAPIER;

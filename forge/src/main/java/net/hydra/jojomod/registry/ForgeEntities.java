@@ -3,7 +3,7 @@ package net.hydra.jojomod.registry;
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.entity.*;
 import net.hydra.jojomod.entity.badCompanyTroops.*;
-import net.hydra.jojomod.entity.gold_experience.GEBrambleEntity;
+import net.hydra.jojomod.entity.gold_experience.*;
 import net.hydra.jojomod.entity.mobs.AnubisGuardian;
 import net.hydra.jojomod.entity.mobs.FalconEntity;
 import net.hydra.jojomod.entity.mobs.StrayCatEntity;
@@ -597,6 +597,18 @@ public class ForgeEntities {
                             clientTrackingRange(14).
                             build(new ResourceLocation(Roundabout.MOD_ID, "bs_player_soul_slim").toString())
             );
+    public static final RegistryObject<EntityType<MandomEntity>> GRABBED_MANDOM =
+            ENTITY_TYPES.register("mandom_bs", () ->
+                    EntityType.Builder.of(MandomEntity::new, MobCategory.MISC).sized(0.5F, 0.6f).
+                            clientTrackingRange(14).
+                            build(new ResourceLocation(Roundabout.MOD_ID, "mandom_bs").toString())
+            );
+    public static final RegistryObject<EntityType<HeyYaEntity>> GRABBED_HEY_YA =
+            ENTITY_TYPES.register("hey_ya_bs", () ->
+                    EntityType.Builder.of(HeyYaEntity::new, MobCategory.MISC).sized(0.3F, 0.5f).
+                            clientTrackingRange(14).
+                            build(new ResourceLocation(Roundabout.MOD_ID, "hey_ya_bs").toString())
+            );
     public static final RegistryObject<EntityType<PearlJamEntity>> PEARL_JAM =
             ENTITY_TYPES.register("pearl_jam", () ->
                     EntityType.Builder.of(PearlJamEntity::new, MobCategory.MISC).sized(0.25F, 0.30f).
@@ -710,6 +722,21 @@ public class ForgeEntities {
                     .clientTrackingRange(16)
                     .updateInterval(20)
                     .build(new ResourceLocation(Roundabout.MOD_ID, "ge_bramble").toString()));
+    public static final RegistryObject<EntityType<GEBatEntity>> GE_BAT = ENTITY_TYPES.register("ge_bat",
+            () -> EntityType.Builder.of(GEBatEntity::new, MobCategory.AMBIENT)
+                    .sized(0.5f, 0.9f)
+                    .clientTrackingRange(5)
+                    .build(Roundabout.MOD_ID + ":ge_bat"));
+    public static final RegistryObject<EntityType<GEFrogEntity>> GE_FROG = ENTITY_TYPES.register("ge_frog",
+            () -> EntityType.Builder.of(GEFrogEntity::new, MobCategory.CREATURE)
+                    .sized(0.5f, 0.9f)
+                    .clientTrackingRange(5)
+                    .build(Roundabout.MOD_ID + ":ge_frog"));
+    public static final RegistryObject<EntityType<GEBeeEntity>> GE_BEE = ENTITY_TYPES.register("ge_bee",
+            () -> EntityType.Builder.of(GEBeeEntity::new, MobCategory.CREATURE)
+                    .sized(0.5f, 0.9f)
+                    .clientTrackingRange(5)
+                    .build(Roundabout.MOD_ID + ":ge_bee"));
     public static final RegistryObject<EntityType<SilverChariotEntity>> SILVER_CHARIOT =
             ENTITY_TYPES.register("silver_chariot", () ->
                     EntityType.Builder.of(SilverChariotEntity::new, MobCategory.MISC).sized(0.75f, 2.05f).

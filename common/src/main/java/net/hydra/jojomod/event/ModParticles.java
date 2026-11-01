@@ -134,4 +134,6 @@ public class ModParticles {
     public static ParticleType<HazeColorParticleOptions> PURPLE_HAZE_BLASTWAVE;
 
     public static ParticleType<PuzzleColorParticleOptions> PUZZLE_PARTICLE;
+
+    public static SimpleParticleType VITAL_ESSENCE;
 }
