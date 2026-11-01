@@ -203,7 +203,7 @@ public class ZWorldRenderer {
         // what is a mere president to the king?
         if (ClientUtil.getPlayer() != null
                 && ((StandUser) ClientUtil.getPlayer()).roundabout$getStandPowers() instanceof PowersKingNothing pkn) {
-            if (pkn.isTrackingItem() && !pkn.itemHoldingBlocks.isEmpty()) {
+            if (pkn.isTrackingItem()) {
                 int color = pkn.getVisualInfo().highlightColor();
                 for (BlockPos pos : pkn.itemHoldingBlocks) {
                     ClientEffectUtil.renderBox(poseStack,

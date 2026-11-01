@@ -250,7 +250,7 @@ public class ClientConfig implements Cloneable {
     }
     public static class KingNothingSettings {
         @BooleanOption(group = "inherit", value = true)
-        public Boolean highlightEntitiesWhileTrackingItem;
+        public Boolean highlightInItemTrack;
     }
     public static class WhitesnakeSettings {
         @BooleanOption(group = "inherit", value = false)

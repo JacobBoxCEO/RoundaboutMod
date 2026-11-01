@@ -19,10 +19,7 @@ import net.hydra.jojomod.entity.visages.CloneEntity;
 import net.hydra.jojomod.event.AbilityIconInstance;
 import net.hydra.jojomod.event.ModGamerules;
 import net.hydra.jojomod.event.ModParticles;
-import net.hydra.jojomod.event.index.OffsetIndex;
-import net.hydra.jojomod.event.index.PacketDataIndex;
-import net.hydra.jojomod.event.index.PowerIndex;
-import net.hydra.jojomod.event.index.PowerTypes;
+import net.hydra.jojomod.event.index.*;
 import net.hydra.jojomod.event.powers.*;
 import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
@@ -52,7 +49,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
@@ -71,12 +67,12 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.phys.*;
-import net.hydra.jojomod.event.index.SoundIndex;
 
 import java.util.*;
 
@@ -101,12 +97,6 @@ public class PowersKingNothing extends NewDashPreset {
             MEMORIZED_UUID_TAG = "memorizedUUID";
 
     public static final Map<Byte, ParticleData> VISUAL_INFO = new HashMap<>();
-    // color 1 = ~~primary~~ main particle color
-    // color 2 = ~~secondary~~ specialized particle color
-    // highlight color = take a guess
-    // percent other = the percent of particles that will be color 2
-    public record ParticleData(int color1, int color2, int highlightColor, float percentOther) {}
-
     private static final float SMELL_RANGE = 5f;
 
     static {
@@ -125,16 +115,22 @@ public class PowersKingNothing extends NewDashPreset {
 
     }
 
+    public final Set<Entity> itemHoldingEntities = new HashSet<>();
+    public final Set<BlockPos> itemHoldingBlocks = new HashSet<>();
     public Vec3 moveVec = Vec3.ZERO;
     // im sure theres a better way to resume idles after the return animation but this works
     // ... probably...
     int returnAnimTicks = 0;
     int disintegrateAnimTicks = 0;
-
+    int passiveParticlesCounter = 0;
     private Block memorizedBlock = null;
     private EntityType<?> memorizedEntityType = null;
     private UUID memorizedPlayer = null;
     private Item trackedItem = null;
+    // kills dimensional desync
+    private ResourceKey<Level> dimension = null;
+    // no more return anim on stand switch
+    private boolean isOut = false;
 
     public PowersKingNothing(LivingEntity self) {
         super(self);
@@ -342,7 +338,7 @@ public class PowersKingNothing extends NewDashPreset {
             normalXIcon = false;
         }
         else if (isTrackingItem()) {
-            setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_REFORM, PowerIndex.SKILL_1_SNEAK );
+            setSkillIcon(context, x, y, 1, StandIcons.KING_NOTHING_REFORM, PowerIndex.SKILL_1_SNEAK);
             normalZIcon = false;
         }
         if (isHoldingSneak()) {
@@ -497,46 +493,46 @@ public class PowersKingNothing extends NewDashPreset {
         }
     }
 
-    public final Set<Entity> itemHoldingEntities = new HashSet<>();
-    public final Set<BlockPos> itemHoldingBlocks = new HashSet<>();
-
     public void addItemEntity(int id) {
-        if (getSelf().level().isClientSide()) {
+        if (getSelf().level().isClientSide() &&
+                ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
             Entity ent = getSelf().level().getEntity(id);
             itemHoldingEntities.add(ent);
         }
     }
 
     public void removeItemEntity(int id) {
-        if (getSelf().level().isClientSide()) {
+        if (getSelf().level().isClientSide() &&
+                ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
             Entity ent = getSelf().level().getEntity(id);
             itemHoldingEntities.remove(ent);
         }
     }
 
     public void addItemBlockPos(BlockPos pos) {
-        itemHoldingBlocks.add(pos);
+        if (getSelf().level().isClientSide() &&
+                ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
+            this.itemHoldingBlocks.add(pos);
+        }
     }
 
     public void removeItemBlockPos(BlockPos pos) {
-        Roundabout.LOGGER.debug("IM REMOVIN ALRIGHT?");
-        if (getSelf().level().isClientSide) {
-            itemHoldingBlocks.remove(pos);
+        if (getSelf().level().isClientSide() &&
+                ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
+            this.itemHoldingBlocks.remove(pos);
         }
     }
 
     @Override
     public boolean highlightsEntity(Entity ent, Player player) {
         return itemHoldingEntities.contains(ent) && player.hasLineOfSight(ent) &&
-                ConfigManager.getClientConfig().kingNothingSettings.highlightEntitiesWhileTrackingItem;
+                ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack;
     }
 
     @Override
     public int highlightsEntityColor(Entity ent, Player player) {
         return getVisualInfo().highlightColor();
     }
-
-    int passiveParticlesCounter = 0;
 
     @Override
     public void tickPower() {
@@ -578,7 +574,7 @@ public class PowersKingNothing extends NewDashPreset {
             int checkRangeChest = 16;
             List<Entity> targets = MainUtil.getEntitiesInRange(getSelf().level(), getSelf().blockPosition(),
                     checkRangeEnt, getSelf());
-            boolean renderHighlights = ConfigManager.getClientConfig().kingNothingSettings.highlightEntitiesWhileTrackingItem;
+            boolean renderHighlights = ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack;
             boolean foundTem = false;
             if (level.isClientSide() && renderHighlights) {
                 itemHoldingEntities.removeIf((entity) -> !targets.contains(entity));
@@ -587,14 +583,16 @@ public class PowersKingNothing extends NewDashPreset {
                 Entity ent = targets.get(i);
                 Entity checkedEnt = ent;
                 if (!PowerTypes.isInADifferentExistence(getSelf(), ent)) {
-                    boolean foundItem = checkedEnt instanceof ItemEntity IE && IE.getItem().getItem().equals(trackedItem);
+                    boolean foundItem = checkedEnt instanceof ItemEntity IE && IE.getItem().getItem().equals(
+                            trackedItem);
                     if (foundItem && level.isClientSide() && renderHighlights) {
                         itemHoldingEntities.add(ent);
                     }
                     if (!foundItem && checkedEnt instanceof LivingEntity LE
                             && (LE.getMainHandItem().is(trackedItem) ||
                             LE.getOffhandItem().getItem().equals(trackedItem) ||
-                            LE.getItemBySlot(LivingEntity.getEquipmentSlotForItem(trackedItem.getDefaultInstance())).is(trackedItem))) {
+                            LE.getItemBySlot(LivingEntity.getEquipmentSlotForItem(trackedItem.getDefaultInstance())).is(
+                                    trackedItem))) {
                         if (level.isClientSide() && renderHighlights) {
                             itemHoldingEntities.add(ent);
                         }
@@ -636,28 +634,38 @@ public class PowersKingNothing extends NewDashPreset {
                                     1, 0.1, 0.05, 0.1, 0.01);
                         }
                     }
-                    else if (level.isClientSide() && renderHighlights) itemHoldingEntities.remove(ent);
+                    else if (level.isClientSide() && renderHighlights) {
+                        itemHoldingEntities.remove(ent);
+                    }
                 }
-                else if (level.isClientSide() && renderHighlights) itemHoldingEntities.remove(ent);
+                else if (level.isClientSide() && renderHighlights) {
+                    itemHoldingEntities.remove(ent);
+                }
             }
-            int checkecChests = 0;
-            Set<BlockPos> locatedChests = new HashSet<>();
+            // chest code!! (kill me)
+            int checked = 0;
             BlockPos selfPos = getSelf().blockPosition();
-            Iterable<BlockPos> fuck = BlockPos.betweenClosed(
+            Iterable<BlockPos> itter = BlockPos.betweenClosed(
                     selfPos.offset(-checkRangeChest / 2, -2, -checkRangeChest / 2),
                     selfPos.offset(checkRangeChest / 2, checkRangeChest / 2, checkRangeChest / 2));
             if (!level.isClientSide()) {
-                for (BlockPos pos : fuck) {
-                    if (checkecChests > 16) break;
-                    if (locatedChests.contains(pos)) continue;
+                Set<BlockPos> locatedChests = new HashSet<>();
+                for (BlockPos itpos : itter) {
+                    BlockPos pos = new BlockPos(itpos);
+                    boolean chestHasItem = false;
+                    if (checked > 16) {
+                        break;
+                    }
+                    if (locatedChests.contains(pos)) {
+                        chestHasItem = true;
+                    }
                     BlockState bstate = level.getBlockState(pos);
                     BlockEntity bentity = level.getBlockEntity(pos);
                     float xSpreadBonus = 0;
                     float zSpreadBonus = 0;
-                    if (bentity instanceof RandomizableContainerBlockEntity CO) {
-                        checkecChests++;
-                        boolean chestHasItem = false;
-                        BlockPos otherChestPos = null;
+                    BlockPos otherChestPos = null;
+                    if (bentity instanceof RandomizableContainerBlockEntity CO && !chestHasItem) {
+                        checked++;
                         if (bstate.hasProperty(ChestBlock.TYPE) && bstate.getValue(
                                 ChestBlock.TYPE) != ChestType.SINGLE) {
                             boolean isLeft = bstate.getValue(ChestBlock.TYPE) == ChestType.LEFT;
@@ -683,64 +691,64 @@ public class PowersKingNothing extends NewDashPreset {
                         for (int i = 0; i < CO.getContainerSize(); i++) {
                             if (CO.getItem(i).is(trackedItem)) {
                                 chestHasItem = true;
-                                if (!itemHoldingBlocks.contains(pos) && passiveParticlesCounter == 20) {
-                                    itemHoldingBlocks.add(pos);
-                                    S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, false);
-                                    if (otherChestPos != null) {
-                                        if (!itemHoldingBlocks.contains(otherChestPos)) {
-                                            itemHoldingBlocks.add(otherChestPos);
-                                            S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), otherChestPos,
-                                                    false);
-                                        }
-                                    }
-                                }
                                 break;
                             }
                         }
-                        if (chestHasItem) {
-                            foundTem = true;
-                            if (otherChestPos != null) locatedChests.add(otherChestPos);
-                            locatedChests.add(pos);
-                            ParticleData pdata = getVisualInfo();
-                            int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
-                                    pdata.color1() : pdata.color2();
-                            int color2 = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
-                                    pdata.color1() : pdata.color2();
-                            Vec3 spawnPos = otherChestPos == null ? pos.getCenter() :
-                                    pos.getCenter().lerp(otherChestPos.getCenter(), 0.5);
-                            int yOffset = 1 + (level.getBlockState(pos.above()).isAir() ||
-                                    (level.getBlockEntity(pos.above()) instanceof RandomizableContainerBlockEntity) ||
-                                    otherChestPos != null && (level.getBlockState(otherChestPos).isAir()
-                                            || (level.getBlockEntity(
-                                            otherChestPos.above()) instanceof RandomizableContainerBlockEntity)) ? 0 : 1);
-                            MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
-                                    PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
-                                    spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
-                                    1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus,
-                                    0.01);
-                            MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
-                                    PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color2),
-                                    spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
-                                    1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus,
-                                    0.01);
+                    }
+                    if (chestHasItem) {
+                        foundTem = true;
+                        if (!this.itemHoldingBlocks.contains(pos)) {
+                            this.itemHoldingBlocks.add(pos);
+                            S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, false);
                         }
-                        else if (!locatedChests.contains(pos)) {
-                            if (itemHoldingBlocks.contains(pos)) {
-                                itemHoldingBlocks.remove(pos);
-                                S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
-                            }
-                            if (otherChestPos != null && itemHoldingBlocks.contains(otherChestPos)) {
-                                itemHoldingBlocks.remove(otherChestPos);
+                        if (otherChestPos != null && !this.itemHoldingBlocks.contains(otherChestPos)) {
+                            this.itemHoldingBlocks.add(otherChestPos);
+                            S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), otherChestPos, false);
+                        }
+                        if (otherChestPos != null) {
+                            locatedChests.add(otherChestPos);
+                        }
+                        locatedChests.add(pos);
+                        ParticleData pdata = getVisualInfo();
+                        int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
+                                pdata.color1() : pdata.color2();
+                        int color2 = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ?
+                                pdata.color1() : pdata.color2();
+                        Vec3 spawnPos = otherChestPos == null ? pos.getCenter() :
+                                pos.getCenter().lerp(otherChestPos.getCenter(), 0.5);
+                        int yOffset = 1 + (level.getBlockState(pos.above()).isAir() ||
+                                (level.getBlockEntity(pos.above()) instanceof RandomizableContainerBlockEntity) ||
+                                otherChestPos != null && (level.getBlockState(otherChestPos).isAir()
+                                        || (level.getBlockEntity(
+                                        otherChestPos.above()) instanceof RandomizableContainerBlockEntity)) ? 0 : 1);
+                        MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
+                                spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
+                                1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus,
+                                0.01);
+                        MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
+                                PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color2),
+                                spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(),
+                                1 + (otherChestPos == null ? 0 : 1), 0.1 + xSpreadBonus, 0.1, 0.1 + zSpreadBonus,
+                                0.01);
+                    }
+                    else {
+                        // if this goes, it spams the logs since it removes even when the pos is already not in the list
+                        // for some reason it also doesn't work if it is in the list
+                        if (this.itemHoldingBlocks.contains(pos)) {
+                            this.itemHoldingBlocks.remove(pos);
+                            S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
+                        }
+                        if (otherChestPos != null) {
+                            if (this.itemHoldingBlocks.contains(otherChestPos)) {
+                                this.itemHoldingBlocks.remove(otherChestPos);
                                 S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), otherChestPos, true);
                             }
                         }
                     }
-                    else if (itemHoldingBlocks.contains(pos)) {
-                        itemHoldingBlocks.remove(pos);
-                        S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
-                    }
                 }
             }
+            // passive particles
             if (!foundTem) {
                 if (passiveParticlesCounter % 5 == 0) {
                     ParticleData pdata = getVisualInfo();
@@ -753,8 +761,12 @@ public class PowersKingNothing extends NewDashPreset {
                     }
                 }
             }
-            if (passiveParticlesCounter == 20) passiveParticlesCounter = 0;
-            else passiveParticlesCounter++;
+            if (passiveParticlesCounter == 20) {
+                passiveParticlesCounter = 0;
+            }
+            else {
+                passiveParticlesCounter++;
+            }
         }
     }
 
@@ -849,7 +861,7 @@ public class PowersKingNothing extends NewDashPreset {
                                 }
                                 else if (held.getItem() instanceof BlockItem BI
                                         && tryPlaceBlock(BI, blockHit, bpos, stand, held)) {
-                                        return;
+                                    return;
                                 }
                                 else if (held.getItem() instanceof BucketItem BU && !held.is(Items.LAVA_BUCKET)
                                         && tryBucketPlace(BU, stand, bpos, blockHit)) {
@@ -915,7 +927,7 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean tryBucketPickup(BlockState state, BlockHitResult blockHit, BlockPos pos, StandEntity stand) {
         BlockState bstate = state;
         BlockPos bpos = pos;
-        BucketPickup pickup = null ;
+        BucketPickup pickup = null;
         if (!(bstate.getBlock() instanceof BucketPickup) || bstate.getBlock() instanceof SimpleWaterloggedBlock
                 && bstate.getFluidState().isEmpty()) {
             Direction dir = blockHit.getDirection();
@@ -968,7 +980,7 @@ public class PowersKingNothing extends NewDashPreset {
         boolean placesfrfr = (placeState.canBeReplaced() || placeState.isAir())
                 && canModifyPos(bpos);
         if (placesfrfr && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
-                    != InteractionResult.FAIL) {
+                != InteractionResult.FAIL) {
             if (getCreative()) {
                 stand.setHeldItem(returnStack);
             }
@@ -1037,6 +1049,7 @@ public class PowersKingNothing extends NewDashPreset {
     private boolean isPhasing() {
         return getActivePower() == PowerIndex.POWER_2 || getActivePower() == PowerIndex.POWER_2_SNEAK;
     }
+
     public boolean isTrackingItem() {
         return trackedItem != null;
     }
@@ -1120,8 +1133,6 @@ public class PowersKingNothing extends NewDashPreset {
         return false;
     }
 
-    // kills dimensional desync
-    private ResourceKey<Level> dimension = null;
     @Override
     public boolean setPowerNone() {
         this.attackTimeDuring = -1;
@@ -1159,10 +1170,8 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean endItemTrack() {
         if (isTrackingItem() && !onCooldown(PowerIndex.SKILL_1_SNEAK)) {
             this.trackedItem = null;
-            if (getSelf().level().isClientSide()) {
-                this.itemHoldingEntities.clear();
-                this.itemHoldingBlocks.clear();
-            }
+            this.itemHoldingEntities.clear();
+            this.itemHoldingBlocks.clear();
             disintegrateAnimTicks = 0;
             if (getSelf() instanceof ServerPlayer) {
                 S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_1_SNEAK,
@@ -1374,7 +1383,8 @@ public class PowersKingNothing extends NewDashPreset {
                         ItemStack bucketItem = BE.getBucketItemStack();
                         BE.saveToBucketTag(bucketItem);
                         stand.setHeldItem(bucketItem);
-                        getSelf().level().playSound(null, getSelf().blockPosition(), BE.getPickupSound(), SoundSource.PLAYERS);
+                        getSelf().level().playSound(null, getSelf().blockPosition(), BE.getPickupSound(),
+                                SoundSource.PLAYERS);
                         $$4.discard();
                         didThing = true;
                     }
@@ -1391,7 +1401,8 @@ public class PowersKingNothing extends NewDashPreset {
                     }
                     else if ($$4.isAttackable() && !($$4 instanceof Player PE && (PE.isCreative() ||
                             PE.isSpectator())) && !($$4 instanceof OwnableEntity OE &&
-                            Objects.equals(OE.getOwner(), getSelf())) && !($$4 instanceof Boat || $$4 instanceof Minecart)) {
+                            Objects.equals(OE.getOwner(),
+                                    getSelf())) && !($$4 instanceof Boat || $$4 instanceof Minecart)) {
                         cooldown += (int) (1F / stand.getAttributeValue(Attributes.ATTACK_SPEED) * 20);
                         doPhaseAttack(held, stand, self, $$4);
                         didThing = true;
@@ -1583,8 +1594,6 @@ public class PowersKingNothing extends NewDashPreset {
         return true;
     }
 
-    // no more return anim on stand switch
-    private boolean isOut = false;
     @Override
     public void onStandSummon(boolean desummon) {
         super.onStandSummon(desummon);
@@ -1595,10 +1604,8 @@ public class PowersKingNothing extends NewDashPreset {
             }
             this.isOut = false;
             this.trackedItem = null;
-            if (getSelf().level().isClientSide()) {
-                this.itemHoldingEntities.clear();
-                this.itemHoldingBlocks.clear();
-            }
+            this.itemHoldingEntities.clear();
+            this.itemHoldingBlocks.clear();
         }
         else if (!isOut) {
             isOut = true;
@@ -1642,7 +1649,7 @@ public class PowersKingNothing extends NewDashPreset {
     private boolean startItemTracking() {
         if (!getSelf().getMainHandItem().isEmpty() && !onCooldown(PowerIndex.SKILL_1_SNEAK)) {
             this.trackedItem = getSelf().getMainHandItem().getItem();
-            if (getSelf() instanceof  ServerPlayer) {
+            if (getSelf() instanceof ServerPlayer) {
                 S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_1_SNEAK,
                         20);
                 this.setCooldown(PowerIndex.SKILL_1_SNEAK,
@@ -1710,5 +1717,12 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public Component ifWipListDevStatus() {
         return Component.translatable("roundabout.dev_status.active").withStyle(ChatFormatting.DARK_PURPLE);
+    }
+
+    // color 1 = ~~primary~~ main particle color
+    // color 2 = ~~secondary~~ specialized particle color
+    // highlight color = take a guess
+    // percent other = the percent of particles that will be color 2
+    public record ParticleData(int color1, int color2, int highlightColor, float percentOther) {
     }
 }
