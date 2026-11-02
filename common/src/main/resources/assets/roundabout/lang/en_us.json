@@ -683,6 +683,8 @@
   "entity.roundabout.killer_queen": "Killer Queen",
   "entity.roundabout.walking_heart": "Walking Heart",
   "entity.roundabout.diver_down": "Diver Down",
+  "entity.roundabout.gold_experience": "Gold Experience",
+  "entity.roundabout.gold_experience_beta": "Gold Experience",
   "entity.roundabout.silver_chariot": "Silver Chariot",
   "entity.roundabout.silver_chariot_pharaoh": "Pharaoh Chariot",
   "entity.roundabout.green_day": "Green Day",
@@ -3321,6 +3323,7 @@
   "skins.roundabout.diver_down.scuba_diver": "Scuba Diver",
 
   "skins.roundabout.gold_experience.base": "Part 5",
+  "skins.roundabout.gold_experience.beta": "Beta",
 
   "skins.roundabout.20_centuryboy.manga": "Manga",
   "skins.roundabout.20_centuryboy.bedrock": "Bedrock",
@@ -3463,6 +3466,7 @@
   "skins.roundabout.tusk.resonance" : "Resonance",
   "skins.roundabout.tusk.breaker" : "Breaker",
   "skins.roundabout.tusk.frigid" : "Frigid",
+  "skins.roundabout.tusk.elegant" : "Elegant",
 
 
   "roundabout.tusk.act_1": "Act 1",
@@ -3622,7 +3626,7 @@
   "roundabout.gold_experience_animal.bat": "Bat",
   "roundabout.gold_experience_animal.bat.desc": "Bats will find the closest entity and fly erraticaly in their face to bait reflection hits.",
   "roundabout.gold_experience_animal.fish": "Fish",
-  "roundabout.gold_experience_animal.fish.desc": "placeholder, rework these after finishing the mobs cuz the doc is kinda vague.",
+  "roundabout.gold_experience_animal.fish.desc": "Swims in a straight line from where it spawned. You can interact with the fish to have it carry you.",
   "roundabout.gold_experience_animal.pirahna": "Pirahna",
   "roundabout.gold_experience_animal.pirahna.desc": "placeholder, rework these after finishing the mobs cuz the doc is kinda vague.",
   "roundabout.gold_experience_animal.snake": "Snake",
