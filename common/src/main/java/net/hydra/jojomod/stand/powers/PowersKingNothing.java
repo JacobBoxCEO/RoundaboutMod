@@ -733,8 +733,6 @@ public class PowersKingNothing extends NewDashPreset {
                                 0.01);
                     }
                     else {
-                        // if this goes, it spams the logs since it removes even when the pos is already not in the list
-                        // for some reason it also doesn't work if it is in the list
                         if (this.itemHoldingBlocks.contains(pos)) {
                             this.itemHoldingBlocks.remove(pos);
                             S2CPacketUtil.knUpdateItemContainers(((Player) getSelf()), pos, true);
