@@ -139,6 +139,7 @@
   "item.roundabout.snake_skin": "Snake Skin",
   "item.roundabout.snake_oil": "Snake Oil",
   "item.roundabout.snake_skin_boots": "Snake Skin Boots",
+  "item.roundabout.piranha_bucket": "Bucket of Piranha",
 
   "item.roundabout.memory_pawn": "Memory Pawn",
   "item.roundabout.memory_rook": "Memory Rook",
@@ -1583,6 +1584,10 @@
   "sounds.roundabout.melee_guard":  "Blocked",
   "sounds.roundabout.hit_sfx1":  "Deflect",
   "sounds.roundabout.terrier_pass": "Terrier fart",
+  "sounds.roundabout.snake_idle": "Snake Hisses",
+  "sounds.roundabout.snake_attack": "Snake Bites",
+  "sounds.roundabout.snake_hurt": "Snake Hisses",
+  "sounds.roundabout.snake_die": "Snake Dies",
   "sounds.roundabout.the_world_assault":  "Drifting force",
   "sounds.roundabout.the_world_wry":  "WRY!",
   "sounds.roundabout.twau_timestop":  "Time was Stopped!",
