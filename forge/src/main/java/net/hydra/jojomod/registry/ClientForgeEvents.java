@@ -140,6 +140,7 @@ public class ClientForgeEvents {
         event.registerEntityRenderer(ForgeEntities.JUSTICE_PIRATE.get(), JusticePirateRenderer::new);
         event.registerEntityRenderer(ForgeEntities.DARK_MIRAGE.get(), DarkMirageRenderer::new);
         event.registerEntityRenderer(ForgeEntities.KING_NOTHING.get(), KingNothingRenderer::new);
+        event.registerEntityRenderer(ForgeEntities.TRACKING_CLOUD.get(), NoRenderer::new);
         event.registerEntityRenderer(ForgeEntities.TUSK_A1.get(), TuskAct1Renderer::new);
         event.registerEntityRenderer(ForgeEntities.TUSK_A2.get(), TuskAct2Renderer::new);
         event.registerEntityRenderer(ForgeEntities.TUSK_A3.get(), TuskAct3Renderer::new);

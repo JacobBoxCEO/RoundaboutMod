@@ -932,6 +932,7 @@ public class ForgeEvents {
         ModEntities.JUSTICE_PIRATE = ForgeEntities.JUSTICE_PIRATE.get();
         ModEntities.DARK_MIRAGE = ForgeEntities.DARK_MIRAGE.get();
         ModEntities.KING_NOTHING = ForgeEntities.KING_NOTHING.get();
+        ModEntities.TRACKING_CLOUD = ForgeEntities.TRACKING_CLOUD.get();
         ModEntities.TUSK_A1 = ForgeEntities.TUSK_A1.get();
         ModEntities.TUSK_A2 = ForgeEntities.TUSK_A2.get();
         ModEntities.TUSK_A3 = ForgeEntities.TUSK_A3.get();

@@ -111,6 +111,7 @@ public class FabricEntityClient {
         EntityRendererRegistry.register(FabricEntities.WALKING_HEART, WalkingHeartRenderer::new);
         EntityRendererRegistry.register(FabricEntities.DARK_MIRAGE, DarkMirageRenderer::new);
         EntityRendererRegistry.register(FabricEntities.KING_NOTHING, KingNothingRenderer::new);
+        EntityRendererRegistry.register(FabricEntities.TRACKING_CLOUD, NoRenderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A1, TuskAct1Renderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A2, TuskAct2Renderer::new);
         EntityRendererRegistry.register(FabricEntities.TUSK_A3, TuskAct3Renderer::new);

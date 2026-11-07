@@ -1432,6 +1432,10 @@ public class FabricEntities {
                     EntityType.Builder.of(SheerHeartAttackEntity::new, MobCategory.CREATURE).
                             sized(SheerHeartAttackEntity.width, SheerHeartAttackEntity.height).clientTrackingRange(15).build(Roundabout.MOD_ID+":sheer_heart_attack")
             );
+    public static final EntityType<TrackingCloudEntity> TRACKING_CLOUD = Registry.register(
+            BuiltInRegistries.ENTITY_TYPE, Roundabout.location("tracking_cloud"),
+            EntityType.Builder.of(TrackingCloudEntity::new, MobCategory.MISC).sized(0.1f, 0.1f).clientTrackingRange(
+                    15).build(Roundabout.MOD_ID + ":tracking_cloud"));
 
     public static void register() {
                 /*Common Code Bridge*/
@@ -1633,6 +1637,7 @@ public class FabricEntities {
 
                 ModEntities.METALLICA_KNIFE = METALLICA_KNIFE;
                 ModEntities.SHEER_HEART_ATTACK = SHEER_HEART_ATTACK;
+                ModEntities.TRACKING_CLOUD = TRACKING_CLOUD;
 
         ModEntities.DNA_CREATION_SPAWNER = DNA_CREATION_SPAWNER;
 
@@ -1777,6 +1782,7 @@ public class FabricEntities {
         FabricDefaultAttributeRegistry.register(CTR_BARRIER, CTRbarrierEntity.createStandAttributes());
 
         FabricDefaultAttributeRegistry.register(SHEER_HEART_ATTACK, SheerHeartAttackEntity.createStandAttributes());
+                FabricDefaultAttributeRegistry.register(TRACKING_CLOUD, TrackingCloudEntity.createStandAttributes());
 
         /*Spawn Weights and Biomes*/
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.DESERT), MobCategory.CREATURE,
