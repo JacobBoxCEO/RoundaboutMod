@@ -27,6 +27,8 @@ public class ModStrayModels {
     public static FirstPersonBerettaPistolModel FirstPersonBerettaPistolModel;
     public static HeyYaModel HEY_YA;
     public static CenturyBoyModel CENTURY_BOY;
+    public static CatchTheRainbowModel CATCH_THE_RAINBOW;
+    public static CatchTheRainbowUmvuthiModel CATCH_THE_RAINBOW_UMVUTHI;
     public static BowlerHatModel BOWLER_HAT;
     public static UVBlasterModel UV_BLASTER;
     public static WornStoneMaskModel WORN_STONE_MASK;
@@ -52,6 +54,7 @@ public class ModStrayModels {
     public static KakyoinHairPart KakyoinHairPart;
     public static GyroHatPart gyroHatPart;
     public static AnakissHatPart anakissHatPart;
+    public static BlackmorePonytailPart blackmorePonytailPart;
     public static SteelBallsPart steelBallsPart;
     public static DiegoHatPart DiegoHatPart;
     public static KosakuHairPart kosakuHairPart;

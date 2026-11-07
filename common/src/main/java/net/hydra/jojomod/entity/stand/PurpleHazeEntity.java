@@ -1,8 +1,13 @@
 package net.hydra.jojomod.entity.stand;
 
+import net.hydra.jojomod.access.IPlayerEntity;
+import net.hydra.jojomod.event.powers.StandPowers;
+import net.hydra.jojomod.event.powers.StandUser;
+import net.hydra.jojomod.stand.powers.PowersPurpleHaze;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class PurpleHazeEntity extends FollowingStandEntity{
@@ -42,9 +47,11 @@ public class PurpleHazeEntity extends FollowingStandEntity{
     public final AnimationState fallinghit= new AnimationState();
     public final AnimationState fallinghitlong= new AnimationState();
     public final AnimationState fallinghitimpact= new AnimationState();
-    public final AnimationState kickWindup = new AnimationState();
     public final AnimationState kickAttack = new AnimationState();
     public final AnimationState podLaunch = new AnimationState();
+    public final AnimationState podLaunch2 = new AnimationState();
+    public final AnimationState heavyPunchWindup = new AnimationState();
+    public final AnimationState heavyPunch = new AnimationState();
 
 
     public static byte
@@ -57,11 +64,10 @@ public class PurpleHazeEntity extends FollowingStandEntity{
             FALLINGHIT = 95,
             FALLINGHITLONG = 96,
             FALLINGHITIMPACT = 97,
-            KICK_WINDUP = 98,
-            KICK_ATTACK = 99,
-            POD_LAUNCH = 100,
-            SNEAK_CHARGE = 101,
-            SNEAK_ATTACK = 102;
+            KICK_ATTACK = 98,
+            POD_LAUNCH = 99,
+            HEAVY_PUNCH_WINDUP = 100,
+            HEAVY_PUNCH = 101;
 
 
 
@@ -69,7 +75,7 @@ public class PurpleHazeEntity extends FollowingStandEntity{
     @Override
     public void setupAnimationStates() {
         super.setupAnimationStates();
-        boolean isNotDistortionSkin = getSkin() != DISTORTION && getSkin() != GREEN_DSITORTION;
+
         if (this.getUser() != null) {
             if (this.getAnimation() != 12) {
                 this.hideFists.startIfStopped(this.tickCount);
@@ -91,12 +97,6 @@ public class PurpleHazeEntity extends FollowingStandEntity{
                 this.kick_barrage_windup.stop();
             }
 
-            if (this.getAnimation() == KICK_WINDUP) {
-                this.kickWindup.startIfStopped(this.tickCount);
-            } else {
-                this.kickWindup.stop();
-            }
-
             if (this.getAnimation() == KICK_ATTACK) {
                 this.kickAttack.startIfStopped(this.tickCount);
             } else {
@@ -104,9 +104,17 @@ public class PurpleHazeEntity extends FollowingStandEntity{
             }
 
             if (this.getAnimation() == POD_LAUNCH) {
+                /*if (getUser() instanceof Player PL && ((IPlayerEntity) PL).roundabout$getPurpleHazePods() < 3) {
+                    this.podLaunch.stop();
+                    this.podLaunch2.startIfStopped(this.tickCount);
+                }else {
+                    this.podLaunch2.stop();
+                    this.podLaunch.startIfStopped(this.tickCount);
+                }*/
                 this.podLaunch.startIfStopped(this.tickCount);
             } else {
                 this.podLaunch.stop();
+                //this.podLaunch2.stop();
             }
 
             if (this.getAnimation() == 43) {
@@ -162,6 +170,17 @@ public class PurpleHazeEntity extends FollowingStandEntity{
             } else {
                 this.fallinghitimpact.stop();
             }
+            if (this.getAnimation() == HEAVY_PUNCH_WINDUP) {
+                heavyPunchWindup.startIfStopped(tickCount);
+            }else {
+                heavyPunchWindup.stop();
+            }
+            if (this.getAnimation() == HEAVY_PUNCH) {
+                heavyPunch.startIfStopped(tickCount);
+            }else {
+                heavyPunch.stop();
+            }
+
         }
     }
 }
