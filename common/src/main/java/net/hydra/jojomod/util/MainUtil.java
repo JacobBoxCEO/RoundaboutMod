@@ -76,6 +76,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -2854,6 +2855,18 @@ public class MainUtil {
         return false;
     }
 
+    public static boolean CenturyBoyReactionBacklistDamage(DamageSource source) {
+
+        boolean isPassive = source.getEntity() == null;
+
+        return (isPassive && !(source.is(DamageTypes.FALL)
+                || source.is(DamageTypes.FALLING_ANVIL)
+                || source.is(DamageTypes.FALLING_BLOCK)
+                || source.is(DamageTypes.UNATTRIBUTED_FIREBALL)
+                || source.is(DamageTypes.FALLING_STALACTITE)
+        ));
+    }
+
     /** Returns the vertical angle between two mobs in degrees */
     public static float getLookAtEntityPitch(Entity user, Entity targetEntity) {
         double f;
@@ -2979,7 +2992,7 @@ public class MainUtil {
                 value.equals(ModEffects.SINGE)
                 || value.equals(ModEffects.STAND_MELTING) ||
                 value.equals(ModEffects.CAPTURING_LOVE) || value.equals(ModEffects.MELTING)
-                || value.equals(ModEffects.MOLD);
+                || value.equals(ModEffects.MOLD) || value.equals(ModEffects.STITCHED);
     }
 
     public static boolean hidesPotionEffectSwirl(MobEffect value) {
@@ -2990,7 +3003,7 @@ public class MainUtil {
                 || value.equals(ModEffects.SWITCH) || value.equals(ModEffects.MELTING) ||
                 value.equals(ModEffects.IMPRINTING) || value.equals(ModEffects.SWAPPED)
                 || value.equals(ModEffects.STAND_MELTING) ||
-                value.equals(ModEffects.SINGE);
+                value.equals(ModEffects.SINGE) || value.equals(ModEffects.STITCHED);
     }
 
     public static boolean isKnockbackResilient(LivingEntity LE) {

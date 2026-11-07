@@ -4992,5 +4992,12 @@
     "sounds": [
       "roundabout:ctr_stabilizing_rain"
     ]
+  },
+
+  "zombiehorse_stitching": {
+    "subtitle": "sounds.roundabout.zombiehorse_stitching",
+    "sounds": [
+      "roundabout:zombiehorse_stitching"
+    ]
   }
 }

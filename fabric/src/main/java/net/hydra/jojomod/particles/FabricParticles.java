@@ -83,6 +83,7 @@ public class FabricParticles {
     public static final SimpleParticleType BRIEF_MAGIC_DUST = FabricParticleTypes.simple();
     public static final SimpleParticleType STITCH = FabricParticleTypes.simple();
     public static final SimpleParticleType MOLD_DUST = FabricParticleTypes.simple();
+    public static final SimpleParticleType ZOMBIE_STITCH = FabricParticleTypes.simple();
     public static final SimpleParticleType OCCULT = FabricParticleTypes.simple();
     public static final SimpleParticleType AIRBUBBLE_PINK = FabricParticleTypes.simple();
     public static final SimpleParticleType AIRBUBBLE_GREEN = FabricParticleTypes.simple();
@@ -204,6 +205,7 @@ public class FabricParticles {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("d4c_lines"), D4C_LINES);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("stitch"), STITCH);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("mold_dust"), MOLD_DUST);
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("zombie_stitch"), ZOMBIE_STITCH);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("occult"), OCCULT);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("airbubble_pink"), AIRBUBBLE_PINK);
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, Roundabout.location("airbubble_cyan"), AIRBUBBLE_CYAN);
@@ -331,6 +333,7 @@ public class FabricParticles {
         ModParticles.MAGIC_DUST = MAGIC_DUST;
         ModParticles.BRIEF_MAGIC_DUST = BRIEF_MAGIC_DUST;
         ModParticles.STITCH = STITCH;
+        ModParticles.ZOMBIE_STITCH = ZOMBIE_STITCH;
         ModParticles.MOLD_DUST = MOLD_DUST;
         ModParticles.OCCULT = OCCULT;
         ModParticles.AIRBUBBLE_PINK = AIRBUBBLE_PINK;

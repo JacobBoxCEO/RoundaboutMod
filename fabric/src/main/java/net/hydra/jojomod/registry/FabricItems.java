@@ -351,6 +351,10 @@ public class FabricItems {
     public static Item SNAKE_SKIN_BOOTS = registerItem("snake_skin_boots", new ArmorItem(SnakeSkinBootsItem.SNAKE_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()));
     public static final Item PIRANHA_BUCKET = Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Roundabout.MOD_ID, "piranha_bucket"),
             new MobBucketItem(FabricEntities.PIRANHA, Fluids.WATER, SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1)));
+    public static final Item PIRANHA = Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Roundabout.MOD_ID, "piranha"),
+            new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build())));
+    public static final Item COOKED_PIRANHA = Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Roundabout.MOD_ID, "cooked_piranha"),
+            new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(4).saturationMod(1.2F).build())));
 
     public static Item MEMORY_PAWN = registerItem("memory_pawn", new MemoryChessPieceItem(ModBlocks.CHESS_PIECE, new Item.Properties().stacksTo(1)));
     public static Item MEMORY_ROOK = registerItem("memory_rook", new MemoryChessPieceItem(ModBlocks.CHESS_PIECE, new Item.Properties().stacksTo(1)));
@@ -466,6 +470,8 @@ public class FabricItems {
     public static Item PAINTING_VAN_GOUGH = registerItem("painting_van_gough", new VanGoughPaintingItem(new Item.Properties().stacksTo(1)));
     public static Item PAINTING_MONA_LISA = registerItem("painting_mona_lisa", new MonaLisaPaintingItem(new Item.Properties().stacksTo(1)));
 
+    public static Item ZOMBIE_HORSE_THREAD = registerItem("zombie_horse_thread", new ZombieHorseThreadItem(new Item.Properties().stacksTo(1).durability(16)));
+
     public static Item MUSIC_DISC_TORTURE_DANCE = registerItem("music_disc_torture_dance",
             new RecordItem(1, ModSounds.TORTURE_DANCE_EVENT,
                     (new Item.Properties()).stacksTo(1).rarity(Rarity.RARE), 2840));
@@ -494,6 +500,8 @@ public class FabricItems {
             0x6dcd4c, 0xf9f07b, new Item.Properties()));
     public static final Item PIRANHA_SPAWN_EGG = registerItem("piranha_spawn_egg", new SpawnEggItem(FabricEntities.PIRANHA,
             0x8fbbdd, 0xe89e4d, new Item.Properties()));
+    public static final Item BUTTERFLY_SPAWN_EGG = registerItem("butterfly_spawn_egg", new SpawnEggItem(FabricEntities.BUTTERFLY,
+            0x95caff, 0xe880c6, new Item.Properties()));
 
     public static final Potion HEX_POTION =
             Registry.register(BuiltInRegistries.POTION, new ResourceLocation(Roundabout.MOD_ID, "roundabout.hex"),
@@ -849,6 +857,9 @@ public class FabricItems {
                         entries.accept(FALCON_SPAWN_EGG);
                         entries.accept(PIRANHA_SPAWN_EGG);
                         entries.accept(PIRANHA_BUCKET);
+                        entries.accept(PIRANHA);
+                        entries.accept(COOKED_PIRANHA);
+                        entries.accept(BUTTERFLY_SPAWN_EGG);
                         entries.accept(STAND_DISC_D4C);
                         entries.accept(MAX_STAND_DISC_D4C);
                         entries.accept(STAND_DISC_GOLD_EXPERIENCE);
@@ -907,6 +918,8 @@ public class FabricItems {
                         entries.accept(ModBlocks.GAMBLING_TABLE);
                         entries.accept(ModBlocks.MAGICIANS_STATUE_BLOCK);
                         entries.accept(NORISUKE_MASK);
+
+                        entries.accept(ZOMBIE_HORSE_THREAD);
                     }).build());
     public static final CreativeModeTab FOG_BLOCK_ITEMS = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
             new ResourceLocation(Roundabout.MOD_ID, "justice_fog_items"),
@@ -1100,6 +1113,8 @@ public class FabricItems {
         ModItems.SNAKE_SKIN_BOOTS = SNAKE_SKIN_BOOTS;
         ModItems.SNAKE_OIL = SNAKE_OIL;
         ModItems.PIRANHA_BUCKET = PIRANHA_BUCKET;
+        ModItems.PIRANHA = PIRANHA;
+        ModItems.COOKED_PIRANHA = COOKED_PIRANHA;
 
         ModItems.STRAY_CAT_ANIME = STRAY_CAT_ANIME;
         ModItems.STRAY_CAT_MANGA = STRAY_CAT_MANGA;
@@ -1210,6 +1225,7 @@ public class FabricItems {
         ModItems.FALCON_SPAWN_EGG = FALCON_SPAWN_EGG;
         ModItems.SNAKE_SPAWN_EGG = SNAKE_SPAWN_EGG;
         ModItems.PIRANHA_SPAWN_EGG = PIRANHA_SPAWN_EGG;
+        ModItems.BUTTERFLY_SPAWN_EGG = BUTTERFLY_SPAWN_EGG;
         ModItems.ZOMBIE_MINION_SPAWN_EGG = ZOMBIE_MINION_SPAWN_EGG;
         ModItems.AESTHETICIAN_SPAWN_EGG = AESTHETICIAN_SPAWN_EGG;
         ModItems.ZOMBIE_AESTHETICIAN_SPAWN_EGG = ZOMBIE_AESTHETICIAN_SPAWN_EGG;
@@ -1239,6 +1255,8 @@ public class FabricItems {
         ModItems.PAINTING_VAN_GOUGH = PAINTING_VAN_GOUGH;
         ModItems.PAINTING_MONA_LISA = PAINTING_MONA_LISA;
         ModItems.PAINTING_BIRTH_OF_VENUS = PAINTING_BIRTH_OF_VENUS;
+
+        ModItems.ZOMBIE_HORSE_THREAD = ZOMBIE_HORSE_THREAD;
 
         ModItems.initializeVisageStore();
         //ModItems.STAND_ARROW_POOL.add((StandDiscItem)STAND_DISC_D4C);

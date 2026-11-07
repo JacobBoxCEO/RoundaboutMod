@@ -58,6 +58,10 @@ public class ForgeItems {
                     () -> SoundEvents.BUCKET_EMPTY_FISH,
                     new Item.Properties().stacksTo(1)
             )));
+    public static final RegistryObject<Item> PIRANHA = addToWIPTab(ITEMS.register("piranha",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build()))));
+    public static final RegistryObject<Item> COOKED_PIRANHA = addToWIPTab(ITEMS.register("cooked_piranha",
+            () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(4).saturationMod(1.2F).build()))));
 
     public static final RegistryObject<Item> STAND_ARROW = addToTab(ITEMS.register("stand_arrow",
             () -> new StandArrowItem(new Item.Properties().stacksTo(1).durability(5))));
@@ -737,6 +741,9 @@ public class ForgeItems {
     public static final RegistryObject<ForgeSpawnEggItem> PIRANHA_SPAWN_EGG = addToWIPTab(ITEMS.register("piranha_spawn_egg",
             () -> new ForgeSpawnEggItem(ForgeEntities.PIRANHA,
                     0x8fbbdd, 0xe89e4d, new Item.Properties())));
+    public static final RegistryObject<ForgeSpawnEggItem> BUTTERFLY_SPAWN_EGG = addToWIPTab(ITEMS.register("butterfly_spawn_egg",
+            () -> new ForgeSpawnEggItem(ForgeEntities.BUTTERFLY,
+                    0x95caff, 0xe880c6, new Item.Properties())));
     public static final RegistryObject<Potion> HEX_POTION = POTIONS.register("roundabout.hex",
             () -> new Potion(new MobEffectInstance(ForgeEffects.HEX.get(), 9600, 0)));
     public static final RegistryObject<Potion> HEX_POTION_EXTENDED = POTIONS.register("roundabout.long_hex",
@@ -1130,6 +1137,9 @@ public class ForgeItems {
             () -> new MemoryChessPieceItem(ForgeBlocks.CHESS_PIECE.get(),new Item.Properties())));
     public static final RegistryObject<Item> EXP_BISHOP = addToTab(ITEMS.register("exp_bishop",
             () -> new ExperienceBishopItem(ForgeBlocks.CHESS_PIECE.get(),new Item.Properties())));
+
+    public static final RegistryObject<Item> ZOMBIE_HORSE_THREAD = addToWIPTab(ITEMS.register("zombie_horse_thread",
+            () -> new ZombieHorseThreadItem(new Item.Properties().stacksTo(1).durability(16))));
 
     public static final RegistryObject<BlockItem> GAMBLING_TABLE_ITEM = addToWIPTab(ITEMS.register("gambling_table",
             () -> new BlockItem(ForgeBlocks.GAMBLING_TABLE.get(), new Item.Properties())));
