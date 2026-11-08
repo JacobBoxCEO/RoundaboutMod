@@ -114,6 +114,8 @@ public class ClientConfig implements Cloneable {
     public ClientConfig.LyinEyesSettings lyinEyesSettings;
     @NestedOption(group = "modded")
     public ClientConfig.KingNothingSettings kingNothingSettings;
+    @NestedOption(group = "modded")
+    public ClientConfig.CatchTheRainbowSettings catchTheRainbowSettings;
   /*  @NestedOption(group = "modded")
     public ClientConfig.StandTweakSettings standTweakSettings; */
 
@@ -287,6 +289,10 @@ public class ClientConfig implements Cloneable {
         public Float nematodeOpacity;
         @FloatOption(group = "inherit", value = 1F, min = 0, max = 1)
         public Float mapOpacity;
+    }
+    public static class CatchTheRainbowSettings {
+        @BooleanOption(group = "inherit", value = false)
+        public Boolean catchTheRainbowAlternateRainWalk;
     }
     public static class AnubisSettings {
         @BooleanOption(group = "inherit", value = false)

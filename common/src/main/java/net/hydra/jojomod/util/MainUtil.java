@@ -19,7 +19,9 @@ import net.hydra.jojomod.entity.KingCrimsonProjectionEntity;
 import net.hydra.jojomod.entity.ParallelChestEntity;
 import net.hydra.jojomod.entity.corpses.FallenMob;
 import net.hydra.jojomod.entity.corpses.FallenPhantom;
+import net.hydra.jojomod.entity.gold_experience.GELifeform;
 import net.hydra.jojomod.entity.mobs.AnubisGuardian;
+import net.hydra.jojomod.entity.mobs.Butterfly;
 import net.hydra.jojomod.entity.mobs.StrayCatEntity;
 import net.hydra.jojomod.entity.npcs.Aesthetician;
 import net.hydra.jojomod.entity.npcs.ZombieAesthetician;
@@ -59,6 +61,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -1683,6 +1686,7 @@ public class MainUtil {
 
     public static boolean hasBlueBlood(Entity target) {
         if (isWhitelistedBlueBlood(target) || target instanceof Spider || target instanceof Bee
+                || target instanceof Butterfly
                 || target instanceof Silverfish || target instanceof Squid) {
             return true;
         } else {
@@ -2834,7 +2838,7 @@ public class MainUtil {
     }
 
     public static boolean getReducedDamage(Entity entity) {
-        return (entity instanceof Player || entity instanceof StandEntity ||
+        return (entity instanceof Player || entity instanceof StandEntity || entity instanceof GELifeform ||
                 ((entity instanceof LivingEntity LE && !((StandUser) LE).roundabout$getStandDisc().isEmpty()) &&
                         ClientNetworking
                                 .getAppropriateConfig().generalStandUserMobSettings.standUserMobsTakePlayerDamageMultipliers));
@@ -4751,6 +4755,41 @@ public class MainUtil {
             return tag.getByte("Type") == (byte) 1;
         }
         return false;
+    }
+
+    public static byte getWornStandIdleSafe(StandUser user, Class<? extends StandPowers> SP) {
+        byte idle = (byte)0;
+
+        if (user.roundabout$getStandPowers() != null && user.roundabout$getStandPowers().getClass().equals(SP)) {
+            idle = user.roundabout$getIdlePos();
+        }else {
+            idle = user.roundabout$getPreviousPose();
+        }
+
+        return idle;
+    }
+
+    public static byte getWornStandSkinSafe(StandUser user, Class<? extends StandPowers> SP) {
+        byte idle = (byte)0;
+
+        if (user.roundabout$getStandPowers() != null && user.roundabout$getStandPowers().getClass().equals(SP)) {
+            idle = user.roundabout$getStandSkin();
+        }else if (user.roundabout$getPreviousStandPowers() != null && user.roundabout$getPreviousStandPowers().getClass().equals(SP)) {
+            idle = user.roundabout$getPreviousSkin();
+        }
+
+        return idle;
+    }
+    public static int getWornStandVanishticksSafe(StandUser user, Class<? extends StandPowers> SP) {
+        int heyticks = 0;
+
+        if (user.roundabout$getStandPowers() != null && user.roundabout$getStandPowers().getClass().equals(SP)) {
+            heyticks = user.roundabout$getCurrentStandVanishTicks();
+        }else if (user.roundabout$getPreviousStandPowers() != null && user.roundabout$getPreviousStandPowers().getClass().equals(SP)) {
+            heyticks = user.roundabout$getPreviousStandVanishTicks();
+        }
+
+        return heyticks;
     }
 
     public static ResourceLocation getPlayerSkinWithRespectToVisage(Player player) {

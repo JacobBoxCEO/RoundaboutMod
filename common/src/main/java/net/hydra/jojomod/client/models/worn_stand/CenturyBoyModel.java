@@ -12,6 +12,8 @@ import net.hydra.jojomod.client.models.layers.animations.CenturyBoyAnimations;
 import net.hydra.jojomod.event.powers.StandUser;
 import net.hydra.jojomod.event.powers.TimeStop;
 import net.hydra.jojomod.stand.powers.Powers20thCenturyBoy;
+import net.hydra.jojomod.stand.powers.PowersHeyYa;
+import net.hydra.jojomod.util.MainUtil;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -176,7 +178,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 
 
 	public void render(Entity context, PoseStack poseStack, MultiBufferSource bufferSource, int light) {
-		VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(context, (byte)0)));
+		VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, (byte)0)));
 		root().render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
 	}
 
@@ -185,7 +187,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity LE) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			Body.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			Body.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderHead(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -193,7 +195,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity LE) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			Head.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			Head.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderRightArm(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -201,7 +203,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity LE) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			RightArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			RightArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderLeftArm(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -209,7 +211,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			LeftArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			LeftArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderRightArmSlim(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -217,7 +219,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity LE) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			RightArmSlim.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			RightArmSlim.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderLeftArmSlim(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -225,7 +227,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			LeftArmSlim.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			LeftArmSlim.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 	public void renderBreast(Entity context, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource,
@@ -236,7 +238,7 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 			if (ClientUtil.hasChangedBody(context)) {
 				consumer = bufferSource.getBuffer(RenderType.entityTranslucent(ClientUtil.getChangedBodyBreastTexture(context)));
 			}
-			Breast.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			Breast.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 
 		}
 	}
@@ -245,10 +247,10 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 		if (context instanceof LivingEntity) {
 			VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(getTextureLocation(context, skin)));
 
-			Body.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
-			Head.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
-			RightArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
-			LeftArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
+			Body.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
+			Head.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
+			RightArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
+			LeftArm.render(poseStack, consumer, light, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
 		}
 	}
 
@@ -257,10 +259,19 @@ public class CenturyBoyModel extends PsuedoHierarchicalModel {
 
 		StandUser user = ((StandUser) LE);
 		user.roundabout$getWornStandIdleAnimation().startIfStopped(context.tickCount);
-		if (user.roundabout$getIdlePos() == 2){
+
+		byte idle = MainUtil.getWornStandIdleSafe(user, Powers20thCenturyBoy.class);
+		/*(byte)0;
+		if (user.roundabout$getStandPowers() instanceof Powers20thCenturyBoy) {
+			idle = user.roundabout$getIdlePos();
+		}else if (user.roundabout$getPreviousStandPowers() instanceof Powers20thCenturyBoy) {
+			idle = user.roundabout$getPreviousPose();
+		}*/
+
+		if (idle == 2){
 			this.animate(user.roundabout$getWornStandIdleAnimation(), CenturyBoyAnimations.standanim.hat,partialTicks, 1f);
 		}
-		if (user.roundabout$getIdlePos() == 1){
+		if (idle == 1){
 			this.animate(user.roundabout$getWornStandIdleAnimation(), CenturyBoyAnimations.standanim.unlatch,partialTicks, 1f);
 		}
 
