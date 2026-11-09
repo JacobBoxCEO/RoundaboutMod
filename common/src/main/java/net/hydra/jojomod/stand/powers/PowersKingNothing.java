@@ -1098,7 +1098,7 @@ public class PowersKingNothing extends NewDashPreset {
             }
         }
         switch (context) {
-            case SKILL_1_NORMAL -> tryTrackMemorizedScent();
+//            case SKILL_1_NORMAL -> tryTrackMemorizedScent();
             case SKILL_1_CROUCH -> tryItemTrack();
             case SKILL_2_NORMAL -> phaseGrabClient();
             case SKILL_2_CROUCH -> phaseItemClient();

@@ -2560,10 +2560,16 @@
 
   "ability.roundabout.kn_smell_track": "Track Scent (TODO)",
   "ability.roundabout.kn_smell_track.desc": "Send out King Nothing to track the scent of the Block, Mob, or Player you currently have memorized.",
-  "abilitiy.roundabout.kn_item_track": "Track Item",
-  "abilitiy.roundabout.kn_item_track.desc": "King Nothing smells your held item and detects other Players or Chests which have that item.",
+  "ability.roundabout.kn_track_item": "Track Item",
+  "ability.roundabout.kn_track_item.desc": "King Nothing smells your held item and detects other Players or Chests which have that item.",
   "ability.roundabout.kn_phase_item": "Phase Item",
-  "ability.roundabout.kn_phase_item.desc": "Like Phase Grab but King Nothing takes your held item and does stuff with it. ",
+  "ability.roundabout.kn_phase_item.desc": "King Nothing will take your held item and use it to do different things. It can do things like place blocks, mine blocks, and even attack enemies!",
+  "ability.roundabout.kn_drop_item": "Drop Item",
+  "ability.roundabout.kn_drop_item.desc": "King Nothing will drop its currently held item where it is. This is so I DONT NEED TO MAKE PILOT MODE LETS GO!!!",
+  "ability.roundabout.kn_form_predict": "Form Prediction",
+  "ability.roundabout.kn_form_predict.desc": "Memorize the scent of the original form of your currently held item.",
+  "ability.roundabout.kn_sniff": "Memorize Scent",
+  "ability.roundabout.kn_sniff.desc": "Memorize the scent of the Block, Mob, or Player you are currently looking at.",
 
 
 
