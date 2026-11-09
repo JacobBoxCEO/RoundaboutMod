@@ -715,7 +715,7 @@
     ]
   },
   "king_nothing_summon": {
-    "subtitle": "sounds.roundabout.king_nothing_summon",
+    "subtitle": "sounds.roundabout.summon_stand",
     "sounds": [
       "roundabout:king_nothing_summon"
     ]

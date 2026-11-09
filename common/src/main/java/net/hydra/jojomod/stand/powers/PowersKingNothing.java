@@ -75,6 +75,8 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
 
 import java.util.*;
@@ -867,7 +869,7 @@ public class PowersKingNothing extends NewDashPreset {
                             }
                             // bucket place
                             else if (held.getItem() instanceof BucketItem BU && !held.is(Items.LAVA_BUCKET)
-                                    && tryBucketPlace(BU, stand, bpos, blockHit)) {
+                                    && !held.is(Items.BUCKET) && tryBucketPlace(BU, stand, bpos, blockHit)) {
                                 didThings = true;
                             }
                             // mining !!
@@ -876,7 +878,6 @@ public class PowersKingNothing extends NewDashPreset {
                             }
                             if (didThings) {
                                 this.stopSoundsIfNearby(PHASE, 32, false);
-                                return;
                             }
                         }
 
@@ -900,7 +901,7 @@ public class PowersKingNothing extends NewDashPreset {
                                     PowerIndex.SKILL_2_SNEAK, 7);
                             this.setCooldown(PowerIndex.SKILL_2_SNEAK, 5);
                             ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
-                            tryPowerPacket(PowerIndex.NONE);
+                            setPowerNone();
                             animateStand(KingNothingEntity.RETURN);
                             playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
                         }
@@ -990,9 +991,25 @@ public class PowersKingNothing extends NewDashPreset {
         BlockPos placePos = bpos.relative(dir);
         BlockState placeState = stand.level().getBlockState(placePos);
         ItemStack returnStack = stand.getHeldItem().copy();
-        boolean placesfrfr = (placeState.canBeReplaced() || placeState.isAir()) && canModifyPos(bpos);
-        if (placesfrfr && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
-                != InteractionResult.FAIL) {
+        boolean doubleSlabbinItFr = false;
+        if (stand.level().getBlockState(bpos).is(blockItem.getBlock())
+                && (stand.level().getBlockState(bpos).getBlock() instanceof SlabBlock)
+                && stand.level().getBlockState(bpos).getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE
+                && (stand.level().getBlockState(bpos).getValue(BlockStateProperties.SLAB_TYPE) == SlabType.TOP ?
+                (dir == Direction.DOWN) : (dir == Direction.UP)) && canModifyPos(bpos)) {
+            stand.level().setBlockAndUpdate(bpos,
+                    stand.level().getBlockState(bpos).setValue(BlockStateProperties.SLAB_TYPE, SlabType.DOUBLE));
+            stand.setHeldItem(ItemStack.EMPTY);
+            doubleSlabbinItFr = true;
+        }
+        if (stand.level().isFluidAtPosition(bpos, fluidState -> !fluidState.isEmpty())
+                && !stand.level().getBlockState(bpos).getValue(BlockStateProperties.WATERLOGGED)) {
+            return false;
+        }
+        boolean placesfrfr = doubleSlabbinItFr || ((placeState.canBeReplaced() || placeState.isAir()) && canModifyPos(bpos)
+                && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
+                != InteractionResult.FAIL);
+        if (placesfrfr) {
             if (getCreative()) {
                 stand.setHeldItem(returnStack);
             }
