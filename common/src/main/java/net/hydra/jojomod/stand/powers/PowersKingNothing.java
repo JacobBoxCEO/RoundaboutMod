@@ -1555,9 +1555,12 @@ public class PowersKingNothing extends NewDashPreset {
                         SoundSource.PLAYERS, 1.7F, 1.3F);
             }
             ItemStack playerHeld = this.getSelf().getMainHandItem();
-            if (playerHeld.isEmpty() || (ItemStack.isSameItemSameTags(standEntity.getHeldItem(), playerHeld)
-                    && playerHeld.getCount() < playerHeld.getMaxStackSize())) {
+            if (playerHeld.isEmpty()) {
                 this.getSelf().setItemSlot(EquipmentSlot.MAINHAND, standEntity.getHeldItem());
+            }
+            else if ((ItemStack.isSameItemSameTags(standEntity.getHeldItem(), playerHeld)
+                    && playerHeld.getCount() < playerHeld.getMaxStackSize())) {
+                this.getSelf().setItemSlot(EquipmentSlot.MAINHAND, playerHeld.copyWithCount(playerHeld.getCount() + 1));
             }
             else {
                 ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
