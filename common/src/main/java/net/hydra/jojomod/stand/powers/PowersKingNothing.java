@@ -863,8 +863,8 @@ public class PowersKingNothing extends NewDashPreset {
                                 didThings = true;
                             }
                             // block place
-                            else if (held.getItem() instanceof BlockItem BI && tryPlaceBlock(BI, blockHit, bpos, stand,
-                                    held)) {
+                            else if (held.getItem() instanceof BlockItem BI && tryPlaceBlock(BI, blockHit, bpos, state,
+                                    stand, held)) {
                                 didThings = true;
                             }
                             // bucket place
@@ -985,28 +985,32 @@ public class PowersKingNothing extends NewDashPreset {
                 pos);
     }
 
-    public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, StandEntity stand,
+    public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, BlockState bstate, StandEntity stand,
             ItemStack held) {
         Direction dir = blockHit.getDirection();
         BlockPos placePos = bpos.relative(dir);
         BlockState placeState = stand.level().getBlockState(placePos);
         ItemStack returnStack = stand.getHeldItem().copy();
         boolean doubleSlabbinItFr = false;
-        if (stand.level().getBlockState(bpos).is(blockItem.getBlock())
-                && (stand.level().getBlockState(bpos).getBlock() instanceof SlabBlock)
-                && stand.level().getBlockState(bpos).getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE
-                && (stand.level().getBlockState(bpos).getValue(BlockStateProperties.SLAB_TYPE) == SlabType.TOP ?
+        if (bstate.is(blockItem.getBlock())
+                && (bstate.getBlock() instanceof SlabBlock)
+                && bstate.getValue(BlockStateProperties.SLAB_TYPE) != SlabType.DOUBLE
+                && (bstate.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.TOP ?
                 (dir == Direction.DOWN) : (dir == Direction.UP)) && canModifyPos(bpos)) {
             stand.level().setBlockAndUpdate(bpos,
-                    stand.level().getBlockState(bpos).setValue(BlockStateProperties.SLAB_TYPE, SlabType.DOUBLE));
+                    bstate.setValue(BlockStateProperties.SLAB_TYPE, SlabType.DOUBLE));
             stand.setHeldItem(ItemStack.EMPTY);
             doubleSlabbinItFr = true;
         }
         if (stand.level().isFluidAtPosition(bpos, fluidState -> !fluidState.isEmpty())
-                && !stand.level().getBlockState(bpos).getValue(BlockStateProperties.WATERLOGGED)) {
+                && !(bstate.hasProperty(BlockStateProperties.WATERLOGGED) &&
+                bstate.getValue(BlockStateProperties.WATERLOGGED))) {
             return false;
         }
-        boolean placesfrfr = doubleSlabbinItFr || ((placeState.canBeReplaced() || placeState.isAir()) && canModifyPos(bpos)
+        boolean placesfrfr = doubleSlabbinItFr || ((bstate.canBeReplaced() || bstate.isAir()) && canModifyPos(bpos)
+                && stand.level().isFluidAtPosition(bpos, FluidState::isEmpty)
+                && blockItem.place(new DirectionalPlaceContext(stand.level(), bpos, dir, held, dir)) != InteractionResult.FAIL)
+                || ((placeState.canBeReplaced() || placeState.isAir()) && canModifyPos(placePos)
                 && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                 != InteractionResult.FAIL);
         if (placesfrfr) {
