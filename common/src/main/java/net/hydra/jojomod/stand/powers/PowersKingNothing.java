@@ -1007,10 +1007,10 @@ public class PowersKingNothing extends NewDashPreset {
                 bstate.getValue(BlockStateProperties.WATERLOGGED))) {
             return false;
         }
-        boolean placesfrfr = doubleSlabbinItFr || ((bstate.canBeReplaced() || bstate.isAir()) && canModifyPos(bpos)
+        boolean placesfrfr = doubleSlabbinItFr || (canModifyPos(bpos)
                 && stand.level().isFluidAtPosition(bpos, FluidState::isEmpty)
-                && blockItem.place(new DirectionalPlaceContext(stand.level(), bpos, dir, held, dir)) != InteractionResult.FAIL)
-                || ((placeState.canBeReplaced() || placeState.isAir()) && canModifyPos(placePos)
+                && blockItem.place(new DirectionalPlaceContext(stand.level(), bpos, dir, held, dir))
+                != InteractionResult.FAIL) || (canModifyPos(placePos)
                 && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                 != InteractionResult.FAIL);
         if (placesfrfr) {
@@ -1554,7 +1554,14 @@ public class PowersKingNothing extends NewDashPreset {
                 playSoundIfPossible(getSelf().level(), null, this.getSelf().blockPosition(), ModSounds.BLOCK_GRAB_EVENT,
                         SoundSource.PLAYERS, 1.7F, 1.3F);
             }
-            ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
+            ItemStack playerHeld = this.getSelf().getMainHandItem();
+            if (playerHeld.isEmpty() || (ItemStack.isSameItemSameTags(standEntity.getHeldItem(), playerHeld)
+                    && playerHeld.getCount() < playerHeld.getMaxStackSize())) {
+                this.getSelf().setItemSlot(EquipmentSlot.MAINHAND, standEntity.getHeldItem());
+            }
+            else {
+                ((Player) this.getSelf()).addItem(standEntity.getHeldItem());
+            }
         }
         else {
             ItemEntity $$4 = new ItemEntity(this.getSelf().level(), this.getSelf().getX(),
