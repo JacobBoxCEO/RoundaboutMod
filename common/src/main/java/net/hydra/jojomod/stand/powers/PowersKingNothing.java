@@ -3,6 +3,7 @@ package net.hydra.jojomod.stand.powers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.hydra.jojomod.Roundabout;
+import net.hydra.jojomod.access.IBucketItem;
 import net.hydra.jojomod.access.IGravityEntity;
 import net.hydra.jojomod.block.FancyLighterBlock;
 import net.hydra.jojomod.block.FogBlock;
@@ -26,6 +27,7 @@ import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.item.SignBlockItem;
 import net.hydra.jojomod.item.StrayCatItem;
+import net.hydra.jojomod.mixin.items.BucketItemMixin;
 import net.hydra.jojomod.particles.PuzzleColorParticleOptions;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
@@ -894,8 +896,12 @@ public class PowersKingNothing extends NewDashPreset {
     private boolean tryBucketPlace(BucketItem bucket, StandEntity stand, BlockPos bpos, BlockHitResult blockHit) {
         BlockPos placePos = bpos.relative(blockHit.getDirection());
         boolean placesNotfr =
-                getSelf().level().isFluidAtPosition(placePos, FluidState::isEmpty) && canModifyPos(placePos);
+                getSelf().level().isFluidAtPosition(placePos, fluidState ->
+                        !(fluidState.isSource() && !(bucket instanceof MobBucketItem))
+                        && (fluidState.getType().isSame(((IBucketItem) bucket).roundabout$getContents())
+                        || fluidState.isEmpty())) && canModifyPos(placePos);
         if (placesNotfr && bucket.emptyContents(null, stand.level(), placePos, null)) {
+            bucket.checkExtraContent(null, stand.level(), stand.getHeldItem(), placePos);
             if (!getCreative()) {
                 stand.setHeldItem(Items.BUCKET.getDefaultInstance());
             }
