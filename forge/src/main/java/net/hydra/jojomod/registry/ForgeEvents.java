@@ -727,6 +727,7 @@ public class ForgeEvents {
         ModItems.HATO_MASK = ForgeItems.HATO_MASK.get();
         ModItems.NORISUKE_MASK = ForgeItems.NORISUKE_MASK.get();
         ModItems.LAEM_MASK = ForgeItems.LAEM_MASK.get();
+        ModItems.CIOCCOLATA_MASK = ForgeItems.CIOCCOLATA_MASK.get();
         ModItems.SHIZUKA_MASK = ForgeItems.SHIZUKA_MASK.get();
         ModItems.JOHNNY_MASK = ForgeItems.JOHNNY_MASK.get();
         ModItems.JOHNGALLIA_MASK = ForgeItems.JOHNGALLIA_MASK.get();

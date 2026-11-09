@@ -288,6 +288,7 @@ public class ModItems {
     public static Item DAIYA_MASK;
     public static Item DAIYA_2_MASK;
     public static Item LAEM_MASK;
+    public static Item CIOCCOLATA_MASK;
     public static Item INTERDIMENSIONAL_KEY;
 
     public static Item ANUBIS_ITEM;
@@ -416,6 +417,7 @@ public class ModItems {
         addToVisageStore(HATO_MASK,page, characterCostExp, characterCostEmerald);
         addToVisageStore(KIRA_PART_EIGHT_MASK, page, characterCostExp, characterCostEmerald);
         addToVisageStore(LAEM_MASK,page, characterCostExp, characterCostEmerald);
+        addToVisageStore(CIOCCOLATA_MASK,page, characterCostExp, characterCostEmerald);
         if (ClientNetworking.getAppropriateConfig().cinderellaSettings.enableJojoveinVisagesInShop){
             page++;
             addToVisageStore(SHIZUKA_MASK,page, characterCostExp, characterCostEmerald);
