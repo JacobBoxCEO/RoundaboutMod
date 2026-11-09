@@ -27,7 +27,6 @@ import net.hydra.jojomod.item.ModItems;
 import net.hydra.jojomod.item.RoadRollerItem;
 import net.hydra.jojomod.item.SignBlockItem;
 import net.hydra.jojomod.item.StrayCatItem;
-import net.hydra.jojomod.mixin.items.BucketItemMixin;
 import net.hydra.jojomod.particles.PuzzleColorParticleOptions;
 import net.hydra.jojomod.sound.ModSounds;
 import net.hydra.jojomod.stand.powers.elements.PowerContext;
@@ -76,7 +75,6 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
 
 import java.util.*;
@@ -86,7 +84,8 @@ public class PowersKingNothing extends NewDashPreset {
     public static final byte MANGA = 1, SPINE = 2, NOTE = 3, BETA = 4, WARDEN = 5, SNIFFER = 6;
 
     // sounds
-    public static final byte DISINTEGRATE = 32, PHASE = 33;
+    public static final byte DISINTEGRATE = 32,
+            PHASE = 33;
 
     // tags
     public static final String MEMORIZED_BLOCK_TAG = "memorizedBlock",
@@ -199,6 +198,14 @@ public class PowersKingNothing extends NewDashPreset {
             }
         }
         return super.getSoundFromByte(soundChoice);
+    }
+
+    @Override
+    public byte getSoundCancelingGroupByte(byte soundChoice) {
+        if (soundChoice == PHASE) {
+            return PHASE;
+        }
+        return super.getSoundCancelingGroupByte(soundChoice);
     }
 
     @Override
@@ -369,7 +376,7 @@ public class PowersKingNothing extends NewDashPreset {
             }
             case 3 -> {
                 if ((isHoldingSneak() && (isTrackingItem()
-                                                  || getFormPrediction(getSelf().getMainHandItem().getItem()) == null))
+                        || getFormPrediction(getSelf().getMainHandItem().getItem()) == null))
                         || isPhasing()) {
                     return true;
                 }
@@ -498,13 +505,15 @@ public class PowersKingNothing extends NewDashPreset {
     }
 
     public void addItemBlockPos(BlockPos pos) {
-        if (getSelf().level().isClientSide() && ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
+        if (getSelf().level().isClientSide()
+                && ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
             this.itemHoldingBlocks.add(pos);
         }
     }
 
     public void removeItemBlockPos(BlockPos pos) {
-        if (getSelf().level().isClientSide() && ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
+        if (getSelf().level().isClientSide()
+                && ConfigManager.getClientConfig().kingNothingSettings.highlightInItemTrack) {
             this.itemHoldingBlocks.remove(pos);
         }
     }
@@ -566,7 +575,8 @@ public class PowersKingNothing extends NewDashPreset {
                 if (passiveParticlesCounter % 5 == 0) {
                     ParticleData pdata = getVisualInfo();
                     for (int i = 0; i < 2; i++) {
-                        int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
+                        int color =
+                                Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                         Vec3 offset = getSelf().getEyePosition().offsetRandom(level.getRandom(), 5);
                         MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                 PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
@@ -658,9 +668,10 @@ public class PowersKingNothing extends NewDashPreset {
                     Vec3 spawnPos = otherChestPos == null ? pos.getCenter() : pos.getCenter().lerp(
                             otherChestPos.getCenter(), 0.5);
                     int yOffset = 1 + (level.getBlockState(pos.above()).isAir() || (level.getBlockEntity(
-                            pos.above()) instanceof RandomizableContainerBlockEntity) || otherChestPos != null && (level.getBlockState(
-                            otherChestPos).isAir() || (level.getBlockEntity(
-                            otherChestPos.above()) instanceof RandomizableContainerBlockEntity)) ? 0 : 1);
+                            pos.above()) instanceof RandomizableContainerBlockEntity) || otherChestPos != null && (
+                            level.getBlockState(
+                                    otherChestPos).isAir() || (level.getBlockEntity(
+                                    otherChestPos.above()) instanceof RandomizableContainerBlockEntity)) ? 0 : 1);
                     MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                             PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color),
                             spawnPos.x(), spawnPos.y() + yOffset, spawnPos.z(), 1 + (otherChestPos == null ? 0 : 1),
@@ -829,37 +840,42 @@ public class PowersKingNothing extends NewDashPreset {
                                         stand));
                         BlockPos bpos = blockHit.getBlockPos();
                         BlockState state = stand.level().getBlockState(bpos);
+                        boolean didThings = false;
                         if (!state.isAir()) {
                             if (this.getSelf().level().getGameRules().getBoolean(
                                     ModGamerules.ROUNDABOUT_STAND_REDSTONE_INTERFERENCE) && !isHoldingItem) {
                                 Block blk = state.getBlock();
                                 if (((blk instanceof LeverBlock) || (blk instanceof ButtonBlock)
-                                             || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
-                                             || (blk instanceof FenceGateBlock))
+                                        || (blk instanceof DoorBlock) || (blk instanceof TrapDoorBlock)
+                                        || (blk instanceof FenceGateBlock))
                                         && this.getSelf() instanceof Player PE) {
                                     blk.use(state, PE.level(), bpos, PE, PE.getUsedItemHand(), blockHit);
                                     ((StandUser) this.getSelf()).roundabout$tryPower(PowerIndex.NONE, true);
                                     playSoundsIfNearby(SoundIndex.SUMMON_SOUND, 27, false);
                                     animateStand(KingNothingEntity.RETURN);
-                                    return;
+                                    didThings = true;
                                 }
                             }
                             // bucket pickup
                             else if (held.is(Items.BUCKET) && tryBucketPickup(state, blockHit, bpos, stand)) {
-                                return;
+                                didThings = true;
                             }
                             // block place
                             else if (held.getItem() instanceof BlockItem BI && tryPlaceBlock(BI, blockHit, bpos, stand,
                                     held)) {
-                                return;
+                                didThings = true;
                             }
                             // bucket place
                             else if (held.getItem() instanceof BucketItem BU && !held.is(Items.LAVA_BUCKET)
                                     && tryBucketPlace(BU, stand, bpos, blockHit)) {
-                                return;
+                                didThings = true;
                             }
                             // mining !!
                             else if (isHoldingItem && tryMineBlock(held, state, bpos, stand)) {
+                                didThings = true;
+                            }
+                            if (didThings) {
+                                this.stopSoundsIfNearby(PHASE, 32, false);
                                 return;
                             }
                         }
@@ -876,6 +892,7 @@ public class PowersKingNothing extends NewDashPreset {
 
                         if ((stand.isTechnicallyInImpassableWall())
                                 || stand.position().distanceTo(this.getSelf().position()) > 15) {
+                            this.stopSoundsIfNearby(PHASE, 32, false);
                             S2CPacketUtil.sendCooldownSyncPacket(((ServerPlayer) this.getSelf()), PowerIndex.SKILL_2,
                                     7);
                             this.setCooldown(PowerIndex.SKILL_2, 5);
@@ -897,9 +914,9 @@ public class PowersKingNothing extends NewDashPreset {
         BlockPos placePos = bpos.relative(blockHit.getDirection());
         boolean placesNotfr =
                 getSelf().level().isFluidAtPosition(placePos, fluidState ->
-                        !(fluidState.isSource() && !(bucket instanceof MobBucketItem))
-                        && (fluidState.getType().isSame(((IBucketItem) bucket).roundabout$getContents())
-                        || fluidState.isEmpty())) && canModifyPos(placePos);
+                        (!fluidState.isSource() || bucket instanceof MobBucketItem)
+                                && (fluidState.getType().isSame(((IBucketItem) bucket).roundabout$getContents())
+                                || fluidState.isEmpty())) && canModifyPos(placePos);
         if (placesNotfr && bucket.emptyContents(null, stand.level(), placePos, null)) {
             bucket.checkExtraContent(null, stand.level(), stand.getHeldItem(), placePos);
             if (!getCreative()) {
@@ -935,7 +952,7 @@ public class PowersKingNothing extends NewDashPreset {
         }
         boolean pickupfrfrfr = pickup != null && !(pickup instanceof SimpleWaterloggedBlock && !bstate.getValue(
                 BlockStateProperties.WATERLOGGED)) && !(pickup instanceof LiquidBlock
-                                                                && !bstate.getFluidState().isSource()) && canModifyPos(
+                && !bstate.getFluidState().isSource()) && canModifyPos(
                 pos);
         if (pickupfrfrfr) {
             if (pickup.getPickupSound().isPresent()) {
@@ -1080,7 +1097,7 @@ public class PowersKingNothing extends NewDashPreset {
 
     @Override
     public boolean tryPower(int move, boolean forced) {
-        if (this.isPhasing()) {
+        if (!this.isClient() && this.isPhasing()) {
             this.stopSoundsIfNearby(PHASE, 120, false);
         }
         return super.tryPower(move, forced);
@@ -1533,7 +1550,7 @@ public class PowersKingNothing extends NewDashPreset {
         boolean bl = false;
         for (ItemStack itemStack2 : inventory.items) {
             if (!itemStack2.isEmpty() && (!ItemStack.isSameItemSameTags(itemStack2, itemStack)
-                                                  || itemStack2.getCount() >= itemStack2.getMaxStackSize())) {
+                    || itemStack2.getCount() >= itemStack2.getMaxStackSize())) {
                 continue;
             }
             bl = true;
