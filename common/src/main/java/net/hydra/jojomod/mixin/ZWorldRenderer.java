@@ -240,12 +240,15 @@ public class ZWorldRenderer {
             if (pkn.isTrackingItem()) {
                 int color = pkn.getVisualInfo().highlightColor();
                 for (BlockPos pos : pkn.itemHoldingBlocks) {
-                    ClientEffectUtil.renderBox(poseStack,
+                    ClientEffectUtil.renderPurpleBox(poseStack,
                             mc.renderBuffers().bufferSource(),
                             camera,
                             pos,
                             pos,
-                            color);
+                         ((color >> 16) & 0xFF) / 255.0F,
+                         ((color >> 8) & 0xFF) / 255.0F,
+                         (color & 0xFF) / 255.0F,
+                         1.0f);
                 }
             }
         }
