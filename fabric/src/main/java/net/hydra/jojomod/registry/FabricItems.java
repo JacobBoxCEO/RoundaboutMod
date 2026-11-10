@@ -88,6 +88,10 @@ public class FabricItems {
             new StandDiscItem(new Item.Properties().stacksTo(1), new PowersKingCrimson(null)));
     public static Item MAX_STAND_DISC_KING_CRIMSON = registerItem("max_king_crimson_disc",
             new MaxStandDiscItem(new Item.Properties().stacksTo(1), new PowersKingCrimson(null)));
+    public static final Item STAND_DISC_JJF = registerItem("jumpin_jack_flash_disc",
+            new StandDiscItem(new Item.Properties().stacksTo(1), new PowersJumpinJackFlash(null)));
+    public static final Item MAX_STAND_DISC_JJF = registerItem("max_jumpin_jack_flash_disc",
+            new MaxStandDiscItem(new Item.Properties().stacksTo(1), new PowersJumpinJackFlash(null)));
 
     public static final Item STAND_DISC_WHITESNAKE = registerItem("whitesnake_disc",
             new StandDiscItem(new Item.Properties().stacksTo(1), new PowersWhitesnake(null)));
@@ -501,6 +505,8 @@ public class FabricItems {
             0x6dcd4c, 0xf9f07b, new Item.Properties()));
     public static final Item PIRANHA_SPAWN_EGG = registerItem("piranha_spawn_egg", new SpawnEggItem(FabricEntities.PIRANHA,
             0x8fbbdd, 0xe89e4d, new Item.Properties()));
+    public static final Item BUTTERFLY_SPAWN_EGG = registerItem("butterfly_spawn_egg", new SpawnEggItem(FabricEntities.BUTTERFLY,
+            0x95caff, 0xe880c6, new Item.Properties()));
 
     public static final Potion HEX_POTION =
             Registry.register(BuiltInRegistries.POTION, new ResourceLocation(Roundabout.MOD_ID, "roundabout.hex"),
@@ -581,6 +587,7 @@ public class FabricItems {
                         entries.accept(ZOMBIE_MINION_SPAWN_EGG);
                         entries.accept(SNAKE_SPAWN_EGG);
                         entries.accept(PIRANHA_SPAWN_EGG);
+                        entries.accept(BUTTERFLY_SPAWN_EGG);
                         entries.accept(COFFEE_GUM);
                         entries.accept(LOCACACA_PIT.asItem());
                         entries.accept(LOCACACA);
@@ -886,6 +893,8 @@ public class FabricItems {
                         entries.accept(STAND_DISC_OASIS);
                         entries.accept(MAX_STAND_DISC_OASIS);
                         entries.accept(STAND_DISC_PEARL_JAM);
+                        entries.accept(STAND_DISC_JJF);
+                        entries.accept(MAX_STAND_DISC_JJF);
                         entries.accept(STAND_DISC_CATCH_THE_RAINBOW);
                         entries.accept(BLACKMORE_MASK);
 
@@ -916,6 +925,7 @@ public class FabricItems {
                         entries.accept(ModBlocks.MAGICIANS_STATUE_BLOCK);
                         entries.accept(NORISUKE_MASK);
 
+                        entries.accept(ZOMBIE_HORSE_THREAD);
                         entries.accept(ZOMBIE_HORSE_THREAD);
                     }).build());
     public static final CreativeModeTab FOG_BLOCK_ITEMS = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
@@ -968,6 +978,9 @@ public class FabricItems {
         ModItems.STAND_DISC_KING_CRIMSON = STAND_DISC_KING_CRIMSON;
         ((MaxStandDiscItem)MAX_STAND_DISC_KING_CRIMSON).baseDisc = ((StandDiscItem)STAND_DISC_KING_CRIMSON);
         ModItems.MAX_STAND_DISC_KING_CRIMSON = MAX_STAND_DISC_KING_CRIMSON;
+        ModItems.STAND_DISC_JJF = STAND_DISC_JJF;
+        ((MaxStandDiscItem)MAX_STAND_DISC_JJF).baseDisc = ((StandDiscItem)STAND_DISC_JJF);
+        ModItems.MAX_STAND_DISC_JJF = MAX_STAND_DISC_JJF;
         ModItems.STAND_DISC_WHITESNAKE = STAND_DISC_WHITESNAKE;
         ((MaxStandDiscItem) MAX_STAND_DISC_WHITESNAKE).baseDisc = (StandDiscItem) STAND_DISC_WHITESNAKE;
         ModItems.MAX_STAND_DISC_WHITESNAKE = MAX_STAND_DISC_WHITESNAKE;
@@ -1223,6 +1236,7 @@ public class FabricItems {
         ModItems.FALCON_SPAWN_EGG = FALCON_SPAWN_EGG;
         ModItems.SNAKE_SPAWN_EGG = SNAKE_SPAWN_EGG;
         ModItems.PIRANHA_SPAWN_EGG = PIRANHA_SPAWN_EGG;
+        ModItems.BUTTERFLY_SPAWN_EGG = BUTTERFLY_SPAWN_EGG;
         ModItems.ZOMBIE_MINION_SPAWN_EGG = ZOMBIE_MINION_SPAWN_EGG;
         ModItems.AESTHETICIAN_SPAWN_EGG = AESTHETICIAN_SPAWN_EGG;
         ModItems.ZOMBIE_AESTHETICIAN_SPAWN_EGG = ZOMBIE_AESTHETICIAN_SPAWN_EGG;
