@@ -74,12 +74,15 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
             } else if (livingEntity instanceof StarPlatinumEntity SP){
                 shiftZ = -1F;
             } else if (livingEntity instanceof KingNothingEntity) {
-                shiftX = 2f;
-                shiftZ = 1.5f;
-                shiftY = 0f;
+                shiftX = -1f;
+                shiftZ = 5f;
+                shiftY = 7f;
             }
             this.getParentModel().translateToHand(humanoidArm, poseStack, shiftZ, shiftY, shiftX);
-            if (!(livingEntity instanceof SeperatedArmEntity || livingEntity instanceof KingNothingEntity) &&
+            if (livingEntity instanceof KingNothingEntity) {
+                poseStack.mulPose(Axis.XP.rotationDegrees(livingEntity.getViewXRot(0) - 65));
+            }
+            else if (!(livingEntity instanceof SeperatedArmEntity) &&
                     MainUtil.isThrownBlockItem((itemStack.getItem()))) {
                 poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             } else {
