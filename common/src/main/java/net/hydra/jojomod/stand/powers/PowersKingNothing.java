@@ -1634,8 +1634,8 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean dropPhaseItem() {
         StandEntity stand = getStandEntity(getSelf());
         if (!getSelf().level().isClientSide()) {
-            ItemEntity $$4 = new ItemEntity(this.getSelf().level(), stand.getX(), stand.getY() + stand.getEyeHeight(),
-                    stand.getZ(), stand.getHeldItem());
+            ItemEntity $$4 = new ItemEntity(this.getSelf().level(), stand.getX(), stand.getY() + (stand.getEyeHeight()/2.0),
+                    stand.getZ(), stand.getHeldItem(), 0, 0.2, 0);
             $$4.setPickUpDelay(40);
             $$4.setThrower(this.getSelf().getUUID());
             PowerTypes.copyPlaneOfExisting(self, $$4);
