@@ -1007,10 +1007,12 @@ public class PowersKingNothing extends NewDashPreset {
                 bstate.getValue(BlockStateProperties.WATERLOGGED))) {
             return false;
         }
-        boolean placesfrfr = doubleSlabbinItFr || (canModifyPos(bpos)
+        boolean placesfrfr = doubleSlabbinItFr || ((bstate.isAir() || bstate.canBeReplaced())
+                && canModifyPos(bpos)
                 && stand.level().isFluidAtPosition(bpos, FluidState::isEmpty)
                 && blockItem.place(new DirectionalPlaceContext(stand.level(), bpos, dir, held, dir))
-                != InteractionResult.FAIL) || (canModifyPos(placePos)
+                != InteractionResult.FAIL) || ((placeState.isAir() || placeState.canBeReplaced())
+                && canModifyPos(placePos)
                 && blockItem.place(new DirectionalPlaceContext(stand.level(), placePos, dir, held, dir))
                 != InteractionResult.FAIL);
         if (placesfrfr) {
