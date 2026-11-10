@@ -926,7 +926,6 @@ public class FabricItems {
                         entries.accept(NORISUKE_MASK);
 
                         entries.accept(ZOMBIE_HORSE_THREAD);
-                        entries.accept(ZOMBIE_HORSE_THREAD);
                     }).build());
     public static final CreativeModeTab FOG_BLOCK_ITEMS = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
             new ResourceLocation(Roundabout.MOD_ID, "justice_fog_items"),

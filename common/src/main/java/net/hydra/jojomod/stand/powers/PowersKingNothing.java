@@ -981,8 +981,9 @@ public class PowersKingNothing extends NewDashPreset {
     public boolean canModifyPos(BlockPos pos) {
         return getSelf() instanceof ServerPlayer SP && SP.level().getGameRules().getBoolean(
                 ModGamerules.ROUNDABOUT_STAND_GRIEFING) && !SP.blockActionRestricted(SP.level(), pos,
-                SP.gameMode.getGameModeForPlayer()) && SP.level().mayInteract(SP, pos) && MainUtil.canPlaceOnClaim(SP,
-                pos);
+                SP.gameMode.getGameModeForPlayer()) && SP.level().mayInteract(SP, pos) &&
+                MainUtil.canInteractWithBlock(SP, pos)
+                && !ClientNetworking.getAppropriateConfig().griefSettings.doExtraGriefChecksForClaims;
     }
 
     public boolean tryPlaceBlock(BlockItem blockItem, BlockHitResult blockHit, BlockPos bpos, BlockState bstate, StandEntity stand,
