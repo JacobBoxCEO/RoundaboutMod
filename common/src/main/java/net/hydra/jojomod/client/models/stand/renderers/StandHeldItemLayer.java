@@ -2,6 +2,7 @@ package net.hydra.jojomod.client.models.stand.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.client.ClientUtil;
 import net.hydra.jojomod.client.models.stand.StandModel;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
@@ -64,7 +65,7 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
             float shiftY = 1;
             float shiftX = 3F;
             if (MainUtil.isThrownBlockItem((itemStack.getItem()))){
-                if(!(livingEntity instanceof SeperatedArmEntity)) {
+                if(!(livingEntity instanceof SeperatedArmEntity || livingEntity instanceof KingNothingEntity)) {
                     if (((StandEntity) livingEntity).getUser() != null) {
                         shiftZ = 0 - Math.max(0, Math.min(((StandUser) ((StandEntity) livingEntity).getUser()).roundabout$getAttackTimeDuring(), 10F)) * 1.4F;
                         shiftY = -0.5F;
@@ -73,10 +74,16 @@ public class StandHeldItemLayer <T extends StandEntity, M extends StandModel<T>>
                 }
             } else if (livingEntity instanceof StarPlatinumEntity SP){
                 shiftZ = -1F;
-            } else if (livingEntity instanceof KingNothingEntity) {
+            }
+            else if (livingEntity instanceof KingNothingEntity) {
+                float angle = livingEntity.getViewXRot(0);
+                // these numbers need tweaks but i think id go insane if i kept going for now
+                float zMult = angle < 0 ? 0.4f : 1f;
+                float yMult = angle > 0 ? 1.1f : -2.2f;
+                float single = (float) Math.sin(Math.toRadians(angle));
                 shiftX = -1f;
-                shiftZ = 5f;
-                shiftY = 7f;
+                shiftZ = 4.5f - (single * 12f * zMult);
+                shiftY = 7f - (single * 4.5f * yMult);
             }
             this.getParentModel().translateToHand(humanoidArm, poseStack, shiftZ, shiftY, shiftX);
             if (livingEntity instanceof KingNothingEntity) {

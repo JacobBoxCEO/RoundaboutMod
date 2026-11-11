@@ -83,14 +83,22 @@ import java.util.*;
 
 public class PowersKingNothing extends NewDashPreset {
     // skins
-    public static final byte MANGA = 1, SPINE = 2, NOTE = 3, BETA = 4, WARDEN = 5, SNIFFER = 6;
+    public static final byte
+            MANGA = 1,
+            SPINE = 2,
+            NOTE = 3,
+            BETA = 4,
+            WARDEN = 5,
+            SNIFFER = 6;
 
     // sounds
-    public static final byte DISINTEGRATE = 32,
+    public static final byte
+            DISINTEGRATE = 32,
             PHASE = 33;
 
     // tags
-    public static final String MEMORIZED_BLOCK_TAG = "memorizedBlock",
+    public static final String
+            MEMORIZED_BLOCK_TAG = "memorizedBlock",
             MEMORIZED_ENTITY_TYPE_TAG = "memorizedEntityType",
             MEMORIZED_UUID_TAG = "memorizedUUID";
 
