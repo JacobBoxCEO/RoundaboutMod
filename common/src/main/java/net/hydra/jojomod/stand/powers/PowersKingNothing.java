@@ -284,7 +284,7 @@ public class PowersKingNothing extends NewDashPreset {
             return memorizedBlock.asItem().getDefaultInstance();
         }
         else if (memorizedEntityType != null) {
-            return new ItemStack(Items.EGG);
+            return Items.ZOMBIE_SPAWN_EGG.getDefaultInstance();
         }
         else if (memorizedPlayer != null) {
             return new ItemStack(Items.PLAYER_HEAD, 1);
@@ -1454,6 +1454,11 @@ public class PowersKingNothing extends NewDashPreset {
                 getDamage(weapon, target, stand))) {
             doHitEffects(weapon, target, stand, self);
         }
+        if (stand.canDisableShield()) {
+            if (target instanceof LivingEntity LE && LE.isBlocking()) {
+                MainUtil.knockShield(target, 60);
+            }
+        }
         playSoundIfPossible(self.level(), null, self.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG,
                 SoundSource.PLAYERS, 1.7F, 1.3F);
         damageHeld(weapon, stand, self);
@@ -1512,7 +1517,6 @@ public class PowersKingNothing extends NewDashPreset {
         if (ench >= 1) {
             target.setSecondsOnFire(ench * 4);
         }
-
     }
 
     public void addItem(StandEntity standEntity) {

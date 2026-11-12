@@ -6,6 +6,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 public class KingNothingEntity extends FollowingStandEntity {
 
@@ -145,11 +146,16 @@ public class KingNothingEntity extends FollowingStandEntity {
     public final AnimationState reach = new AnimationState();
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot $$0) {
+    public @NotNull ItemStack getItemBySlot(EquipmentSlot $$0) {
         if ($$0.equals(EquipmentSlot.MAINHAND)) {
             return getHeldItem();
         }
         return super.getItemBySlot($$0);
+    }
+
+    @Override
+    public @NotNull ItemStack getMainHandItem() {
+        return getHeldItem();
     }
 
     @Override
