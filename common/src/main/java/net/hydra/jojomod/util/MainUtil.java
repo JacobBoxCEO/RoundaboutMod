@@ -1803,6 +1803,9 @@ public class MainUtil {
 
         mob.rdbt$setExperienceTaken(compoundtag.getBoolean("expTaken"));
         StandPowers powers = mob.roundabout$getStandPowers();
+        if (tag.hasUUID("GEActiveImbueId") && powers instanceof PowersGoldExperience gePowers) {
+            gePowers.setActiveImbuedItemId(tag.getUUID("GEActiveImbueId"));
+        }
         List<CooldownInstance> CDCopy = new ArrayList<>(mob.rdbt$getPowerCooldowns()) {
         };
         if (!CDCopy.isEmpty()) {
@@ -1845,6 +1848,12 @@ public class MainUtil {
         }
 
         StandPowers powers = mob.roundabout$getStandPowers();
+        if (powers instanceof PowersGoldExperience gePowers) {
+            UUID activeId = gePowers.getActiveImbuedItemId();
+            if (activeId != null) {
+                tag.putUUID("GEActiveImbueId", activeId);
+            }
+        }
         List<CooldownInstance> CDCopy = new ArrayList<>(mob.rdbt$getPowerCooldowns()) {
         };
         if (!CDCopy.isEmpty()) {
