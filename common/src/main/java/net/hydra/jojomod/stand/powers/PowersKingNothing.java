@@ -102,16 +102,16 @@ public class PowersKingNothing extends NewDashPreset {
             MEMORIZED_ENTITY_TYPE_TAG = "memorizedEntityType",
             MEMORIZED_UUID_TAG = "memorizedUUID";
 
-    public static final Map<Byte, ParticleData> VISUAL_INFO = new HashMap<>();
+    public static final Map<Byte, VisualData> VISUAL_INFO = new HashMap<>();
     private static final float SMELL_RANGE = 5f;
 
     static {
-        VISUAL_INFO.put(KingNothingEntity.MANGA, new ParticleData(0xb982df, 0xe959b1, 0xb982df, 0.2f));
-        VISUAL_INFO.put(KingNothingEntity.SPINE, new ParticleData(0xff7abc, 0xececec, 0xff7abc, 0.15f));
-        VISUAL_INFO.put(KingNothingEntity.NOTE, new ParticleData(0x78b898, 0xe4806d, 0x78b898, 0.5f));
-        VISUAL_INFO.put(KingNothingEntity.BETA, new ParticleData(0xae41ff, 0x82ff00, 0xae41ff, 0.15f));
-        VISUAL_INFO.put(KingNothingEntity.WARDEN, new ParticleData(0x022d38, 0x1d9ca4, 0x1d9ca4, 0.25f));
-        VISUAL_INFO.put(KingNothingEntity.SNIFFER, new ParticleData(0x93311d, 0x459d8a, 0x459d8a, 0.25f));
+        VISUAL_INFO.put(KingNothingEntity.MANGA, new VisualData(0xb982df, 0xe959b1, 0xb982df, 0.2f));
+        VISUAL_INFO.put(KingNothingEntity.SPINE, new VisualData(0xff7abc, 0xececec, 0xff7abc, 0.15f));
+        VISUAL_INFO.put(KingNothingEntity.NOTE, new VisualData(0x78b898, 0xe4806d, 0x78b898, 0.5f));
+        VISUAL_INFO.put(KingNothingEntity.BETA, new VisualData(0xae41ff, 0x82ff00, 0xae41ff, 0.15f));
+        VISUAL_INFO.put(KingNothingEntity.WARDEN, new VisualData(0x022d38, 0x1d9ca4, 0x1d9ca4, 0.25f));
+        VISUAL_INFO.put(KingNothingEntity.SNIFFER, new VisualData(0x93311d, 0x459d8a, 0x459d8a, 0.25f));
 
     }
 
@@ -275,7 +275,7 @@ public class PowersKingNothing extends NewDashPreset {
         return humanoidPosList();
     }
 
-    public ParticleData getVisualInfo() {
+    public VisualData getVisualInfo() {
         return VISUAL_INFO.getOrDefault(standSkin, VISUAL_INFO.get(MANGA));
     }
 
@@ -547,7 +547,7 @@ public class PowersKingNothing extends NewDashPreset {
             // passive particles
             if (!foundTem) {
                 if (passiveParticlesCounter % 5 == 0) {
-                    ParticleData pdata = getVisualInfo();
+                    VisualData pdata = getVisualInfo();
                     for (int i = 0; i < 2; i++) {
                         int color =
                                 Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
@@ -636,7 +636,7 @@ public class PowersKingNothing extends NewDashPreset {
                         locatedChests.add(otherChestPos);
                     }
                     locatedChests.add(pos);
-                    ParticleData pdata = getVisualInfo();
+                    VisualData pdata = getVisualInfo();
                     int color = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                     int color2 = Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                     Vec3 spawnPos = otherChestPos == null ? pos.getCenter() : pos.getCenter().lerp(
@@ -722,7 +722,7 @@ public class PowersKingNothing extends NewDashPreset {
                 if (foundItem) {
                     foundTem = true;
                     if (!level.isClientSide()) {
-                        ParticleData pdata = getVisualInfo();
+                        VisualData pdata = getVisualInfo();
                         int color =
                                 Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                         int color2 =
@@ -760,7 +760,7 @@ public class PowersKingNothing extends NewDashPreset {
                 else if (this.attackTimeDuring >= 0) {
                     StandEntity stand = getStandEntity(this.self);
                     if (Objects.nonNull(stand)) {
-                        ParticleData pdata = getVisualInfo();
+                        VisualData pdata = getVisualInfo();
                         int color =
                                 Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                         int color2 =
@@ -1752,6 +1752,6 @@ public class PowersKingNothing extends NewDashPreset {
     // color 2 = ~~secondary~~ specialized particle color
     // highlight color = take a guess
     // percent other = the percent of particles that will be color 2
-    public record ParticleData(int color1, int color2, int highlightColor, float percentOther) {
+    public record VisualData(int color1, int color2, int highlightColor, float percentOther) {
     }
 }

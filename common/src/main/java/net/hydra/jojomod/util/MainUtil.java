@@ -1045,8 +1045,7 @@ public class MainUtil {
         }
     }
 
-    public static <T extends Comparable<T>> BlockState copyBlockStateProperty(BlockState from, BlockState to,
-                                                                              Property<T> prop) {
+    public static <T extends Comparable<T>> BlockState copyBlockStateProperty(BlockState from, BlockState to, Property<T> prop) {
         return to.setValue(prop, from.getValue(prop));
     }
 

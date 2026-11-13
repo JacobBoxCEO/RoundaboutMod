@@ -2,9 +2,11 @@ package net.hydra.jojomod.client.models.stand.renderers;
 
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.client.models.layers.ModEntityRendererClient;
+import net.hydra.jojomod.client.models.layers.StandGlowingLayer;
 import net.hydra.jojomod.client.models.stand.KingNothingModel;
 import net.hydra.jojomod.client.models.stand.StandModel;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +22,7 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
 
     public KingNothingRenderer(EntityRendererProvider.Context context) {
         super(context, new KingNothingModel<>(context.bakeLayer(ModEntityRendererClient.KING_NOTHING_LAYER)), 0f);
-        this.addLayer(new KingNothingEmissiveLayer<>(this));
+        this.addLayer(new StandGlowingLayer<>(this, this));
     }
 
     public static ResourceLocation getSkin(byte bt) {
@@ -37,5 +39,20 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
     @Override
     public @NotNull ResourceLocation getTextureLocation(KingNothingEntity entity) {
         return getSkin(entity.getSkin());
+    }
+
+    private static final RenderType WARDEN_E = RenderType.eyes(Roundabout.location("textures/stand/king_nothing/warden_e.png"));
+
+    @Override
+    public boolean hasGlowingParts(byte skin) {
+        return getGlowingReference(skin) != null;
+    }
+
+    @Override
+    public RenderType getGlowingReference(byte skin) {
+        return switch (skin) {
+            case KingNothingEntity.WARDEN -> WARDEN_E;
+            default -> super.getGlowingReference(skin);
+        };
     }
 }
