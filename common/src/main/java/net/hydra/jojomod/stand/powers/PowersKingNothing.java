@@ -89,7 +89,8 @@ public class PowersKingNothing extends NewDashPreset {
             NOTE = 3,
             BETA = 4,
             WARDEN = 5,
-            SNIFFER = 6;
+            SNIFFER = 6,
+            SOMETHING = 7;
 
     // sounds
     public static final byte
@@ -112,7 +113,7 @@ public class PowersKingNothing extends NewDashPreset {
         VISUAL_INFO.put(KingNothingEntity.BETA, new VisualData(0xae41ff, 0x82ff00, 0xae41ff, 0.15f));
         VISUAL_INFO.put(KingNothingEntity.WARDEN, new VisualData(0x022d38, 0x1d9ca4, 0x1d9ca4, 0.25f));
         VISUAL_INFO.put(KingNothingEntity.SNIFFER, new VisualData(0x93311d, 0x459d8a, 0x459d8a, 0.25f));
-
+        VISUAL_INFO.put(KingNothingEntity.SOMETHING, new VisualData(0xA8DF81, 0x58E990, 0xA8DF81, 0.2f));
     }
 
     public final Set<Entity> itemHoldingEntities = new HashSet<>();
@@ -142,6 +143,7 @@ public class PowersKingNothing extends NewDashPreset {
             case BETA -> "beta";
             case WARDEN -> "warden";
             case SNIFFER -> "sniffer";
+            case SOMETHING -> "something";
             default -> "manga";
         };
     }
@@ -1038,6 +1040,7 @@ public class PowersKingNothing extends NewDashPreset {
         if (!isTrackingItem()) {
             $$1.add(MANGA);
             $$1.add(SPINE);
+            $$1.add(SOMETHING);
             $$1.add(NOTE);
             $$1.add(WARDEN);
             $$1.add(SNIFFER);

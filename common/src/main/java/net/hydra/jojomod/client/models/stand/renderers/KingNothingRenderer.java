@@ -19,6 +19,7 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
     private static final ResourceLocation BETA = Roundabout.location("textures/stand/king_nothing/beta.png");
     private static final ResourceLocation WARDEN = Roundabout.location("textures/stand/king_nothing/warden.png");
     private static final ResourceLocation SNIFFER = Roundabout.location("textures/stand/king_nothing/sniffer.png");
+    private static final ResourceLocation SOMETHING = Roundabout.location("textures/stand/king_nothing/something.png");
 
     public KingNothingRenderer(EntityRendererProvider.Context context) {
         super(context, new KingNothingModel<>(context.bakeLayer(ModEntityRendererClient.KING_NOTHING_LAYER)), 0f);
@@ -32,6 +33,7 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
             case 4 -> BETA;
             case 5 -> WARDEN;
             case 6 -> SNIFFER;
+            case 7 -> SOMETHING;
             default -> MANGA;
         };
     }

@@ -27,7 +27,8 @@ public class KingNothingEntity extends FollowingStandEntity {
             NOTE = 3,
             BETA = 4,
             WARDEN = 5,
-            SNIFFER = 6;
+            SNIFFER = 6,
+            SOMETHING = 7;
 
     @Override
     public void setupAnimationStates() {
