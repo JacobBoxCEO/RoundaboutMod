@@ -637,7 +637,7 @@
   "effect.roundabout.mold": "Mold",
   "effect.roundabout.switch": "Switch",
   "effect.roundabout.singe": "Char",
-  "effect.roundabout.crippled": "Crippled",
+  "effect.roundabout.crippled": "Maimed",
   "effect.roundabout.refreshed": "Refreshed",
   "effect.roundabout.infinite_spin": "Infinite Spin",
   "effect.roundabout.haze_virus": "Haze Virus",
@@ -964,6 +964,11 @@
   "block.roundabout.ginkgo_hanging_sign": "Ginkgo Hanging Sign",
   "block.roundabout.ginkgo_wall_hanging_sign": "Ginkgo Wall Hanging Sign",
   "block.roundabout.ginkgo_trapdoor": "Ginkgo Trapdoor",
+  "block.roundabout.autumn_leaves": "Autumn Leaves",
+  "block.roundabout.ginkgo_stairs": "Ginkgo Stairs",
+  "block.roundabout.ginkgo_slab": "Ginkgo Slab",
+  "block.roundabout.ginkgo_fence": "Ginkgo Fence",
+  "block.roundabout.ginkgo_fence_gate": "Ginkgo Fence Gate",
 
   "itemgroup.jojo": "Roundabout",
   "itemgroup.jojo_discs": "Stand Discs",
@@ -3812,6 +3817,8 @@
 
   "roundabout.gold_experience_item_imbue.animal": "Animal Imbue",
   "roundabout.gold_experience_item_imbue.animal.desc": "Transforms into an animal when used.",
+  "roundabout.gold_experience_item_imbue.tree": "Tree Imbue",
+  "roundabout.gold_experience_item_imbue.tree.desc": "Roots enemies when used.",
 
   "tooltip.roundabout.ge_imbue.animal": "Imbued with Life Energy (%s)",
   "tooltip.roundabout.ge_imbue.tree": "Imbued with Life Energy (Tree)",
@@ -4639,6 +4646,8 @@
 
   "config.roundabout.bitesTheDustOpacity.name":"BTD Opacity",
   "config.roundabout.bitesTheDustOpacity.desc":"How see through Bites The Dust effect is.",
+  "config.roundabout.hazeFieldOpacity.name":"Purple Haze Overlay Opacity",
+  "config.roundabout.hazeFieldOpacity.desc":"How see through of Purple Haze effect is.",
 
   "config.roundabout.killerQueenCurrentBombConfig.name":"Bomb Config",
   "config.roundabout.killerQueenCurrentBombConfig.desc":"Current Bomb Settings.",
@@ -4740,6 +4749,13 @@
   "config.roundabout.mapOpacity.desc": "What is the opacity of the map overlay in first person? 1.0 is the default. (Change this as a decimal point, i.e. 0.5 for 50%)",
   "config.roundabout.spinMapInsteadOfArrow.name": "Spin Map Instead Of Arrow",
   "config.roundabout.spinMapInsteadOfArrow.desc": "Spins the minimap of the second ability instead of the player arrow.",
+  "config.roundabout.scoleciphobiaMode.name": "Scoleciphobia Mode",
+  "config.roundabout.scoleciphobiaMode.desc": "Disables the idle animation of the nematodes in first person.",
+  "config.roundabout.scoleciphobiaModeUsing.name": "Scoleciphobia-2 Mode",
+  "config.roundabout.scoleciphobiaModeUsing.desc": "Disables the transition animation of the nematodes in first person.",
+
+  "config.roundabout.disablePHazeOverlayAnimation.name": "Disable Haze Overlay Animation",
+  "config.roundabout.disablePHazeOverlayAnimation.desc": "Disables the idle animation of the haze in first person.",
 
   "config.roundabout.goldExperienceCurrentAnimal.name": "Selected Animal Type",
   "config.roundabout.goldExperienceCurrentAnimal.desc": "For Gold Experience, your client remembers what animal is presently selected.",
@@ -5723,6 +5739,7 @@
   "config.roundabout.PurpleHazeSettings.name": "Purple Haze",
   "config.roundabout.softAndWetSettings.name": "Soft And Wet",
   "config.roundabout.killerQueenSettings.name": "Killer Queen",
+  "config.roundabout.purpleHazeSettings.name": "Purple Haze",
   "config.roundabout.silverChariotSettings.name": "Silver Chariot",
   "config.roundabout.magiciansRedSettings.name": "Magician's Red",
   "config.roundabout.walkingHeartSettings.name": "Walking Heart",

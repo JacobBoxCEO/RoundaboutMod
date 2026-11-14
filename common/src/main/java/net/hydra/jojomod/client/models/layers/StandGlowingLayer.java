@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
 public class StandGlowingLayer<T extends StandEntity, M extends StandModel<T>> extends EyesLayer<T, M> {
-    private final StandRenderer standRenderer;
+    private final StandRenderer<T> standRenderer;
 
     public StandGlowingLayer(RenderLayerParent<T, M> $$0, StandRenderer<T> standRenderer) {
         super($$0);
@@ -27,10 +27,10 @@ public class StandGlowingLayer<T extends StandEntity, M extends StandModel<T>> e
     }
 
     @Override
-    public void render(PoseStack $$0, MultiBufferSource $$1, int $$2, T mobEntity, float $$4, float $$5, float $$6, float $$7, float $$8, float $$9) {
+    public void render(PoseStack $$0, MultiBufferSource $$1, int i, T mobEntity, float $$4, float $$5, float $$6, float $$7, float $$8, float $$9) {
         LivingEntity User = mobEntity.getUser();
 
-        if (!standRenderer.hasGlowingParts(mobEntity.getSkin()) || ((User != null && ((IEntityAndData)User).roundabout$getTrueInvisibility() > -1) ||
+        if (!standRenderer.hasGlowingParts(mobEntity.getSkin(), i) || ((User != null && ((IEntityAndData)User).roundabout$getTrueInvisibility() > -1) ||
                 ((IEntityAndData)mobEntity).roundabout$getTrueInvisibility() > -1)){
             return;
         }
@@ -38,7 +38,7 @@ public class StandGlowingLayer<T extends StandEntity, M extends StandModel<T>> e
         if (ClientUtil.canSeeStands(Minecraft.getInstance().player)
         && (mobEntity.getFadeOut() >= mobEntity.getMaxFade()) && standRenderer.getGlowingReference(mobEntity.getSkin()) != null){
             VertexConsumer $$10 = $$1.getBuffer(standRenderer.getGlowingReference(mobEntity.getSkin()));
-            this.getParentModel().renderToBuffer($$0, $$10, 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, mobEntity.fadePercent);
+            this.getParentModel().renderToBuffer($$0, $$10, standRenderer.getGlowAmount(mobEntity.getSkin()), OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, mobEntity.fadePercent);
 
         }
     }
