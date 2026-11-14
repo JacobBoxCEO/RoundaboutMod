@@ -28,13 +28,20 @@ public class KingNothingEntity extends FollowingStandEntity {
             BETA = 4,
             WARDEN = 5,
             SNIFFER = 6,
-            SOMETHING = 7;
+            SOMETHING = 7,
+            RAM = 8;
 
     @Override
     public void setupAnimationStates() {
         super.setupAnimationStates();
         if (this.getUser() != null) {
             byte animation = this.getAnimation();
+            if (getSkin() == RAM) {
+                this.hideHorns.stop();
+            }
+            else {
+                this.hideHorns.startIfStopped(this.tickCount);
+            }
             if (animation == REACH) {
                 this.reach.startIfStopped(this.tickCount);
             }
@@ -140,6 +147,7 @@ public class KingNothingEntity extends FollowingStandEntity {
     public final AnimationState disintegrate = new AnimationState();
     public final AnimationState returning = new AnimationState();
     public final AnimationState reach = new AnimationState();
+    public final AnimationState hideHorns = new AnimationState();
 
     @Override
     public @NotNull ItemStack getItemBySlot(EquipmentSlot $$0) {

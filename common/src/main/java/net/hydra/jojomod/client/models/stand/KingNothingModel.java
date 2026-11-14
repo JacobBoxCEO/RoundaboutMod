@@ -40,9 +40,21 @@ public class KingNothingModel<T extends KingNothingEntity> extends StandModel<T>
         PartDefinition head2 = head.addOrReplaceChild("head2", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -7.85F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 16).addBox(-4.0F, -7.85F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.3F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-        PartDefinition horn_r1 = head2.addOrReplaceChild("horn_r1", CubeListBuilder.create().texOffs(56, 36).addBox(-2.5F, -3.0F, -1.5F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(3.6F, -4.0F, 0.5F, 0.0F, 0.0F, 0.8727F));
+        PartDefinition horn_r = head2.addOrReplaceChild("horn_r", CubeListBuilder.create(), PartPose.offsetAndRotation(-3.6F, -6.0F, 0.5F, 0.0F, 0.0F, 0.6981F));
 
-        PartDefinition horn_r2 = head2.addOrReplaceChild("horn_r2", CubeListBuilder.create().texOffs(56, 14).addBox(-2.5F, -3.0F, -1.5F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-3.6F, -4.0F, 0.5F, 0.0F, 0.0F, -0.8727F));
+        PartDefinition horn_r1 = horn_r.addOrReplaceChild("horn_r1", CubeListBuilder.create().texOffs(56, 14).addBox(-2.5F, -3.0F, -1.5F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -1.5708F));
+
+        PartDefinition ram_r = horn_r.addOrReplaceChild("ram_r", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition horn_r2 = ram_r.addOrReplaceChild("horn_r2", CubeListBuilder.create().texOffs(77, 16).addBox(-2.5F, -3.0F, -3.5F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -1.5708F));
+
+        PartDefinition horn_l = head2.addOrReplaceChild("horn_l", CubeListBuilder.create(), PartPose.offsetAndRotation(3.6F, -6.0F, 0.5F, 0.0F, 0.0F, -0.6981F));
+
+        PartDefinition horn_r3 = horn_l.addOrReplaceChild("horn_r3", CubeListBuilder.create().texOffs(56, 36).addBox(-2.5F, -3.0F, -1.5F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.5708F));
+
+        PartDefinition ram_l = horn_l.addOrReplaceChild("ram_l", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition horn_r4 = ram_l.addOrReplaceChild("horn_r4", CubeListBuilder.create().texOffs(77, 16).mirror().addBox(0.5F, -3.0F, -3.5F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.5708F));
 
         PartDefinition body = stand2.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, -24.0F, 0.0F));
 
@@ -181,6 +193,7 @@ public class KingNothingModel<T extends KingNothingEntity> extends StandModel<T>
         this.animate(pEntity.disintegrate, KingNothingAnimations.DISINTEGRATE, pAgeInTicks, 1f);
         this.animate(pEntity.reach, KingNothingAnimations.REACH, pAgeInTicks, 2f);
         this.animate(pEntity.returning, KingNothingAnimations.RETURN, pAgeInTicks, 1f);
+        this.animate(pEntity.hideHorns, KingNothingAnimations.HIDE_HORNS, pAgeInTicks, 1f);
     }
 
     @Override

@@ -90,7 +90,8 @@ public class PowersKingNothing extends NewDashPreset {
             BETA = 4,
             WARDEN = 5,
             SNIFFER = 6,
-            SOMETHING = 7;
+            SOMETHING = 7,
+            RAM = 8;
 
     // sounds
     public static final byte
@@ -107,13 +108,14 @@ public class PowersKingNothing extends NewDashPreset {
     private static final float SMELL_RANGE = 5f;
 
     static {
-        VISUAL_INFO.put(KingNothingEntity.MANGA, new VisualData(0xb982df, 0xe959b1, 0xb982df, 0.2f));
-        VISUAL_INFO.put(KingNothingEntity.SPINE, new VisualData(0xff7abc, 0xececec, 0xff7abc, 0.15f));
-        VISUAL_INFO.put(KingNothingEntity.NOTE, new VisualData(0x78b898, 0xe4806d, 0x78b898, 0.5f));
-        VISUAL_INFO.put(KingNothingEntity.BETA, new VisualData(0xae41ff, 0x82ff00, 0xae41ff, 0.15f));
-        VISUAL_INFO.put(KingNothingEntity.WARDEN, new VisualData(0x022d38, 0x1d9ca4, 0x1d9ca4, 0.25f));
-        VISUAL_INFO.put(KingNothingEntity.SNIFFER, new VisualData(0x93311d, 0x459d8a, 0x459d8a, 0.25f));
-        VISUAL_INFO.put(KingNothingEntity.SOMETHING, new VisualData(0xA8DF81, 0x58E990, 0xA8DF81, 0.2f));
+        VISUAL_INFO.put(MANGA, new VisualData(0xb982df, 0xe959b1, 0xb982df, 0.2f));
+        VISUAL_INFO.put(SPINE, new VisualData(0xff7abc, 0xececec, 0xff7abc, 0.15f));
+        VISUAL_INFO.put(NOTE, new VisualData(0x78b898, 0xe4806d, 0x78b898, 0.5f));
+        VISUAL_INFO.put(BETA, new VisualData(0xae41ff, 0x82ff00, 0xae41ff, 0.15f));
+        VISUAL_INFO.put(WARDEN, new VisualData(0x022d38, 0x1d9ca4, 0x1d9ca4, 0.25f));
+        VISUAL_INFO.put(SNIFFER, new VisualData(0x93311d, 0x459d8a, 0x459d8a, 0.25f));
+        VISUAL_INFO.put(SOMETHING, new VisualData(0xA8DF81, 0x58E990, 0xA8DF81, 0.2f));
+        VISUAL_INFO.put(RAM, new VisualData(0xde9c64, 0xd77f5b, 0xde9c64, 0.2f));
     }
 
     public final Set<Entity> itemHoldingEntities = new HashSet<>();
@@ -144,6 +146,7 @@ public class PowersKingNothing extends NewDashPreset {
             case WARDEN -> "warden";
             case SNIFFER -> "sniffer";
             case SOMETHING -> "something";
+            case RAM -> "ram";
             default -> "manga";
         };
     }
@@ -1044,6 +1047,7 @@ public class PowersKingNothing extends NewDashPreset {
             $$1.add(NOTE);
             $$1.add(WARDEN);
             $$1.add(SNIFFER);
+            $$1.add(RAM);
             $$1.add(BETA);
         }
         return $$1;
