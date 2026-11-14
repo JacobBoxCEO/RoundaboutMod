@@ -544,7 +544,7 @@ public class PowersKingNothing extends NewDashPreset {
         }
         if (getSelf().isAlive() && !getSelf().isRemoved() && isTrackingItem()) {
             Level level = getSelf().level();
-            float checkRangeEnt = 64.0f;
+            float checkRangeEnt = 32;
             int checkRangeChest = 16;
             boolean foundTem = itemTrackEnt(checkRangeEnt, level);
             // chest code!!
@@ -1040,7 +1040,7 @@ public class PowersKingNothing extends NewDashPreset {
     @Override
     public List<Byte> getSkinList() {
         List<Byte> $$1 = Lists.newArrayList();
-        if (!isTrackingItem()) {
+        if (!isTrackingItem() || true) {
             $$1.add(MANGA);
             $$1.add(SPINE);
             $$1.add(SOMETHING);
@@ -1647,7 +1647,7 @@ public class PowersKingNothing extends NewDashPreset {
             this.itemHoldingEntities.clear();
             this.itemHoldingBlocks.clear();
         }
-        else if (!isOut) {
+        else if (!isOut && canSummonStandAsEntity()) {
             isOut = true;
             returnAnimTicks = 0;
             animateStand(KingNothingEntity.RETURN);

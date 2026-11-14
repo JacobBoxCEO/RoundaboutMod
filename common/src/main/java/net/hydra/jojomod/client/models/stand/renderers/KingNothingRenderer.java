@@ -1,11 +1,13 @@
 package net.hydra.jojomod.client.models.stand.renderers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.hydra.jojomod.Roundabout;
 import net.hydra.jojomod.client.models.layers.ModEntityRendererClient;
 import net.hydra.jojomod.client.models.layers.StandGlowingLayer;
 import net.hydra.jojomod.client.models.stand.KingNothingModel;
 import net.hydra.jojomod.client.models.stand.StandModel;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +43,18 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
     }
 
     @Override
+    public void render(KingNothingEntity mobEntity, float f, float g, PoseStack matrixStack,
+            MultiBufferSource vertexConsumerProvider, int i) {
+        float factor = 0.5F + (mobEntity.getSizePercent()/2);
+        if(mobEntity.isBaby()){
+            matrixStack.scale(0.50f * factor, 0.50f * factor, 0.50f * factor);
+        } else {
+            matrixStack.scale(0.87f * factor, 0.87f * factor, 0.87f * factor);
+        }
+        super.render(mobEntity, f, g, matrixStack, vertexConsumerProvider, i);
+    }
+
+    @Override
     public @NotNull ResourceLocation getTextureLocation(KingNothingEntity entity) {
         return getSkin(entity.getSkin());
     }
@@ -48,7 +62,7 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
     private static final RenderType WARDEN_E = RenderType.eyes(Roundabout.location("textures/stand/king_nothing/warden_e.png"));
 
     @Override
-    public boolean hasGlowingParts(byte skin) {
+    public boolean hasGlowingParts(byte skin, int packedLight) {
         return getGlowingReference(skin) != null;
     }
 
@@ -56,7 +70,7 @@ public class KingNothingRenderer extends StandRenderer<KingNothingEntity> {
     public RenderType getGlowingReference(byte skin) {
         return switch (skin) {
             case KingNothingEntity.WARDEN -> WARDEN_E;
-            default -> super.getGlowingReference(skin);
+            default -> null;
         };
     }
 }
