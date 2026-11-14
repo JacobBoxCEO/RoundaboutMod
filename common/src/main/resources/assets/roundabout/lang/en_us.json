@@ -2889,7 +2889,7 @@
   "ability.roundabout.gold_experience_tree_growth": "Tree Growth",
   "ability.roundabout.gold_experience_tree_growth.desc": "Grow a barren tree from the ground. This tree lets you ride on it to the top, or parkour up it's branches. Enemies that hit the tree will have the damage reflected back to them.",
   "ability.roundabout.gold_experience_item_imbue": "Item Imbue",
-  "ability.roundabout.gold_experience_item_imbue.desc": "This move opens a menu that lets you imbue an item with life energy. This lets you give unique properties to the item, such as being able to turn the item into an animal, root enemies in place, and disguise the item.",
+  "ability.roundabout.gold_experience_item_imbue.desc": "This move opens a menu that lets you imbue an item with life energy. This lets you give unique properties to the item, such as being able to turn the item into an animal, root enemies in place, and disguise the item. Only 1 item may be imbued at a time.",
   "ability.roundabout.gold_experience_life_sensor": "Life Sensor",
   "ability.roundabout.gold_experience_life_sensor.desc": "Gold experience scans the nearby area for lifeforms. If someone has an imbued item on them, you will be able to see their aura from a lot further away.",
 
@@ -3817,7 +3817,7 @@
   "roundabout.gold_experience_animal.snake": "Snake",
   "roundabout.gold_experience_animal.snake.desc": "Rushes to the last enemy you hit, or who hit you, and bites them, inflicting poison.",
   "roundabout.gold_experience_animal.frog": "Frog",
-  "roundabout.gold_experience_animal.frog.desc": "Hops around erratically.",
+  "roundabout.gold_experience_animal.frog.desc": "Pulls in the closest enemy within 10 blocks using it's tongue.",
   "roundabout.gold_experience_animal.fox": "Fox",
   "roundabout.gold_experience_animal.fox.desc": "Finds nearby items and fetches them for you.",
 
@@ -3830,7 +3830,7 @@
 
   "tooltip.roundabout.ge_imbue.animal": "Imbued with Life Energy (%s)",
   "tooltip.roundabout.ge_imbue.tree": "Imbued with Life Energy (Tree)",
-  "tooltip.roundabout.ge_imbue.disguise": "(Disguised as %s)",
+  "tooltip.roundabout.ge_imbue.disguise": "(Original Item: %s)",
 
   "roundabout.pose.giorno": "Requiem",
   "roundabout.pose.joseph": "Bloody Stream",
