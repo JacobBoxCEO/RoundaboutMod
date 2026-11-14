@@ -14,6 +14,7 @@ import net.hydra.jojomod.entity.KingCrimsonCloneEntity;
 import net.hydra.jojomod.entity.LifePunchCloneEntity;
 import net.hydra.jojomod.entity.ModEntities;
 import net.hydra.jojomod.entity.mobs.StrayCatEntity;
+import net.hydra.jojomod.entity.stand.FollowingStandEntity;
 import net.hydra.jojomod.entity.stand.KingNothingEntity;
 import net.hydra.jojomod.entity.stand.StandEntity;
 import net.hydra.jojomod.entity.substand.TrackingCloudEntity;
@@ -772,7 +773,7 @@ public class PowersKingNothing extends NewDashPreset {
                                 Roundabout.RANDOM.nextFloat() > pdata.percentOther() ? pdata.color1() : pdata.color2();
                         AABB BB1 = stand.getBoundingBox();
                         double x = BB1.getCenter().x();
-                        double y = BB1.getCenter().y() + 0.1;
+                        double y = BB1.getCenter().y() + (((FollowingStandEntity) stand).getSizePercent() - 1) / 2;
                         double z = BB1.getCenter().z();
                         MainUtil.sendParticlesIfPossible(getSelf(), getSelf().level(),
                                 PuzzleColorParticleOptions.fromPackedColor(ModParticles.PUZZLE_PARTICLE, color), x, y,
